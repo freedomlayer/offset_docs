@@ -185,7 +185,9 @@ If A and B are not friends, they need the help of a mediator, or a chain of
 mediators, to perform the transaction. A and B will look for a chain of the
 following form:
 
+```
 A -- M1 -- M2 -- M3 -- B
+```
 
 Where A, M1 are friends, M1, M2 are friends, M2, M3 are friends and M3, B are
 friends. Of course, the length of the chain could be arbitrary.
@@ -202,7 +204,84 @@ of funds between A and B. If no such chain is found, transfer of funds will not
 be possible.
 
 
+## Buying communication for credit
+
+We showed above how funds could be transferred between nodes that are not
+friends (They do not have a direct mutual credit clearing setup). We could use
+a similar idea for the transfer of communication between nodes.
+
+Assume of network of nodes, where every node is directly connected to some other
+predefined nodes. If A and B are two directly connected nodes, we say that A
+and B are **neighbors**. 
+
+Note that being neighbors is not the same as being friends. Being neighbors
+means being adjacent in the network topology. It does not imply the trust
+required for being friends. Hence the network of neighbors (Used for transfer
+of communication) is independent of the network of friends (Used for the
+transfer of funds).
+
+If A wants to send a message to some remote node C, A first finds a path from A
+to C that goes along neighbors. For example:
+
+```
+A -- N1 -- N2 -- C
+```
+
+In the picture, A and N1 are neighbors, N1 and N2 are neighbors and N2 and C
+are neighbors. This means that there is a direct communication channel from A
+to N1, from N1 to N2 and from N2 to C. We will pass the message from A to C
+along this path of neighbors.
+
+To send the message, A prepares a message together with payment to the
+mediators N1, N2, and to the recipient C. The mediators will pass the message
+and earn some amount of credit for their services.
+
+
+How can A pay N1? A and N1 maintain mutual credit clearing with very small
+maximum debt amounts. 
+
+There is no real world relationship between A and N1, hence they can not trust
+each other to repay large debts. However, A and B can set up mutual credit
+clearing for very small amounts.
+
+Generally this setup of small mutual credit clearing should be sustainable if A
+and B send similar amounts of messages through each other. However, if for
+example A sends many messages through B and reaches the maximum debt B allows,
+A will send B funds using a chain of friends from A to B. 
+
+The mutual credit between two neighbors represents communication purchasing
+power. If A and B are neighbors, A will try to ensure that it is not too close to
+the maximum debt possible to B, and B will try to ensure it is not too close to
+the maximum debt possible to A.
+
+If for example, A notices that it is getting close to the maximum debt possible
+to B, it will send funds to B through a chain of friends. The funds should be
+approximately enough to balance the mutual credit between the neighbors A
+and B.
+
+As a summary: large amounts of credit passes using chain of friends, and
+neighbors maintain mutual credit for very small amounts, used mostly for the
+purchase of communication ability.
+
+
+## Atomicity and incentives during transactions
+
+In the previous sections we showed that transfer of funds between
+two nodes could be accomplished by "pushing" credit along a chain of friends.
+On the communication layer, we showed that communication between two nodes is
+accomplished by sending messages together with credit along a chain of neighbors.
+
+To examine the security of this setup, we need to consider the incentives of
+the nodes participating in the transaction. In this section we observe a
+transcation done in the communication layer, between neighbors. The
+considerations for a transaction done in the funds layer (between friends)
+should be similar.
+
+TODO
+
+
 ## The problem of distributed routing
+
 
 TODO
 
