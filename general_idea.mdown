@@ -107,8 +107,8 @@ without ever repaying the debt to the baker? The baker is left with a note that
 the milkman ows him credit, but this note can not be redeemed anywhere for
 goods.
 
-The baker, by allowing A to have debt to him, trusts that A will stick around to be
-able to pay back the debt in the future, in some way.
+The baker, by allowing the milkman to have debt to him, trusts that the milkman
+will stick around to be able to pay back the debt in the future, in some way.
 
 Some measures to be taken when using mutual credit clearing:
 
@@ -122,7 +122,33 @@ Some measures to be taken when using mutual credit clearing:
     more than 3 loafs of bread if A can't repay the debt.
 
 
-The economy of mutual credit clearing between two people is very simple, and it
+Given these assumptions, the state of mutual credit between two nodes A and B
+consists of the following parameters:
+
+- A allows B maximum debt of d{AB}
+- B allows A maximum debt of d{BA}
+
+d{BA} and d{AB} are not necessarily equal. Drawn on a one dimensional scale,
+we get a picture as follows (from the point of view of A):
+
+```
+     [-----------|-----^-------]
+   d{BA}         0           d{AB}
+```
+
+In the picture, B owes A some amount of money. The `^` marks shows the current
+credit relationship between A and B. From the point of view of B, the picture
+looks as follows:
+
+```
+     [-------^-----|-----------]
+   d{AB}           0         d{BA}
+```
+
+TODO
+
+
+The economy of mutual credit clearing between two people is simple, and it
 requires that each side generates goods that the other side wants. In the
 example above, the milkman wants to get bread, and the baker wants to get milk.
 This does not always happen in the real world. 
@@ -134,9 +160,21 @@ the baker for credit, the baker will not allow the milkman to take any more,
 because the debt is too large.
 
 This problem could be solved if the baker possibly wanted to buy service from
-the carpenter, assuming that the carpenter buys milk from the milkman. 
+the carpenter, assuming that the carpenter buys milk from the milkman. This
+will usually happen in an economy of multiple players.
+
 
 ## Chains of mutual credit clearing
+
+To extend the idea of credit clearing to the economy of multiple players we use
+chains of mutual credit clearing. In this setting, every person has a few other
+people he trusts, and maintains mutual credit clearing with.
+
+Assume that a person A wants to send funds to another person B. If A and B 
+If A and B directly manage mutual credit clearing, A will keep a note that he
+owes B more credit, and B will keep a note that A owes him credit.
+
+
 
 TODO
 
