@@ -1,0 +1,149 @@
+
+# CSwitch motivation and general idea
+
+02.12.2017
+
+## Introduction
+
+CSwitch is an international communication infrastructure. It allows nodes
+to send data packets to each other. To allow fair usage of the networking
+resources, CSwitch allows a means of transferring credit between its
+nodes.
+
+Differently from the current design of the Internet, sending data packets over
+the CSwitch network costs some credit for the sender. This credit is split
+between the mediators of the message, and the end receiver. 
+
+The sender, by sending a message, makes other nodes in the network perform work
+for him. The mediators need to pass the message, and the receiver of the
+message has to open the message and confirm the message receipt.  The credit
+paid by the sender of the message is a sort of compensation for all the nodes
+involved.
+
+In the CSwitch design, nodes that pass messages through them earn credit. This
+could incentivize people that are located in key geographical locations to
+build communication infrastructure. In the current Internet only priviledged
+people are allowed to start a new ISP (Internet Service Provider). CSwitch
+allows anyone to be part of the communication infrastructure and earn credit
+for his contribution.
+
+Another advantage is resiliency against DoS (Denial of Service) inside the
+CSwitch infrastructure. On the Internet, if a computer receives many data
+packets he could be overloaded and as a result, stop being able to provide
+service.  On the CSwitch infrastructure, sending many messages to a remote node
+costs credit. In addition, a node that is bombarded with many messages earns
+credit. 
+
+
+## Ability to send funds implies ability to send messages
+
+Consider this abstract idea: The abilities to send funds between nodes is
+related to the ability to send messages between nodes. 
+
+In particular, if we have a network where sending funds between nodes could be
+performed efficiently, it is possible to create a mechanism to send messages
+efficiently between nodes. This could be done as follows:
+
+To send a message bit from node `A` to node `B`, `A` could send a `B` 1 credit
+to represent the bit `0`, and 2 credits to represent the bit `1`. This
+mechanism should also allow `B` to send messages to `A`. If `A` and `B` send
+about the same amount of bytes to each other, on average none of them should
+ever run out of funds to be able to send communication.
+
+This of course is a very abstract idea, but it shows that ability to send funds
+implies ability to send messages. 
+
+
+## Blockchain solutions for passing value are not efficient
+
+The CSwitch infrastrucure allows every node to send a message to a remote node
+for a small fee. One could suggest to use a blockchain system, like Bitcoin, to
+manage the transfer of funds between nodes (Those funds are the payment for
+sending messages).
+
+Direct blockchain based payment for every message sending is very inefficient,
+as a blockchain based transaction involves communication to the whole
+participants of the network.
+
+One could suggest instead that nodes remember the debt between them, and settle
+the payment at a later time using a blockchain based transaction. In the next
+sections we take this idea further, and remove the requirement for a blockchain
+based transaction to settle the debt.
+
+
+## Mutual credit clearing
+
+Assume that two business owners, a milkman and a baker, live next to each
+other. Also assume that they live in a world without money.
+
+One way the milkman and the baker could exchange goods without the use of money
+is using the method of barter. the milkman could ask the baker from some break,
+in exchange for some milk.  However, what if at a specific time the milkman
+wants to get some bread from the baker, but the baker doesn't need any milk
+from the milkman? In this case, the method of barter will not allow to perform
+a transaction. Barter only works if the two involved parties are interested in
+the exchange in a specific point in time and location.
+
+To solve the problem, the milkman and the baker could use **mutual credit
+clearing**: If the milkman wants to get bread from the baker, but the baker
+doesn't need any milk right now, the baker will give the milkman a loaf of
+bread, and write down on a piece of paper that the milkman owes him some
+credit. The milkman will also write a similar note for reference.
+
+A few days later later, if the baker wants to get milk from the milkman, but
+the milkman doesn't want any bread from the baker at that specific point of
+time, the baker could use his credit at the milkman to get milk. After the
+milkman gives the baker a bottle of milk, the debt of the milkman to the baker
+is cleared.
+
+This method allows the milkman and the baker to perform exchange of their
+goods, even if they do not want to exchange them at exactly the same time. 
+
+One assumption that mutual credit clearing makes is that the milkman and the
+baker trust each other. Suppose that the milkman takes 5 loafs of bread from
+the baker. The milkman and the baker both write a note that the milkman ows the
+baker credit that equals 5 loafs of bread. What if the milkman is gone one day,
+without ever repaying the debt to the baker? The baker is left with a note that
+the milkman ows him credit, but this note can not be redeemed anywhere for
+goods.
+
+The baker, by allowing A to have debt to him, trusts that A will stick around to be
+able to pay back the debt in the future, in some way.
+
+Some measures to be taken when using mutual credit clearing:
+
+- Mutual credit clearing should only be set up between people that trust each
+    other. It is advantage if those people know each other from the real world,
+    and they have met in person.
+
+- The maximum debt possible in the mutual credit clearing between two sides
+    should be limited to some maximum amount. For example: If the baker allows the milkman to owe
+    him credit of value at most 3 loafs of bread, the baker will not be able to lose
+    more than 3 loafs of bread if A can't repay the debt.
+
+
+The economy of mutual credit clearing between two people is very simple, and it
+requires that each side generates goods that the other side wants. In the
+example above, the milkman wants to get bread, and the baker wants to get milk.
+This does not always happen in the real world. 
+
+If, for example, the baker decided to stop drinking milk (Maybe he got
+allergic?), the simple mutual credit clearing between the milkman and the baker
+will not keep working. After a few loafs of bread that the milkman takes from
+the baker for credit, the baker will not allow the milkman to take any more,
+because the debt is too large.
+
+This problem could be solved if the baker possibly wanted to buy service from
+the carpenter, assuming that the carpenter buys milk from the milkman. 
+
+## Chains of mutual credit clearing
+
+TODO
+
+## The problem of distributed routing
+
+TODO
+
+
+
+
