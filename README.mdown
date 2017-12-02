@@ -1,0 +1,7 @@
+# CSwitch documentation
+
+This respository contains documentation and general ideas behind cswitch.
+
+To open the pencil diagrams (Files ending with .egz) you need to install
+[pencil](https://pencil.evolus.vn/).
+
