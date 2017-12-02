@@ -125,28 +125,35 @@ Some measures to be taken when using mutual credit clearing:
 Given these assumptions, the state of mutual credit between two nodes A and B
 consists of the following parameters:
 
-- A allows B maximum debt of d{AB}
-- B allows A maximum debt of d{BA}
+- A allows B maximum debt of md{AB}
+- B allows A maximum debt of md{BA}
 
-d{BA} and d{AB} are not necessarily equal. Drawn on a one dimensional scale,
+md{BA} and md{AB} are not necessarily equal. Drawn on a one dimensional scale,
 we get a picture as follows (from the point of view of A):
 
 ```
+                     d{AB}
      [-----------|-----^-------]
-   d{BA}         0           d{AB}
+  -md{BA}        0           md{AB}
 ```
 
 In the picture, B owes A some amount of money. The `^` marks shows the current
-credit relationship between A and B. From the point of view of B, the picture
-looks as follows:
+credit relationship between A and B. The value d{AB} is the mutual credit state
+between A and B. It denotes the purchasing power of A with respect to B. It is
+always true that `-md{BA} <= d{AB} <= md{AB}`. Note the symmetric property:
+`d{AB} = -d{BA}`.
+
+From the point of view of B, the picture looks as follows:
 
 ```
+            d{BA)
      [-------^-----|-----------]
-   d{AB}           0         d{BA}
+  -md{AB}          0         md{BA}
 ```
 
-TODO
-
+In the CSwitch architecture, we call such a pair of identities A and B **friends**.
+A pair of friends represents a trust relationship in the real world between two
+people.
 
 The economy of mutual credit clearing between two people is simple, and it
 requires that each side generates goods that the other side wants. In the
@@ -170,13 +177,30 @@ To extend the idea of credit clearing to the economy of multiple players we use
 chains of mutual credit clearing. In this setting, every person has a few other
 people he trusts, and maintains mutual credit clearing with.
 
-Assume that a person A wants to send funds to another person B. If A and B 
-If A and B directly manage mutual credit clearing, A will keep a note that he
-owes B more credit, and B will keep a note that A owes him credit.
+Assume that a person A wants to send funds to another person B. If A and B
+are friends (They directly manage mutual credit clearing), the transaction is
+simple: A will decrease d{AB} and B will increase d{BA}. 
 
+If A and B are not friends, they need the help of a mediator, or a chain of
+mediators, to perform the transaction. A and B will look for a chain of the
+following form:
 
+A -- M1 -- M2 -- M3 -- B
 
-TODO
+Where A, M1 are friends, M1, M2 are friends, M2, M3 are friends and M3, B are
+friends. Of course, the length of the chain could be arbitrary.
+
+To transfer funds from A to B, A will first transfer funds to M1, M1 and will
+transfer the funds to M2, M2 will transfer the funds to M3 and M3 will transfer
+the funds to B. Each mediator (M1, M2, M3) can take a little amount of funds
+for himself during the transaction, in exchange for helping A and B perform the
+transaction.
+
+We assume that friendship between people in the real world should allow any two
+strangers A,B to find a chain of friends that connects them, to allow transfer
+of funds between A and B. If no such chain is found, transfer of funds will not
+be possible.
+
 
 ## The problem of distributed routing
 
