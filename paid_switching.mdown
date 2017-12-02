@@ -1,8 +1,4 @@
-Title: Paid packet switching protocol
-Date: 2017-10-06 17:37
-Author: real
-Status: draft
-
+# Paid packet switching protocol
 
 ## Abstract
 
