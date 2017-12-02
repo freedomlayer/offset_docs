@@ -342,10 +342,61 @@ credit. We multiply by `2` to allow for the case of failure, where only half of
 the promised amount of credits will be paid.
 
 
-## Analyzing incentives in Backwards payment
+## Analyzing incentives in Backwards credit payment
+
+We now analyze various cases of action during a backwards credit payment
+transaction, to make sure that all the participants of the transaction are
+properly incentivized to play by the rules.
+
+Consider the following network formation between neighbors:
+
+```
+A -- B -- C -- D -- E
+```
+
+The following are some edge cases we manage to deal with:
+
+(1) A sends a message to a nonexistent remote node T.
+
+As a result, One of the nodes, for example D, will send back an error response
+message, signed by D, back to C. The error response message will eventually
+arrive A, and all the mediator nodes will be paid half of the promised credit
+amount. This means that sending a message to a nonexistent remote node costs
+money to A, and the mediator nodes are still compensated.
 
 
-TODO
+(2) B receives a request to forward a message to C, but he doesn't forward the
+message to C.
+
+This is not a reasonable for B, because B could potentially earn money
+from this transaction.
+
+
+(3) A and E cooperate. When E receives a request message, E doesn't return a
+signed response message to D.
+
+D will keep the transaction open, waiting for a response from E. This blocks
+the channel between D and E. Next time, A will not be able to send a message to
+A through D. The channel between D and E will be opened only when E sends back
+a response message to D.
+
+
+(4) B receives a response message from C but doesn't pay C.
+
+An inconsistency will be created in the neighbor relationship between B and C,
+and communication will not continue between them until this inconsistency is
+solved manually.
+
+
+(5) C receives a response message from D but does not pass it to B.
+
+This means that C gives up on credit, passing the response message to B will
+earn C credit. Therefore, C will prefer to pass the response message to B.
+
+
+Analyzing the cases above does not mean that the backwards credit payment is
+proved to be safe, but currently we do not know of any holes in its design.
+
 
 
 ## The problem of distributed routing
