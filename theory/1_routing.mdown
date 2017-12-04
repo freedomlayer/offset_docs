@@ -108,34 +108,30 @@ CSwitch network.
 
 ## Allowing Open market of indexing
 
-Every node in the network should maintain at all times routes to a few closest
-indexer nodes. Those routes are exchanged using gossip between neighbors in the
-network. The indexer nodes will have identity signed by an official key, so
-that all nodes in the network will be able to recognize them.
+CSwitch aims to be a decentralized communication infrastructure. Having a
+single entity used for indexing could introduce a single point of failure.
+If this entity will stop working for some reason, communication and funds
+transfer in the CSwitch network will not be possible.
+
+Therefore the CSwitch supports the participation of multiple indexing
+providers. An indexing provider is a single economic entity (with aligned
+incentives) that provides indexing services to nodes on the CSwitch network in
+exchange for credit. It should be profitable for an indexing provider to
+operate, or it will soon be out of business.
+
+Operating an indexing service inccurs costs. The main costs are probably for
+collecting updated information about the network topology (The graphs of
+neighbors and friends). Other costs could be the equipment for storage of the
+current CSwitch network state and power for computing routes in the stored
+network state. Additional costs could arise from the communication between
+different indexers belonging to the same indexing service.
 
 
-TODO: Continue here.
+TODO:
 
+- Every node should pick a few indexing providers.
+- Indexing provider protocol.
+- Chains of signatures instead of using time for signatures. An end node should
+    know a current state of signatures in the ledger.
+- Pairs of public keys for indexers.
 
-
-If we let different nonrelated people run indexers themselves, we run the risk
-of no cooperation between them. It is possible that person Q that runs an
-indexer will not propagate network topology changes to person T that runs an
-indexer. If this happens, T will not have an updated view of the network.
-
-This problem of incentives between indexer operators is currently unsolved, and
-therefore the current plan is to let us own all indexers with an official
-public key.
-
-
-An indexer node works as a node over the CSwitch infrastructure. 
-
-TODO: Write about how one indexer works.
-
-
-The indexers part of the design is the part we are worried about the most,
-because it is not decentralized, and not even federated. We will be happy to
-change this design to something more decentralized, if a solution is found.
-
-
-TODO: Write about finding credit flow using indexers.
