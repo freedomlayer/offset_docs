@@ -398,9 +398,49 @@ Analyzing the cases above does not mean that the backwards credit payment is
 proved to be safe, but currently we do not know of any holes in its design.
 
 
+## Possible transaction delays
+
+The methods we have described for transactions of messages neighbors, and
+dually, for transactions of funds between friends, do not put any limit on the
+amount of time it takes for a transaction to complete.
+
+Consider the following example. In a neighbors graph of the following
+formation:
+```
+A -- B -- C -- D
+```
+
+A wants to send a message to D. A request message is first created, and A sends
+the request message to B, with a promise of paying 6 credits given a proof of
+delivery to D. B then forwards the request message to C, with a promise of
+paying 4 credits given proof of delivery to D. Suddenly C crashes due to a power outage. 
+
+B could naively send back to A an error response message. A will pay B 1
+credit, which is half of the promised credit for forwarding the message. 
+
+However, if C did manage to receive the message from B just before it crashed,
+when the power is restored C will wake up and forward the request message to
+D, with promise of payment of 2 credits to D. D will receive the message, and
+send back to C a signed response message. C then pays D 2 credits.
+
+Next, C sends the signed response message to B, requiring B to pay C 4 credits.
+B will have no choice but paying 4 credits to C, **leaving B at a loss of 3
+credits.** Therefore, B is taking a risk by sending an error message back to A.
+
+Instead, in the above described situation (C doesn't respond in a timely
+manner), B will keep the request sent by A in memory, and wait indefinately for
+a response message from C. If C ever wakes up and sends B the response, B will
+pay C 4 credits.  Then B will send the response back to A and redeem his
+promised 6 credits.
+
+
+TODO: This method is not much of a problem in the transfer of messages between
+neighbors, but it could be a problem when transferring funds. 
+
+- How to overcome those problems?
+- How long should a node wait before discarding a request?
 
 TODO: Write about possible infinite delay of a transaction, partial solution.
-
 
 
 ## Distributed routing is difficult
@@ -489,7 +529,6 @@ TODO: Write about how one indexer works.
 The indexers part of the design is the part we are worried about the most,
 because it is not decentralized, and not even federated. We will be happy to
 change this design to something more decentralized, if a solution is found.
-
 
 
 TODO: Write about finding credit flow using indexers.
