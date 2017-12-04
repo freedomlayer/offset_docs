@@ -1,0 +1,97 @@
+# Routing and indexers
+
+04.12.2017
+
+## Introduction
+
+CSwitch serves as an infrastructure for the transfer of communication and
+funds.  To be able to send messages in the graph of neighbors or to send funds
+in the graph of friends, we need to be able to find routes between
+nodes. Routes are chains of neighbors or friends.
+
+Finding routes between nodes in a distributed setting (Every node only knows his
+immediate graph neighbors) is a difficult problem. We never managed to find a
+solution to this problem that is both distributed and efficient. Currently we
+do not know of any method of distributed routing that scales well.
+
+The naive solution for this problem is flooding: Every node passes the message
+to all the nodes that he knows of, until the message arrives at all nodes.
+Specifically, the message also arrives at its destination.
+
+The method of routing by flooding is very inefficient, and can not be used in
+CSwitch, as CSwitch should be an efficient communication infrastructure.
+
+Other methods were tested as part of the freedomlayer project. Those attempts
+are outside of the scope of this document, and can be read at the 
+[Freedomlayer research section](https://www.freedomlayer.org/pages/research.html).
+At the time of writing this document, none of those methods allowed practical
+distributed routing.
+
+
+## Using centralized indexers
+
+Instead of using distributed routing, we plan to use centralized, possibly
+federated, set of index nodes. Those nodes will run different code from the
+rest of the node on the network, and will supply the service of finding routes
+in the networks of neighbors and friends. This service will be provided in
+exchange for credit.
+
+Every node in the network should maintain at all times routes to a few closest
+indexer nodes. Those routes are exchanged using gossip between neighbors in the
+network. The indexer nodes will have identity signed by an official key, so
+that all nodes in the network will be able to recognize them.
+
+Every node sends periodically to the a few close indexers the following
+information:
+
+- A of current neighbors 
+- A set of current friends, and current funds capacities to those friends (How
+    much funds could be pushed to each friend)
+- A current communication public key, that could be used for a fast half-static
+    diffie-hellman exchange with another node. (TODO: Should we have this?)
+
+When this information is received by an indexer, it will be propagated to the
+rest of the indexers somehow. The communication between the indexers could be
+done over the CSwitch infrastructure, which means that the indexers themselves
+need to pay for communication.
+
+If we let different nonrelated people run indexers themselves, we run the risk
+of no cooperation between them. It is possible that person Q that runs an
+indexer will not propagate network topology changes to person T that runs an
+indexer. If this happens, T will not have an updated view of the network.
+
+This problem of incentives between indexer operators is currently unsolved, and
+therefore the current plan is to let us own all indexers with an official
+public key.
+
+
+Whenever a node A wants to send a message to some remote node B, A will first
+send a request for route to B to one (or more) of the closest indexers he knows
+of. A will then receive a few possible routes to B. Using these routes, A will
+be able to send a message to B. (The response will possibly include a recent
+communication public key of B. This will allow A to perform a static
+diffie-hellman exchange with B, saving one roundtrip time).
+
+The request that A sends to an indexer I goes over the communication layer,
+between neighbors. It contains extra credit for:
+
+- Processing of the path finding.
+- Allocating bytes for the indexer response.
+
+These types of extra credit inside communication messages (processing fee, fee
+for response bytes allocation) are part of the specification for a message in
+the communication layer between friends, and could be used for other purposes
+by users of the CSwitch infrastructure.
+
+
+An indexer node works as a node over the CSwitch infrastructure. 
+
+TODO: Write about how one indexer works.
+
+
+The indexers part of the design is the part we are worried about the most,
+because it is not decentralized, and not even federated. We will be happy to
+change this design to something more decentralized, if a solution is found.
+
+
+TODO: Write about finding credit flow using indexers.
