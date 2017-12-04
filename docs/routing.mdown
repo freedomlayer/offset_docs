@@ -2,6 +2,11 @@
 
 04.12.2017
 
+TODO:
+
+- Write about the idea of semi-decentralized indexers (Federated?)
+
+
 ## Introduction
 
 CSwitch serves as an infrastructure for the transfer of communication and
