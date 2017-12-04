@@ -10,7 +10,7 @@ TODO:
 ## Introduction
 
 CSwitch serves as an infrastructure for the transfer of communication and
-funds.  To be able to send messages in the graph of neighbors or to send funds
+funds. To be able to send messages in the graph of neighbors or to send funds
 in the graph of friends, we need to be able to find routes between
 nodes. Routes are chains of neighbors or friends.
 
@@ -29,36 +29,94 @@ CSwitch, as CSwitch should be an efficient communication infrastructure.
 Other methods were tested as part of the freedomlayer project. Those attempts
 are outside of the scope of this document, and can be read at the 
 [Freedomlayer research section](https://www.freedomlayer.org/pages/research.html).
-At the time of writing this document, none of those methods allowed practical
+At the time of writing this document, none of those methods allow practical
 distributed routing.
 
 
-## Using centralized indexers
+## Introducing Indexers
 
-Instead of using distributed routing, we plan to use centralized, possibly
-federated, set of index nodes. Those nodes will run different code from the
-rest of the node on the network, and will supply the service of finding routes
-in the networks of neighbors and friends. This service will be provided in
-exchange for credit.
+Instead of using distributed routing, we plan to use a more centralized
+approach to routing. Finding routes in the network will be given to nodes as a
+service that costs credit.
+
+The nodes that give routing services are called **indexers**. A few indexers
+might belong to one **indexing provider**. Indexers that belong to one indexing
+provide collabarate and together index the whole connected component of the
+CSwitch network they reside in.
+
+Whenever a node A wants to send a message to some remote node B, A will first
+send a request for route to B to an indexer node I. The indexer I will send
+back to A a response message containing a few possible routes to B. Using these
+routes, A will be able to send a message to B. (The response from I to A will
+possibly include a recent communication public key of B. This will allow A to
+perform a static diffie-hellman exchange with B, saving one roundtrip time).
+
+The request that A sends to an indexer I goes over CSwitch's communication
+layer, between neighbors. It contains extra credit for:
+
+- Processing of the path finding.
+- Allocating bytes for the indexer response.
+
+These types of extra credit inside communication messages (processing fee, fee
+for response bytes allocation) are part of the specification for a message in
+the communication layer between friends, and could be used for other purposes
+by users of the CSwitch infrastructure.
+
+To index the network, the an indexer I will occasionaly send a node A an
+inquiry asking for the following:
+
+- A set of current neighbors
+- A set of current friends, and current funds capacities to those friends (How
+    much funds could be pushed to each friend), and whether those friends are
+    online.
+- A current communication public key, that could be used for a fast half-static
+    diffie-hellman exchange with another node. (TODO: Should we have this?)
+
+This inquiry from the indexer I to the node A will be sent as a paid request
+over the communication layer. It will include processing fees and extra credits
+for the allocation of response bytes. This makes the inquiry worth responding
+to. (TODO: How to deal with false responses?)
+
+As a simplistic example, an indexing provider could consist of a single indexer
+I that works alone, asking all the nodes in the network for their set of
+neighbors and friends. Whenever a request for route (of neighbors or friends)
+is sent to the indexer, the indexer will find the routes using classic graph
+theory algorithms and return a response to the requesting node.
+
+In the past we proposed an indexing method in which every node picks a few
+close indexers, and reports to them changes to his set of neighbors or friends
+whenever such changes happen. This has the advantage of saving bandwidth,
+comparing to the above network of periodically requesting the current sets of
+neighbors and friends. However, using this method causes a lock in to one
+indexing provider.  New emerging indexing providers will not be able to
+start operating, because they will lack adoption of users, hence they will not
+be able to get the information required to index the CSwitch network.
+
+As mapping the whole network could be bandwidth consuming for a single node, an
+indexing provider could use multiple indexer nodes. Then the work of indexing
+the network could be divided by regions: Every indexer from the group will be
+responsible to obtain up to date information for some part of the CSwitch
+network. The information is then exchanged between the indexer nodes. 
+
+An indexing provider could use indexer nodes with a proprietary implementation.
+The indexer nodes belonging to one indexing provider may even communicate outside
+the CSwitch network, possibly for efficiency reasons. For example, the indexers
+belonging to one indexing provider might be connected directly, or communicate
+using TCP over the Internet. Of course they may also communicate over the
+CSwitch network.
+
+
+## Allowing Open market of indexing
 
 Every node in the network should maintain at all times routes to a few closest
 indexer nodes. Those routes are exchanged using gossip between neighbors in the
 network. The indexer nodes will have identity signed by an official key, so
 that all nodes in the network will be able to recognize them.
 
-Every node sends periodically to the a few close indexers the following
-information:
 
-- A of current neighbors 
-- A set of current friends, and current funds capacities to those friends (How
-    much funds could be pushed to each friend)
-- A current communication public key, that could be used for a fast half-static
-    diffie-hellman exchange with another node. (TODO: Should we have this?)
+TODO: Continue here.
 
-When this information is received by an indexer, it will be propagated to the
-rest of the indexers somehow. The communication between the indexers could be
-done over the CSwitch infrastructure, which means that the indexers themselves
-need to pay for communication.
+
 
 If we let different nonrelated people run indexers themselves, we run the risk
 of no cooperation between them. It is possible that person Q that runs an
@@ -68,25 +126,6 @@ indexer. If this happens, T will not have an updated view of the network.
 This problem of incentives between indexer operators is currently unsolved, and
 therefore the current plan is to let us own all indexers with an official
 public key.
-
-
-Whenever a node A wants to send a message to some remote node B, A will first
-send a request for route to B to one (or more) of the closest indexers he knows
-of. A will then receive a few possible routes to B. Using these routes, A will
-be able to send a message to B. (The response will possibly include a recent
-communication public key of B. This will allow A to perform a static
-diffie-hellman exchange with B, saving one roundtrip time).
-
-The request that A sends to an indexer I goes over the communication layer,
-between neighbors. It contains extra credit for:
-
-- Processing of the path finding.
-- Allocating bytes for the indexer response.
-
-These types of extra credit inside communication messages (processing fee, fee
-for response bytes allocation) are part of the specification for a message in
-the communication layer between friends, and could be used for other purposes
-by users of the CSwitch infrastructure.
 
 
 An indexer node works as a node over the CSwitch infrastructure. 
