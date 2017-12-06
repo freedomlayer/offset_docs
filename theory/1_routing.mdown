@@ -139,8 +139,6 @@ Some open questions regarding the list of trusted indexing providers:
     can we do about this?
 
 
-## Indexing protocol
-
 Nodes in the CSwitch network communicate with indexers using a standard
 protocol. This protocol satisfies the following requirements:
 
@@ -151,28 +149,180 @@ protocol. This protocol satisfies the following requirements:
     to notify nodes in the network about this change in a secure manner.
 
 
-We describe here a standard protocol between CSwitch nodes and indexers.
-Messages:
+In the following sections we describe a standard protocol between CSwitch
+nodes and indexers.
 
+
+
+## Authenticity of indexer nodes
+
+Consider a node A in the CSwitch network that uses the services of an indexing
+provider IndP. A needs a method of discovering routes to indexer nodes
+belonging to IndP, to be able to get service from those indexer nodes.
+
+This is done as follows: some indexer node I of IndP sends a message to the
+node A, somehow stating that the indexer node I belongs to IndP, and giving A a
+route to the indexer node I. Then whenever A wants to request a route to some
+remote node, A will send a route request to I.
+
+How can A be sure that I belongs to IndP? We could use here the traditional
+method of [digital certificates](https://en.wikipedia.org/wiki/Public_key_certificate),
+having the indexing provider IndP represent a certificate authority.
+IndP will have a root public key. Using this key it will issue a digital
+certificate, signed for a limited period of time, to each of his indexer nodes.
+
+Using this method an indexer I could show the node A his up to date
+certificate signed by IndP. A will then believe that I is a legitimate indexer
+node belonging to the indexing provider IndP.
+
+If any indexer node E needs to be revoked (Maybe it was somehow taken over), the
+certificate authority IndP will not renew the indexer's certificate. After
+enough time passes, E's certificate will expire, and E will not be able to
+convince nodes in the CSwitch network that he is a legitimate indexer node
+belonging to IndP.
+
+A main drawback to the traditional method of digital certificates is the
+dependence on synchronized time system. If a node A in the CSwitch network is to
+verify an indexer node digital certificate, it is a required that A knows a
+good approximation of the current time.
+
+Therefore we choose a different method for an indexer node to prove his
+belonging to an indexing provider. We use a system of **states chain**.
+
+One link in an indexing provider states chain is of the following form:
+
+- previousStateHash             [32 bytes]
+
+- newOwnersPublicKeys
+    - newOwnerPublicKey{0},     [32 bytes]
+    - newOwnerPublicKey{1},
+    - ...
+    - newOwnerPublicKey{m-1}, 
+
+- newIndexersPublicKeys
+    - indexerPublicKey{0}       [32 bytes]
+    - indexerPublicKey{1}
+    - ...
+    - indexerPublicKey{t-1}
+
+- signaturesByOldOwners
+    - signature{1}              [32 bytes]
+    - signature{2}
+    - ...
+    - signature{r-1}
+
+
+previousStateHash is the hash (Sha512/256) of the previous state.
+newOwnerPublicKeys is a list of the new owners of the indexing provider. Each
+owner has a public key.
+
+newIndexersPublicKeys is a list of public keys for indexers belonging to the
+indexing provider.
+
+signaturesByOldOwners is a list of signatures by the old owners of the indexing
+provider over the new state of the indexing provider. The signatures is over
+all the previous fields: previousStateHash, newIndexersPublicKeys and
+newOwnersPublicKeys. 
+
+The first link in a chain could have a random value for previousStateHash.
+
+To provide a canonical form for a link in the states chain, each of the lists
+(newOwnersPublicKeys and signaturesByOldOwners) is sorted.
+
+A new link in an indexing provider states chain is valid only if signatures of
+at least 2/3 of the old owners are present and valid.
+
+
+# Updating states chain protocol
+
+A node A that uses the services of indexing provider
+IndP should always know some recent link (also named: state) in the states chain
+of the indexing provider. A recent state allows the node A to know the list of
+legitimate indexer nodes belonging to IndP.
+
+The following messages are used to keep CSwitch nodes up to date with the
+recent state of their indexing providers:
+
+
+**RequestUpdateState** (Indexer -> Node)
+
+- indexingProviderName [16 bytes]
+- indexingProviderStatesChain
+
+
+**ResponseUpdateState** (Node -> Indexer)
+
+- knownIndexingProviderStateHash [32 bytes]
+
+
+**RouteToIndexer** (Indexer -> Node)
+
+- routeToIndexer
+
+
+RequestUpdateState message is sent from an Indexer (belonging to indexing
+provider IndP) to a node in the CSwitch network. It states the indexing
+provider name and the few last links the states chain of the indexing provider
+(Possibly 0 links). 
+
+The receiving node, A, will update his known last link of the chain, given
+that all the new links are valid. The node A then responds with a
+ResponseUpdateState, containing his new value of last link of the states chain. 
+
+It is possible that the value of the last state of the chain that A keeps could
+be left unchanged. This could happen if A already had the most recent link of
+the chain, or in case the indexer has sent invalid new links.
+
+After the indexing provider has made sure the remote node A knows the current
+state of the indexing provider, he can send a RouteToIndexer message to the
+node A through any indexer node. This message will provide a route to an
+indexer belonging to the indexing provider IndP.
+
+The node A can verify that an indexer belongs to the indexing provider IndP by
+looking at his current state of the indexing provider IndP, in the list of
+newIndexersPublicKeys.
+
+
+## Information collection by indexers
+
+Information about the network topology may be collected using the two protocol
+messages:
 
 **RequestIndexerInfo** (Indexer -> Node)
 
-- indexingProviderName [16 bytes]
-- pathToIndexer
+- (empty)
 
 
 **ResponseIndexerInfo** (Node -> Indexer)
 
-- knownIndexingProviderStateHash [32 bytes]
 - connectedNeighborsList
 - neighborsCommPublicKey
 - connectedFriendsList (with available capacities)
 - friendsCommPublicKey
 
 
-**UpdateIndexingProviderState** (Indexer -> Node)
+An indexer node can send a message to any node, requesting local information.
+The node that responds with information about currently connected neighbors,
+his communication public key for neighbors, the currently connected friends
+(And their current capacity for pushing funds), and a communication public key
+for friends.
 
-- indexingProviderStatesChain
+Note that the indexer I sending the RequestIndexerInfo message does not need to
+identify himself against the receiving node A. The indexer I may belong to an
+indexing provider that A is not associated with. The message RequestIndexerInfo
+can also be sent by nodes that are not indexers (TODO: Privacy implications of
+this?)
+
+Nodes are incentivized to respond to RequestIndexerInfo messages. Those
+messages are sent over the communication channel (between neighbors) and they
+contain a promise for credit. However, there is no guarantee that the responses
+to those messages contain true information. (TODO: What are the implications of
+this?)
+
+
+## Requesting information from indexer nodes
+
+TODO: Explain here.
 
 
 **RequestNeighborsRoute** (Node -> Indexer)
