@@ -106,7 +106,7 @@ using TCP over the Internet. Of course they may also communicate over the
 CSwitch network.
 
 
-## Allowing Open market of indexing
+## Allowing Open market of indexing providers
 
 CSwitch aims to be a decentralized communication infrastructure. Having a
 single entity used for indexing could introduce a single point of failure.
@@ -119,17 +119,97 @@ incentives) that provides indexing services to nodes on the CSwitch network in
 exchange for credit. It should be profitable for an indexing provider to
 operate, or it will soon be out of business.
 
-Operating an indexing service inccurs costs. The main costs are probably for
-collecting updated information about the network topology (The graphs of
-neighbors and friends). Other costs could be the equipment for storage of the
-current CSwitch network state and power for computing routes in the stored
-network state. Additional costs could arise from the communication between
-different indexers belonging to the same indexing service.
+Operating an indexing service inccurs costs for the following:
+
+- Periodic collection of updated information about the network topology (The
+    graphs of neighbors and friends). 
+- Equipment for storage of the current CSwitch network state.
+- Power used for computation of routes in the stored network state. 
+- Communication between different indexers belonging to the same indexing service.
+
+
+A CSwitch client contains a list of trusted indexing providers used for
+requests for routes. This list is configurable by the user of the client. Every
+user of the CSwitch network may pick the indexing providers he trusts and is
+willing to buy service from. This list is somewhat similar in its role to
+the list of trusted certificate authorities in a user's browser.
+
+
+Some open questions regarding the list of trusted indexing providers:
+
+- How can a non savvy user pick a list of trusted indexing providers?
+- What list will we provide as default?
+- Is this going to make it harder for new indexing providers to emerge? What
+    can we do about this?
+
+
+## Indexing protocol
+
+Nodes in the CSwitch network communicate with indexers using a standard
+protocol. This protocol satisfies the following requirements:
+
+- A node in the CSwitch network should be able to discover in a secure manner a
+    route to a close indexer that is part of any indexing provider he trusts.
+
+- An indexing provider should be able to update his set of indexer nodes, and
+    to notify nodes in the network about this change in a secure manner.
+
+
+We describe here a standard protocol between CSwitch nodes and indexers.
+Messages:
+
+
+**RequestIndexerInfo** (Indexer -> Node)
+
+- indexingProviderName [16 bytes]
+- pathToIndexer
+
+
+**ResponseIndexerInfo** (Node -> Indexer)
+
+- knownIndexingProviderStateHash [32 bytes]
+- connectedNeighborsList
+- neighborsCommPublicKey
+- connectedFriendsList (with available capacities)
+- friendsCommPublicKey
+
+
+**UpdateIndexingProviderState** (Indexer -> Node)
+
+- indexingProviderStatesChain
+
+
+**RequestNeighborsRoute** (Node -> Indexer)
+
+- sourceNode
+- secondNode (Optional)
+- beforeLastNode (Optional)
+- destinationNode
+
+
+**ResponseNeighborsRoute** (Indexer -> Node)
+
+- routes
+- destinationCommPublicKey
+
+
+**RequestFriendsRoute** (Node -> Indexer)
+
+- sourceNode
+- secondNode (Optional)
+- beforeLastNode (Optional)
+- destinationNode
+
+
+**ResponseFriendsRoute** (Indexer -> Node)
+
+- routes
+- destinationCommPublicKey
+
 
 
 TODO:
 
-- Every node should pick a few indexing providers.
 - Indexing provider protocol.
 - Chains of signatures instead of using time for signatures. An end node should
     know a current state of signatures in the ledger.
