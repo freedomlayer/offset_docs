@@ -322,14 +322,14 @@ this?)
 
 ## Requesting information from indexer nodes
 
-TODO: Explain here.
+A node in the CSwitch network may send a request to any indexer node,
+requesting either a route between neighbor or a route between friends.
+The following messages are used for issuing such requests:
 
 
 **RequestNeighborsRoute** (Node -> Indexer)
 
 - sourceNode
-- secondNode (Optional)
-- beforeLastNode (Optional)
 - destinationNode
 
 
@@ -354,10 +354,32 @@ TODO: Explain here.
 
 
 
+Consider for example the message RequestNeighborsRoute (The message
+RequestFriendsRoute is similar). The request contains sourceNode and
+destinationNode. This means that the sending node is requesting routes between
+neighbors that begin from the sourceNode and end with the destinationNode.
+
+secondNode and beforeLastNode are two extra optional fields that are specific
+for RequestFriendsRoute. It is possible to request a friends route that begins
+with two specific nodes and ends with two specific nodes. This can be useful in
+cases of rebalancing debts to direct neighbors. 
+
+For example, if a node A is planning to unfriend another node B, he may first
+push flow of credit through B back to himself, to acheive balanced credit
+between A and B. Then A can unfriend B without leaving an unsettled debt.
+
+This method of balancing debts is not relevant for the communication layer
+(between neighbors), where rebalancing can be done by sending funds on the
+funds layer (between friends).
+
+
+
+
+
 TODO:
 
-- Indexing provider protocol.
-- Chains of signatures instead of using time for signatures. An end node should
-    know a current state of signatures in the ledger.
-- Pairs of public keys for indexers.
+- How often should indexers collect information about the network?
+- What happens if collected information is not up to date?
+        - A communication (neighbors) route that is not up to date?
+        - A funds route (friends) that is not up to date?
 
