@@ -1,10 +1,6 @@
 # Routing and indexers
 
-04.12.2017
-
-TODO:
-
-- Write about the idea of semi-decentralized indexers (Federated?)
+06.12.2017
 
 
 ## Introduction
