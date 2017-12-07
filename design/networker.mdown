@@ -1,0 +1,87 @@
+# Networker design
+
+07.12.2017
+
+
+## Introduction
+
+The Networker component is the interface used by all other components for
+sending and receiving messages in the CSwitch network. In addition, it is
+responsible for mutual credit management against the Networkers of the
+node's neighbors.
+
+The Networker is the core component of the CSwitch client. It performs the
+"magic" that allows secure exchange of communication and credit.
+
+
+## Interface with the Channeler
+
+The Networker relies on the Channeler component for the ability to communicate
+with the Networkers of direct neighbors. 
+
+```
+Networker             Networker
+   |                     ^
+   |                     |
+   V                     |
+Channeler ----------> Channeler
+```
+
+This is done using the messages:
+
+**ChannelOpened** (Channeler -> Networker)
+
+- remotePublicKey
+
+
+**ChannelClosed** (Channeler -> Networker)
+
+- remotePublicKey
+
+
+**SendChannelMessage** (Networker -> Channeler)
+
+- remotePublicKey
+- tokenChannelIndex
+- messageContent
+
+ 
+**ChannelMessageReceived** (Channeler -> Networker)
+
+- remotePublicKey
+- messageContent
+
+
+
+ChannelOpened is a message sent Channeler to the Networker, notifying that a
+new communication channel is available from the Networker to the Networker of a
+remote node. ChannelClosed message means that the channel was closed.
+
+SendChannelMessage is a message sent from the Networker to the Channeler,
+allowing to send a message to a Networker of a remote neighbor.
+tokenChannelIndex is a hint to the Channeler, specifying the index number of
+the token channel used for the underlying message. 
+
+In case the Channeler is using an implementation of multiple TCP connections,
+the tokenChannelIndex hint can be used to help divide messages to different TCP
+connections to the remote neighbor.
+
+ChannelMessageReceived is a message sent from the Channeler to the Networker,
+notifying about the receipt of a new message from a Networker of a remote
+neighbor.
+
+
+Note that synchronization issues are possible: It is possible that the
+Networker is sending a SendChannelMessage to the Channeler, while at the same time
+the Channeler is sending a ChannelClosed message to the Networker. 
+It is possible that the Networker and the Channeler have seen the events in
+different order: The Channeler closed the TCP connections before the message
+could be sent, while the Networker believes that he sent the SendChannelMessage
+message to the Channeler before the channel was closed.
+
+This is not a problem, because the Networker uses token based communication.
+The Networker always remembers the last message he attempted to send over a
+token channel. If later the Networker finds that the remote Networker did not
+received the message, it will send it again.
+
+
