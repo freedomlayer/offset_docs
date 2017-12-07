@@ -355,6 +355,18 @@ There is no theoretically sound countermeasure that we currently know of
 against malicious users using up gateway node's credit. Instead, ad-hoc
 solutions can be used, such as monitoring the IP address of connecting hosts.
 
+Gateway nodes are implemented through the PluginManager, as a plugin. Gateway
+nodes open a service on the Internet, possibly an HTTP server. A host A that
+wants to join the CSwitch network through a gateway node G first connects to G
+over the Internet, and sends a message containing his public key.
+G then configures through the PluginManager interface a new neighbor
+relationship. This neighbor relationship is passed to the Networker, and from
+there to the Channeler.
 
+The gateway node G can track the pairs public keys and IP addresses of hosts
+that want to be added as neighbors, and using some ad-hoc methods block
+malicious hosts.
 
+This is a very general description of how to run gateway nodes. Details should
+be added in the future if implementing this feature is required.
 
