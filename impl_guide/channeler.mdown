@@ -76,6 +76,18 @@ Channeler is given addressing information about the new neighbor: The public
 key of the remote neighbor, and an optional socketAddress: IP address and port
 for TCP connections.
 
+Note that the socketAddress field is optional. This is because it is possible
+that in a neighbor connection between two CSwitch clients, only one side knows
+the IP address of the other. 
+
+This could happen, for example, if one side is a home PC, and the other side is
+a VPS (Virtual Private Server). The server has a dedicated IP address, but the
+home PC is given a different IP address every period of time from its ISP. 
+In this case the home PC will fill in the socketAddress to be the IP address of
+the VPS server, while the VPS server will leave the socketAddress field blank.
+This means that TCP connections between the home PC and the VPS server will be
+initiated by the home PC.
+
 RemoveNeighborRelation removes a neighbor relation given the neighbors public
 key.
 
@@ -92,14 +104,257 @@ that all of his configuration is saved on RAM memory. If the CSwitch client is
 restarted, the Networker will have to reconfigure the Channeler.
 
 
+## TCP frames
+
+The Channeler uses TCP connections for communication. 
+
+TCP is a streaming protocol. This means, for example, that two messages M and N
+sent over TCP could be received by the receiver as a chunk containing part of
+M, then a chunk containing part of M and part of N, and finally the rest of N.
+In other words: The receiving side can not infer the boundaries of messages
+sent over TCP.
+
+To be able to send discrete messages over TCP we use frames. A frame has the
+following form:
+
+**Frame**
+
+- length        [32 bit, big endian]
+- data bytes    [length bytes]
+
+Every frame begins with a 32 bit length prefix (Big Endian), after which a blob
+of length data bytes follow.
+
+A reader can infer the boundaries of a received frame by first reading the
+length of a frame, and then waiting for length of bytes to arrive. When length
+bytes arrive, the receiver produces a full frame as output.
+
+The following described message based protocols all work on top of a framing
+mechanism.
+
+
 ## A TCP based channel
 
-TODO
+A Channel is the basic communication method between two Channelers. It is
+implemented as a TCP connection. The Channeler has the dual job of listening to
+incoming TCP connections, and initiating TCP connections to remote hosts.
+
+The server or client role of the Channeler in any neighbors relationship is
+decided according to the configuration given from the Networker.
+
+Consider a node A, with a configured node B as a neighbor.
+A is provided neighborAddress for the neighbor B, as previously described in
+the AddNeighborRelation message:
+
+- neighborAddress
+    - neighborPublicKey
+    - socketAddress (optional)
+
+If A is provided socketAddress: An IP address and port for opening a TCP
+connection to the node B, A will serve as a TCP client and initiate connections
+to B. **Note that in this case A will not accept any incoming TCP connections
+from the neighbor B, because A has the role of initiator.** (Having both A and
+B trying to initiate TCP connections to each other could have side
+effects of synchronization problems).
+
+On the other hand, if A is provided a blank socketAddress, it will wait for TCP
+connections from B.
+
+Once a TCP connection is initiated, both sides send the InitChannel message:
+
+**InitChannel**
+
+- neighborPublicKey [256 bit]
+    (The identity public key of the sender of this message)
+
+- channelRandValue [128 bit]
+    (An initial random value. This will be later used for the key exchange as a nonce.
+    A nonce is required to avoid replay of the signature.)
+
+
+In this message every node declares his public key, and adds a random value to
+be used with a signature in the next message, Exchange.
+
+
+When a InitChannel message is received by a Channeler, it does the following:
+
+- If this is a TCP connection that was initiated by the Channeler, check if the
+    declared neighbor public key is the public key expected when connected to
+    the remote host. If not, close the connection.
+
+- If this is a TCP connection initiated by the remote host: Check if the public
+    key belongs to a neighbor that has the initator role. If not, close the
+    connection.
+
+
+Next, both sides initiate a
+[diffie-hellman](https://en.wikipedia.org/wiki/Diffie%E2%80%93Hellman_key_exchange)
+exchange. Every side generates a private, public communication key pair for
+diffie-hellman exchange. Then the Exchange message is sent:
+
+**Exchange**
+
+- commPublicKey [256 bit]
+    (Communication public key (Generated for the new channel)
+    Using diffie-hellman we will use the communication keys to generate a
+    symmetric encryption key for this channel.)
+
+- keySalt [256 bit]
+    (A salt for the generation of a shared symmetric encryption key)
+
+- signature [256 bit]
+    (Signature over (channelRandValue || commPublicKey || keySalt)
+    Signed using neighborPublicKey.)
 
 
 
-## Operating a public Channeler server
+When a Channeler receives an Exchange message he does the following:
 
-TODO
+- Check the signature with the previously declared neighborPublicKey from the
+    previous InitChannel message. If the signature is not valid, close the
+    connection.
+
+- Combine his private key with the received commPublicKey and sent keySalt, to
+    obtain a symmetric key for sending data.
+
+- Combine his private key with the received commPublicKey and received keySalt,
+    to obtain a symmetric key for receiving data.
+
+- If this is the only successful connection between the two sides, Notify the
+    Networker using a ChannelOpened message that a channel was opened.
+    The Networker doesn't care about how many TCP connections are between the
+    two hosts. He only wants to know that there exists a way to communicate.
+
+
+This means that after the exchange, every side should have two symmetric keys:
+one for sending messages and one for receiving messages. The sending messages
+symmetric key of one side equals the receiving messages symmetric key of the
+other side, and vice versa.
+
+
+Next, the two Channelers send encrypted messages. No further exchanges can
+be done. If a Channeler receives an InitChannel or Exchange message after the
+exchange was already made, the connection will be closed.
+
+An encrypted message has the following form:
+
+**EncMessage**
+
+- incCounter        [128 bit]
+- randPadding       [Some length between 0 and 32 bytes]
+- messageType       [1 byte]
+- content
+
+The whole message is encrypted.
+
+incCounter is an increasing counter, used as a  countermeasure against replay
+attack.  Every side has his own counter for sending messages. The counter
+begins from 0 and increases for every message sent. As we are using TCP, we
+don't expect messages to be lost. The receiving side keeps track of the
+incCounter of received messages. It will discard any messages that do not have
+the expected incCounter value.
+
+randPadding is a blob of random bytes of size randomly chosen between 0 and 32.
+It contains random bytes. This is a countermeasure against traffic analysis.
+
+The possible messageType values for a message are:
+
+- User
+- KeepAlive
+
+User means a message sent to the other side. The other side will
+decrypt it and report it as a received message. 
+
+KeepAlive is a message used to notify that a Channeler is still alive.  It is
+sent periodically to ensure that the other side has received a message from us
+every known period of time If, for example, many User messages are sent from
+A's Channeler to B's in a given period of time, there is no need for A to send
+extra KeepAlive messages.
+
+content contains the message's Content. If the message type is KeepAlive, the
+message content is discarded.
+
+
+Whenever a new message of type User is received, the Channeler sends this
+message to the Networker over a ChannelMessageReceived message.
+
+
+## Using multiple TCP connections
+
+The Channeler will usually open multiple TCP connections against a remote host.
+The maximum amount of allowed multiple TCP connections to a specific remote
+host is determined by the SetNeighborMaxChannels message.
+
+Why open multiple TCP connections? This happens because of the way the Networker works.
+
+The networker maintains multiple Token channels between neighbors. Token
+channels are abstract atomic communication method. Token channels allow only
+one side of the medium to send a message to the other side at any given time.
+Assume that there are two sides of a token channel, A and B. A sends a message.
+B may send a message only after it has received A's message. If B sends a
+message, A has to wait until it has received B's message before it may send a
+message. 
+
+In the Networker's document we will explain how to implement a
+token channel, but for now just assume that the Networker communicates with
+other neighbor's Networkers using multiple token channels.
+
+TCP is a good candidate for the transport of a token channel. No loss of
+efficiency is caused when using TCP for the transport of a token channel.
+However, if one wants to transport multiple token channels, using a single TCP
+channel may not be efficient. 
+
+Assume that A communicates with B using two token channels TC1, TC2. Consider the case where A
+sends a message M1 on TC1 and then a message M2 on TC2, but the message M1 is
+lost. If we use a single TCP connection to transport both token channels, the
+delivery of the message M2 will be delayed until the message M1 is
+retransmitted.
+
+If instead we used two TCP connections, one TCP connection to transport the token
+channel TC1 and one TCP connection to transport the token channel TC2, even if
+a message sent over TC1 is lost and retransmitted, messages sent over TC2 will
+not be delayed.
+
+Therefore the channeler should strive to have about the same amount of TCP
+connections as the amount of token channels used in the Networker.
+
+If we had a protocol that operates like UDP but is reliable (Does not promise
+order of messages but allows reliable sending of large messages), we could use
+it instead. The [Fragmentos](https://github.com/realcr/fragmentos) project was
+an attempt to implement such a protocol, but it was discontinued because of
+difficulties with [flow](https://en.wikipedia.org/wiki/Flow_control_(data)) and
+congestion control. Hence we currently use the practical compromise of multiple
+TCP connections to the same host.
+
+
+To help the Channeler with deciding which TCP connection should be used for
+sending a message, the Networker should specify in every SendChannelMessage
+message to the Channeler a token channel index. The Channeler will use this
+index to pick a TCP connection for sending the message by calculating `index %
+numOfTcpConnections`. Usually `numOfTcpConnections` should equal maxChannels.
+
+
+## Public CSwitch gateway nodes
+
+Users that wish to join the CSwitch network may initially have no existing
+acquaintance in the network. As a result, it could be difficult for newcomers
+to add new neighbors.
+
+To allow newcomers and the non tech savvy consumers to join the network easily
+it is possible to set up **public CSwitch gateway nodes**, or shortly, gateway
+nodes. Those are nodes that allow any host on the Internet to start neighbor
+relationship with them.
+
+There is some risk involved with having gateway nodes. A malicious user could
+connect to a gateway node, start a neighbor relationship with that node and
+use up all the communication credit allocated in that relationship. When the
+credit is all used up, the malicious user will disconnect, possibly
+reconnecting to the same or another gateway node.
+
+There is no theoretically sound countermeasure that we currently know of
+against malicious users using up gateway node's credit. Instead, ad-hoc
+solutions can be used, such as monitoring the IP address of connecting hosts.
+
+
 
 
