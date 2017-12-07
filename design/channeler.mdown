@@ -202,7 +202,7 @@ diffie-hellman exchange. Then the Exchange message is sent:
 - keySalt [256 bit]
     (A salt for the generation of a shared symmetric encryption key)
 
-- signature [256 bit]
+- signature [512 bit]
     (Signature over (channelRandValue || commPublicKey || keySalt)
     Signed using neighborPublicKey.)
 

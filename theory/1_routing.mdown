@@ -206,7 +206,7 @@ One link in an indexing provider states chain is of the following form:
     - indexerPublicKey{t-1}
 
 - signaturesByOldOwners
-    - signature{1}              [32 bytes]
+    - signature{1}              [64 bytes]
     - signature{2}
     - ...
     - signature{r-1}
