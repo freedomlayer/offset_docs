@@ -1,0 +1,105 @@
+# Channeler design
+
+07.12.2017
+
+
+## Introduction
+
+The channeler is the CSwitch component facing the Internet. It translates
+abstract channels between neighbors into actual encrypted TCP connections over
+the Internet. The Channeler allows operating the CSwitch network over the
+Internet.
+
+(TODO: How to design a component that allows operating the CSwitch network over
+wires? Could we reuse the Channeler component, or will we need to do something
+else?)
+
+Every node in the CSwitch is directly connected to a few **neighbors**. Those are
+other CSwitch nodes in the network. Those direct neighbor connections are
+configured by the users of the CSwitch nodes. For two nodes to be neighbors in
+the CSwitch network, the users of both nodes need to configure their CSwitch
+nodes to connect to each other. Having only one user configuring his node is
+not enough to set up a direct neighbor connection between nodes.
+
+The direct neighbor connections between nodes should allow to pass messages
+from any node A to any other node B in the CSwitch network, even if the two
+nodes A and B are not directly connected as neighbors. In such a case, a
+message sent from A to B will be forwarded along a route of neighbors from A to
+B. The nodes along the route (including the node B) will be payed credit for
+their effort in forwarding the message.
+
+Why not form a direct TCP connection between A and B instead of passing
+messages through a route of neighbors?
+
+- It is sometimes very difficult or not possible to form a TCP connection
+    between two computers on the Internet. This could happen because one or two
+    of the computers are connected to the Internet behind
+    [NAT](https://en.wikipedia.org/wiki/Network_address_translation)s or
+    Firewalls.
+
+- We want that the CSwitch network could work as an ad-hoc mesh network, even
+    without an existing Internet communication infrastructure. In that setting,
+    some nodes will be directly connected using some medium (Cables, Antennas
+    etc.), and messages will have to be forwarded through a route of directly
+    connected nodes.
+
+
+
+## Configuring neighbors
+
+The Channeler component is configured through the Networker component (Which in
+turn is configured from the PluginManager). The network can send the following
+messages to configure the Channeler:
+
+
+**AddNeighborRelation**
+
+- neighborInfo
+    - neighborAddress
+        - neighborPublicKey
+        - socketAddress (optional)
+    - maxChannels
+
+**RemoveNeighborRelation**
+
+- neighborPublicKey
+
+
+**SetMaxChannel**
+
+- neighborPublicKey
+- maxChannels
+
+
+AddNeighborRelation allows to configure a new neighbor. The
+Channeler is given addressing information about the new neighbor: The public
+key of the remote neighbor, and an optional socketAddress: IP address and port
+for TCP connections.
+
+RemoveNeighborRelation removes a neighbor relation given the neighbors public
+key.
+
+SetMaxChannel allows to change the maximum amount of channels openend against a
+neighbor. This usually corresponds to the amount of TCP connections that the
+channeler may open against the neighbor.
+
+The three messages mentioned here (AddNeighborRelation, RemoveNeighborRelation
+and SetMaxChannel) may be sent to the Channeler during any time of his
+operation.
+
+The Channeler does not have any method of persisting information. This means
+that all of his configuration is saved on RAM memory. If the CSwitch client is
+restarted, the Networker will have to reconfigure the Channeler.
+
+
+## A TCP based channel
+
+TODO
+
+
+
+## Operating a public Channeler server
+
+TODO
+
+
