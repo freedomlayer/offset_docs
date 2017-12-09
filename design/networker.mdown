@@ -1,6 +1,7 @@
 # Networker design
 
-07.12.2017
+09.12.2017
+Required prior reading: 0_credit_clearing.mdown
 
 
 ## Introduction
@@ -74,14 +75,52 @@ neighbor.
 Note that synchronization issues are possible: It is possible that the
 Networker is sending a SendChannelMessage to the Channeler, while at the same time
 the Channeler is sending a ChannelClosed message to the Networker. 
-It is possible that the Networker and the Channeler have seen the events in
+
+It might happen that the Networker and the Channeler have seen the events in
 different order: The Channeler closed the TCP connections before the message
 could be sent, while the Networker believes that he sent the SendChannelMessage
 message to the Channeler before the channel was closed.
 
-This is not a problem, because the Networker uses token based communication.
+This is not a problem though, because the Networker uses token based communication.
 The Networker always remembers the last message he attempted to send over a
 token channel. If later the Networker finds that the remote Networker did not
 received the message, it will send it again.
+
+The Networker has the responsibility of configuring the Channeler.
+This is done using the following messages:
+
+
+**AddNeighborRelation**
+
+- neighborPublicKey
+- socketAddr (Optional)
+- maxChannels
+
+(TODO: This message is not exactly the same as the one in `inner_messages.rs`)
+
+**RemoveNeighborRelation**
+
+- neighborPublicKey
+
+
+**SetNeighborMaxChannels**
+
+- neighborPublicKey
+- maxChannels
+
+
+The message AddNeighborRelation allows to add a new neighbor with a few
+parameters. neighborPublicKey is the public key of the remote neighbor.
+socketAddr is an optional field, containing the remote IP and port of the
+neighbor, used for TCP connection. If this field is left blank, the remote
+neighbor is expected to know our address and initiate connection.
+maxChannels should match the amount of token channels used to communicate with
+this neighbor. This number will be used internally by the Channeler to optimize
+the communication for the transport of token channels.
+
+The message RemoveNeighborRelation removes a neighbor according to its public
+key. The message SetNeighborMaxChannels changes the amount of maxChannels
+parameter.
+
 
 
