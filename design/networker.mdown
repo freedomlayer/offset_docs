@@ -124,3 +124,15 @@ parameter.
 
 
 
+TODO:
+
+- How to configure the Networker?
+- Service that Networker supplies to other components.
+- The protocol between Networkers (Transported using the Channeler)
+    - Dealing with invalid move token requests
+- Dependence on the Funder for transfer of funds, to free communication capacity.
+- The Networker multiplexes incoming messages to: IndexerClient, Funder,
+    PluginManager
+
+
+
