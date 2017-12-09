@@ -124,6 +124,8 @@ parameter.
 
 
 
+
+
 TODO:
 
 - How to configure the Networker?
@@ -133,6 +135,9 @@ TODO:
 - Dependence on the Funder for transfer of funds, to free communication capacity.
 - The Networker multiplexes incoming messages to: IndexerClient, Funder,
     PluginManager
+- Write about networker persistency
+    - What should be persisted?
+    - How to do this?
 
 
 
