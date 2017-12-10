@@ -78,28 +78,50 @@ before it is sent. An incoming MoveToken message is saved in long term memory
 only after it was fully processed.
 
 
-A token channel keeps the following invariant: At any given time at most
-one party belives that it "holds the token". 
+The following algorithm is used for a party A in a Token Channel:
 
-Proof: Assume that the two parties A and B both believe that they "hold the token". 
-This means that both A and B currently keep in their slot of long term memory a
-received MoveToken message with corresponding oldToken values TA and TB.
+- Upon startup
+    - If MA is an outgoing message:
+        - Send MA
 
-The token values are a fully ordered chain of hashes, with some first token
-value that was used to initialize the communication.
+- Upon request to send a message
+    - If MA is an incoming MoveToken:
+        - Set MA = MoveToken(message) (outgoing)
+        - Send MA
+    - Else:
+        - Send RequestToken 
+        - Report Not Ready
 
-```
-oldToken1 ---[A->B]--> oldToken2 ---[B->A]--> oldToken3 ---[A->B]--> oldToken4
+- Upon data received:
+    - If data is MT := MoveToken(message):
+        - If MA is an incoming message:
+            - If MT == MA: 
+                - discard message
+            - Else:
+                - Report Token Channel inconsistency
+        - Else:
+            - If MT.oldToken == hash(MA):
+                - process(MT)
+                - set MA = MT (incoming)
+                - Report message received (MT)
+            - Else:
+                - If MA.oldToken == hash(MT)
+                    - Send MA
+                - Else:
+                    - Report Token Channel inconsistency
+    - Else (data is RequestToken):
+        - If MA is an outgoing message:
+            - discard message
+        - Else: (MA is an incoming message)
+            - Set MA = MoveToken(emptyMessage) (outgoing)
+            - Send MA
 
-oldToken1 = random
-oldToken2 = hash(contents1 || oldToken1 || randNonce1)
-oldToken3 = hash(contents2 || oldToken2 || randNonce2)
-oldToken4 = hash(contents3 || oldToken3 || randNonce3)
-```
 
-Without loss of generality we assume that the token TA is at least as high on
-the chain as the token TB.
+TODO: Prove that the Token Channel algorithm is sound in the fail-stop
+adversarial model:
 
+- At any give time at most one party thinks that it "holds the token".
+- Token Channel inconsistency should never happen.
 
 
 
