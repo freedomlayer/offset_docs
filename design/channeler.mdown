@@ -220,7 +220,7 @@ When a Channeler receives an Exchange message he does the following:
 - Combine his private key with the received commPublicKey and received keySalt,
     to obtain a symmetric key for receiving data.
 
-- If this is the only successful connection between the two sides, Notify the
+- If this is the only successful connection between the two sides, notify the
     Networker using a ChannelOpened message that a channel was opened.
     The Networker doesn't care about how many TCP connections are between the
     two hosts. He only wants to know that there exists a way to communicate.
