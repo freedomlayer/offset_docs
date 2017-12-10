@@ -1,6 +1,6 @@
 # Networker design
 
-09.12.2017
+10.12.2017
 Required prior reading: 0_credit_clearing.mdown
 
 
@@ -13,6 +13,94 @@ node's neighbors.
 
 The Networker is the core component of the CSwitch client. It performs the
 "magic" that allows secure exchange of communication and credit.
+
+
+## Introduction to Token Channels
+
+Consider the Networkers of two neighbor nodes A and B. A and B manage mutual
+credit. A sends a few messages, some of which should increase A's balance with
+respect to B. At the same time B sends a few message, some of which should
+increase B's balance with respect to A.
+
+If any of A or B crash in the middle of the messages transfer, it can become
+difficult to find out what is the current credit balance between A and B,
+which messages were received by any of the parties, and possibly which messages
+need to be resent.
+
+We choose the following conservative solution: At each given time only one of
+the nodes A and B is allowed to send a message. In other words: A and B take
+turns in sending messages. For example, when it is A's turn to send a message,
+B is waiting for a message to arrive from A. B can not send any message before
+it has received A's message. We begin here with a simplified form of this idea.
+
+To make sure B doesn't send his message before A's message was received, B has
+to include in his message a hash over A's message. A's message contains a
+random nonce, therefore B can not produce a valid message until it receives A
+message.
+
+Therefore, the messages sent between A and B will be of the following format:
+
+MoveToken
+
+- contents
+- oldToken
+- randNonce
+
+contents contains the actual message contents. oldToken is the hash over the
+previously received message. randNonce is a randomly generated nonce, generated
+by the sender of the message. The first ever message between A and B could be
+initialized with a random value for oldToken. At any time, we call the party
+whose turn to send a message the party that **holds the token**.
+
+If the party A that holds the token doesn't have anything to send, it will wait.
+This could block the remote party B (Who does not hold the token) from sending
+messages. The remote B party could request access to the token by sending A a
+message requesting the token:
+
+RequestToken
+
+- (empty)
+
+A will then respond with a MoveToken message, possibly with empty contents. If
+A believes that he does not own the token, A will send B the last MoveToken
+message he sent B.
+
+We call this form of communication between A and B a simple **Token Channel**.
+
+To allow recovering from crashes of any of the parties and possible
+communication problems, we add the following persistency feature: The last
+MoveToken message seen is saved in long term memory. This could be the last
+MoveToken message that was sent, or the last MoveToken message that was
+received.
+
+For atomicity, an outgoing MoveToken message is saved in long term memory
+before it is sent. An incoming MoveToken message is saved in long term memory
+only after it was fully processed.
+
+
+A token channel keeps the following invariant: At any given time at most
+one party belives that it "holds the token". 
+
+Proof: Assume that the two parties A and B both believe that they "hold the token". 
+This means that both A and B currently keep in their slot of long term memory a
+received MoveToken message with corresponding oldToken values TA and TB.
+
+The token values are a fully ordered chain of hashes, with some first token
+value that was used to initialize the communication.
+
+```
+oldToken1 ---[A->B]--> oldToken2 ---[B->A]--> oldToken3 ---[A->B]--> oldToken4
+
+oldToken1 = random
+oldToken2 = hash(contents1 || oldToken1 || randNonce1)
+oldToken3 = hash(contents2 || oldToken2 || randNonce2)
+oldToken4 = hash(contents3 || oldToken3 || randNonce3)
+```
+
+Without loss of generality we assume that the token TA is at least as high on
+the chain as the token TB.
+
+
 
 
 ## Interface with the Channeler
@@ -123,12 +211,57 @@ key. The message SetNeighborMaxChannels changes the amount of maxChannels
 parameter.
 
 
+## Basic Networker configuration
+
+
+The networker can be configured through the PluginManager component using the
+following messages:
+
+
+**AddNeighbor**
+
+- neighborPublicKey
+- socketAddr
+- channelCapacity
+- maxTokenChannels
+
+
+**RemoveNeighbor**
+
+- neighborPublicKey
+
+
+**SetNeighborChannelCapacity**
+
+- neighborPublicKey
+- channelCapacity
+
+
+**SetNeighborMaxTokenChannels**
+
+- neighborPublicKey
+- maxTokenChannels
+
+
+The Networker's configuration is forwarded to the Channeler, in the form of the
+corresponding messages: AddNeighborRelation, RemoveNeighborRelation,
+SetNeighborMaxChannels.  Note that the Channeler is not given information about
+channelCapacity of the token channels.
+
+The Networker's configuration does not persist (It is kept on RAM). Therefore
+the Networker has to be configured every time it is started through the
+PluginManager component.
+
+
+
+
+
+
 
 
 
 TODO:
 
-- How to configure the Networker?
 - Service that Networker supplies to other components.
 - The protocol between Networkers (Transported using the Channeler)
     - Dealing with invalid move token requests
