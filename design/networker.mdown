@@ -52,8 +52,7 @@ MoveToken
 
 contents contains the actual message contents. oldToken is the hash over the
 previously received message. randNonce is a randomly generated nonce, generated
-by the sender of the message. The first ever message between A and B could be
-initialized with a random value for oldToken. At any time, we call the party
+by the sender of the message. At any time, we call the party
 whose turn to send a message the party that **holds the token**.
 
 If the party A that holds the token doesn't have anything to send, it will wait.
@@ -82,10 +81,54 @@ before it is sent. An incoming MoveToken message is saved in long term memory
 only after it was fully processed.
 
 
+For the beginning of a Token Channel we use some method of tie breaking to
+determine which party will have the token first. Tie breaking is done by
+comparing hash(publicKey) for both parties (We assume here that each party
+knows the public key of itself and the remote party).
+
+The first message sent by a party is decided according to the tie breaking
+result. If `hash(localPublicKey) < hash(remotePublicKey)` then the first
+message sent by the party will be of the form:
+
+```
+FirstMoveTokenLower {
+    contents = Empty
+    oldToken = hash(localPublicKey)
+    randNonce = hash(remotePublicKey)
+}
+```
+
+For the other side (with the higher hash value), this will be the first
+message:
+
+```
+FirstMoveTokenHigher {
+    contents = Empty
+    oldToken = hash(FirstMoveTokenLower)
+    randNonce = random
+}
+```
+
+
+
 The following algorithm is used for a party A in a Token Channel:
 
 - Upon startup
-    - If MA is an outgoing message:
+    - If MA is empty (Initialization of Token Channel):
+        - If `hash(localPublicKey) < hash(remotePublicKey)`:
+            - Set MA = MoveToken 
+                - contents = Empty
+                - oldToken = hash(localPublicKey)
+                - randNonce = hash(remotePublicKey)
+            - Send MA
+        - Else:
+            - Set MA = MoveToken
+                - contents = Empty
+                - oldToken = hash(Empty || hash(localPublicKey) || hash(remotePublicKey))
+                - randNonce = random
+            - sendMA
+
+    - ElseIf MA is an outgoing message:
         - Send MA
 
 - Upon request to send a message
@@ -102,17 +145,19 @@ The following algorithm is used for a party A in a Token Channel:
             - If MT == MA: 
                 - Discard message
             - Else:
-                - Discard message + error log
-        - Else:
+                - Discard message
+                - Report inconsistency
+        - Else: (MA is an outgoing message)
             - If MT.oldToken == hash(MA):
-                - process(MT)
-                - set MA = MT (incoming)
-                - Report message received (MT)
+                    - process(MT)
+                    - set MA = MT (incoming)
+                    - Report message received (MT)
             - Else:
                 - If MA.oldToken == hash(MT)
                     - Send MA
                 - Else:
-                    - Discard message + error log
+                    - Discard message
+                    - Report inconsistency
     - Else (data is RequestToken):
         - If MA is an outgoing message:
             - Discard message
@@ -125,85 +170,14 @@ TODO: Add here a proof that the Token Channel algorithm is sound in the
 fail-stop adversarial model:
 
 - At any give time at most one party thinks that it "holds the token".
-- Token Channel inconsistency should never happen.
-
-
-
-## Networker Token Channels
-
-Networkers communicate using Token Channels to ensure resistance to failure
-situations. The protocol used between Networkers is based on the ideas from the
-previous section, with a few enhancements. These are the messages used for
-Token Communication between Networkers of neighbor nodes:
-
-**NeighborRequestToken**
-
-- tokenIndex            [1 byte]
-
-
-**NeighborMoveToken**
-
-- tokenIndex            [1 byte]
-- transactions
-- oldToken              [32 bytes]
-- randNonce             [32 bytes]
-
-
-**NeighborInconsistencyError**
-
-- tokenIndex            [1 byte]
-- creditsForReset       [8 bytes]
-- badNeighborMoveToken
-- errorInfo
-
-
-tokenIndex is the current token channel in use.
-
-Using a single Token Channel for communication could be very inefficient. This
-is because only one message could be sent over the channel at any given time.
-To overcome this problem while still having the fail-stop guarantees of a token
-channel, we use multiple token channels.
-
-Therefore Networkers of neighbor nodes will usually communicate using a few
-token channels simultaneously. The amount of token channels to be used is
-configurable (It is configured through the plugin manager). tokenIndex
-represents the current Token Channel in use.
-
-The transactions field may contain zero or more transactions. A transaction
-can be one of a few predefined types.
-
-We allow sending a few transactions in one NeighborMoveToken message to avoid
-having to wait for the token to come back to us for every single transaction.
-TODO: There should be a maximum size for the transactions field.
-
-Sending NeighborMoveToken with zero transactions can be used to move the token
-to the remote Networker.
-
-The newBalance field contains the new credit balance between the two parties
-after all the transactions have been processed, from the point of view of the
-sender. When a receiver receives balance `b`, it should interpret it as balance
-`-b`.
-
-oldToken is the hash of the previously received NeighborMoveToken message.
-
-randNonce is a random nonce generated by the sender. Using a random nonce makes
-sure that the remote side can not create a new valid NeighborMoveToken message
-before it has received a previous NeighborMoveToken message.
-
-
-Whenever a NeighborMoveToken message is received, the receiving party verifies the
-token hashes (As shown in the previous section). In addition, the receiving
-party verifies that the previously agreed upon balance adds up to the value of
-newBalance after all the transactions are processed.
-
-If the oldToken value is invalid, or the newBalance doesn't match the
-calculated newBalance, an inconsistency is reported to the remote party and the
-the PluginManager.
+- Token Channel inconsistency should never happen if data and code are not
+    corrupted.
 
 
 ## Persistent representation of a Token Channel
 
-A Token Channel has a representation in long term memory of the following form:
+A Networker Token Channel has a representation in long term memory of the
+following form:
 
 - lastNeighborMoveToken (incoming or outgoing)
 - remoteMaxDebt [8 bytes]
@@ -217,7 +191,10 @@ A Token Channel has a representation in long term memory of the following form:
         - destPublicKey
         - creditToPay
         - TODO: Response data
-
+- isInconsistent
+    - Yes
+        - inconsistentMessage (Sent\Received)
+    - No
 
 
 lastNeighborMoveToken is the last seen NeighborMoveToken message, either
@@ -267,6 +244,98 @@ pendingRequests contain a list of all requests opened against the remote party
 but not yet completed.  TODO: Write about request fields.
 
 
+## Networker Token Channels
+
+Networkers communicate using Token Channels to ensure resistance to failure
+situations. The protocol used between Networkers is based on the ideas from the
+previous section, with a few enhancements. These are the messages used for
+Token Communication between Networkers of neighbor nodes:
+
+**NeighborRequestToken**
+
+- tokenIndex            [1 byte]
+
+
+**NeighborMoveToken**
+
+- tokenIndex            [1 byte]
+- transactions
+- oldToken              [32 bytes]
+- randNonce             [32 bytes]
+
+
+**NeighborInconsistencyError**
+
+- tokenIndex            [1 byte]
+- currentToken          [32 bytes]
+- balanceForReset       [8 bytes]
+
+
+
+tokenIndex is the current token channel in use.
+
+Using a single Token Channel for communication could be very inefficient. This
+is because only one message could be sent over the channel at any given time.
+To overcome this problem while still having the fail-stop guarantees of a token
+channel, we use multiple token channels.
+
+Therefore Networkers of neighbor nodes will usually communicate using a few
+token channels simultaneously. The amount of token channels to be used is
+configurable (It is configured through the plugin manager). tokenIndex
+represents the current Token Channel in use.
+
+The transactions field may contain zero or more transactions. A transaction
+can be one of a few predefined types.
+
+We allow sending a few transactions in one NeighborMoveToken message to avoid
+having to wait for the token to come back to us for every single transaction.
+TODO: There should be a maximum size for the transactions field.
+
+Sending NeighborMoveToken with zero transactions can be used to move the token
+to the remote Networker.
+
+The newBalance field contains the new credit balance between the two parties
+after all the transactions have been processed, from the point of view of the
+sender. When a receiver receives balance `b`, it should interpret it as balance
+`-b`.
+
+oldToken is the hash of the previously received NeighborMoveToken message.
+
+randNonce is a random nonce generated by the sender. Using a random nonce makes
+sure that the remote side can not create a new valid NeighborMoveToken message
+before it has received a previous NeighborMoveToken message.
+
+
+Whenever a NeighborMoveToken message is received, the receiving party verifies the
+token hashes (As shown in the previous section).
+
+If the oldToken value is invalid, or the newBalance doesn't match the
+calculated newBalance, an inconsistency is reported to the remote party and the
+PluginManager.
+
+Whenever a NeighborInconsistencyError message is received, the Networker
+passes the information about the inconsistency to the PluginManager. In
+addition, the token channel is marked as inconsistent in long term memory. It
+will not be able to receive any further messages, or be used to send messages.
+
+Any further message (That is not a ResetChannel or NeighborInconsistencyError
+message) to the inconsistent channel will have as a response a
+NeighborInconsistencyError message, containing the token channel index,
+currentToken equals the same currentToken received at the
+NeighborInconsistencyError message, and balanceForReset is the credit balance
+required for channel reset, equals to `balance + remotePendingR`.
+
+Further incoming NeighborInconsistencyError messages will be ignored. 
+
+The channel may become operational again when a ResetChannel transaction inside
+a MoveToken message is received with the required balance for reset (balance is
+from the point of view of the sender of the message). oldToken is expected to
+equal currentToken.
+
+Note that an inconsistency may occur again if both sides send a ResetChannel
+transaction at about the same time. 
+
+
 ## Token Channel Transaction types
 
 The following transactions types are available for sending inside the
@@ -284,13 +353,8 @@ transactions field of a NeighborMoveToken message.
 
 - remoteMaxDebt [8 bytes]
 
-TODO
-
-
-
 
 TODO: Continue here.
-
 
 
 
