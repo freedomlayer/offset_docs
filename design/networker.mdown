@@ -100,9 +100,9 @@ The following algorithm is used for a party A in a Token Channel:
     - If data is MT := MoveToken(message):
         - If MA is an incoming message:
             - If MT == MA: 
-                - discard message
+                - Discard message
             - Else:
-                - Report Token Channel inconsistency
+                - Discard message + error log
         - Else:
             - If MT.oldToken == hash(MA):
                 - process(MT)
@@ -112,10 +112,10 @@ The following algorithm is used for a party A in a Token Channel:
                 - If MA.oldToken == hash(MT)
                     - Send MA
                 - Else:
-                    - Report Token Channel inconsistency
+                    - Discard message + error log
     - Else (data is RequestToken):
         - If MA is an outgoing message:
-            - discard message
+            - Discard message
         - Else: (MA is an incoming message)
             - Set MA = MoveToken(emptyMessage) (outgoing)
             - Send MA
@@ -138,16 +138,23 @@ Token Communication between Networkers of neighbor nodes:
 
 **NeighborRequestToken**
 
-- tokenIndex            [2 bytes]
+- tokenIndex            [1 byte]
 
 
 **NeighborMoveToken**
 
-- tokenIndex            [2 bytes]
+- tokenIndex            [1 byte]
 - transactions
-- newBalance            [8 bytes]
 - oldToken              [32 bytes]
 - randNonce             [32 bytes]
+
+
+**NeighborInconsistencyError**
+
+- tokenIndex            [1 byte]
+- creditsForReset       [8 bytes]
+- badNeighborMoveToken
+- errorInfo
 
 
 tokenIndex is the current token channel in use.
@@ -163,15 +170,7 @@ configurable (It is configured through the plugin manager). tokenIndex
 represents the current Token Channel in use.
 
 The transactions field may contain zero or more transactions. A transaction
-can be one of the following:
-
-- SetNeighborCapacity
-- LoadFunds
-- OpenNeighborTokenChannel
-- RequestSendMessage
-- ResponseSendMessage
-- FailedSendMessage
-- CloseNeighborTokenChannel
+can be one of a few predefined types.
 
 We allow sending a few transactions in one NeighborMoveToken message to avoid
 having to wait for the token to come back to us for every single transaction.
@@ -192,7 +191,106 @@ sure that the remote side can not create a new valid NeighborMoveToken message
 before it has received a previous NeighborMoveToken message.
 
 
+Whenever a NeighborMoveToken message is received, the receiving party verifies the
+token hashes (As shown in the previous section). In addition, the receiving
+party verifies that the previously agreed upon balance adds up to the value of
+newBalance after all the transactions are processed.
+
+If the oldToken value is invalid, or the newBalance doesn't match the
+calculated newBalance, an inconsistency is reported to the remote party and the
+the PluginManager.
+
+
+## Persistent representation of a Token Channel
+
+A Token Channel has a representation in long term memory of the following form:
+
+- lastNeighborMoveToken (incoming or outgoing)
+- remoteMaxDebt [8 bytes]
+- localMaxDebt [8 bytes]
+- remotePendingRequests [8 bytes]
+- localPendingRequests [8 bytes]
+- balance [8 bytes]
+- pendingRequests
+    - request (The contents of one request):
+        - requestId
+        - destPublicKey
+        - creditToPay
+        - TODO: Response data
+
+
+
+lastNeighborMoveToken is the last seen NeighborMoveToken message, either
+incoming or outgoing. This field is written right after sending a
+neighborMoveToken, or after receipt and processing of an incoming
+neighborMoveToken.
+
+remoteMaxDebt is the maximum debt the remote party can have in this channel.
+Initially this value equals 0.
+
+localMaxDebt is the maximum debt the local party can have in this channel.
+Initially this value equals 0.
+
+This means that the maximum balance the local party can have in this channel is
+`remoteMaxDebt - localMaxDebt`. Dually, The maximum balance the remote party can have in
+this channel is `localMaxDebt - remoteMaxDebt`.
+
+remotePendingRequests is the total required credit for payment of future
+response messages from the remote party.
+
+localPendingRequests is the total amount of credit expected to be earned from
+future response messages sent to the remote party.
+
+
+The relationship between the mentioned fields for a Token Channel:
+
+
+```
+      balance - localPendingR  balance       balance + remotePendingR
+                      |          |                |
+    ----------[-------(----------*----------------)------------]--------->
+              |                                                |
+    -localMaxDebt                                   RemoteMaxDebt
+```
+
+At all times:
+
+```
+-localMaxDebt  
+    <= balance - localPendingRequests
+    <= balance
+    <= balance + remotePendingRequests
+    <= RemoteMaxDebt
+```
+
+pendingRequests contain a list of all requests opened against the remote party
+but not yet completed.  TODO: Write about request fields.
+
+
+## Token Channel Transaction types
+
+The following transactions types are available for sending inside the
+transactions field of a NeighborMoveToken message.
+
+- setRemoteMaxDebt
+- LoadFunds
+- RequestSendMessage
+- ResponseSendMessage
+- FailedSendMessage
+- ResetChannel
+
+
+**SetRemoteMaxDebt**
+
+- remoteMaxDebt [8 bytes]
+
+TODO
+
+
+
+
 TODO: Continue here.
+
 
 
 
