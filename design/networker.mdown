@@ -185,12 +185,7 @@ following form:
 - remotePendingRequests [8 bytes]
 - localPendingRequests [8 bytes]
 - balance [8 bytes]
-- pendingRequests
-    - request (The contents of one request):
-        - requestId
-        - destPublicKey
-        - creditToPay
-        - TODO: Response data
+- pendingRequests (A list of requests)
 - isInconsistent
     - Yes
         - inconsistentMessage (Sent\Received)
@@ -207,10 +202,6 @@ Initially this value equals 0.
 
 localMaxDebt is the maximum debt the local party can have in this channel.
 Initially this value equals 0.
-
-This means that the maximum balance the local party can have in this channel is
-`remoteMaxDebt - localMaxDebt`. Dually, The maximum balance the remote party can have in
-this channel is `localMaxDebt - remoteMaxDebt`.
 
 remotePendingRequests is the total required credit for payment of future
 response messages from the remote party.
@@ -237,7 +228,7 @@ At all times:
     <= balance - localPendingRequests
     <= balance
     <= balance + remotePendingRequests
-    <= RemoteMaxDebt
+    <= remoteMaxDebt
 ```
 
 pendingRequests contain a list of all requests opened against the remote party
@@ -349,14 +340,147 @@ transactions field of a NeighborMoveToken message.
 - ResetChannel
 
 
+We describe here in detail each of those messages:
+
 **SetRemoteMaxDebt**
 
 - remoteMaxDebt [8 bytes]
 
+Set the maximum debt possible for the remote party. Note that `balance +
+remotePendingRequests <= remoteMaxDebt`, hence it is not possible to set
+`remoteMaxDebt` to a value lower than `balance  + remotePendingRequests`.
 
-TODO: Continue here.
+The dual localMaxDebt can only be set by the remote party.
 
 
+**LoadFunds**
+
+- paymentReceipt (TODO: Find out real structure)
+    - paymentId     [?]
+    - numCredits    [?]
+    - signature     [?]
+
+
+The LoadFunds transaction increases the balance of the sender by numCredits.
+Note that `balance + numCredits + remotePendingRequests` must be at most
+`remoteMaxDebt`, therefore `numCredits <= remoteMaxDebt - balance -
+remotePendingRequests`.
+
+To send this message the sender first needs to send a payment to the remote
+node, getting back a receipt. Then the receipt is used to top up the balance in
+the Token Channel using a LoadFunds message.
+
+EncContent
+
+- senderPublicKey           [32 bytes]
+- keyDerivationNonce        [32 bytes]
+- encryptedContent: Encrypt{key=derivedSymmetricKey, nonce=random}(
+    recipientTimestamp, senderTimestamp, messageContent)
+
+**RequestSendMessage**
+
+- requestId                     [16 bytes]
+- nodeIdPath
+- requestContent: EncContent
+- maxResponseLength             [4 bytes]
+- processingFeeProposal         [8 bytes]
+- halfCreditsPerByteProposal    [4 bytes]
+
+
+RequestSendMessage transaction message opens a communication transaction with a
+neighbor, requesting to pass a message to a remote node on the CSwitch network. 
+requestId is the identification number of request, generated randomly by
+the initiator of the request.
+
+nodeIdPath is a path of nodes. Each node is stored as
+`sha512(nodePublicKey)[0:8]`, the first 8 bytes of the hash the node's public
+key. This makes the representation of nodes shorter on the path of nodes, while
+still making it very unlikely to have a collision between nodes' representations.
+The last node on the path is the destination node.
+
+requestContent contains an encrypted message to be sent to the remote node.
+It is of type EncContent. 
+
+EncContent contains the senderPublicKey and keyDerivationNonce. These are used
+for static diffie-hellman between the originator of the request and the
+destination node. Together the two parties derive a symmetric key used for
+encryption/decryption of messages from the originator of the request to the
+remote party. (The other side of communication will have a different symmetric
+key).
+
+EncContent also contains encryptedContent: The actually encrypted message,
+together with a recent recipientTimestamp and the last senderTimestamp,
+mechanisms used to avoid replay attacks.
+
+maxResponseLength is the maximum amount of bytes allowed for the response.
+There is a limit for this amount of bytes because credit is frozen when the
+request is being forwarded, and nodes need to know ahead of time how much
+credit to freeze.
+
+processingFeeProposal is the amount of credits proposed for the destination
+node to generate a signed ResponseSendMessage. Usually processingFee is offered
+in cases where issuing a response message takes some effort from the
+destination node (For example: Having to calculate something).
+
+halfCreditsPerByteProposal is half the amount of credits proposed for sending
+one byte of this request. All the bytes of the request are counted (including
+the requestId field, the nodeIdPath field etc).
+
+In case of a failure on delivering the request, only half the amount of credits
+proposed will be payed to the intermediate nodes. This is why the field name is
+is halfCreditsPerByteProposal, and not "creditsPerByteProposal".
+
+Whenever A's Networker sends a RequestSendMessage to B's Networker, A's
+Networker inserts the request into pendingRequests. In addition,
+localPendingRequests is increased by:
+
+```
+processingFeeProposal + 
+    (length(request) + maxResponseLength) * halfCreditsPerBytesProposal * 2
+```
+
+Note that it is not possible to send this request message if this causes
+`balance - localPendingRequests` to be smaller than `-localMaxDebt`. Attempting
+to do so will cause a token channel inconsistency.
+
+
+**ResponseSendMessage**
+
+- requestId
+- responseContent: EncContent
+- Signature{key=recipientKey}(originalRequestSendMessage || responseContent)
+
+TODO: Use some kind of HMAC to combine the two hashes instead of using simple
+concatenation. Those could cause security issues.
+
+The ResponseSendMessage transaction message can be created by the destination
+node of a request.
+
+requestId is the requestId of the original received request.
+
+responseContent is an encrypted message sent back to the originator of the
+request. 
+
+The total length of ResponseSendMessage must not exceed maxResponseLength as
+specified in the request.
+
+
+TODO: Effects on balances when this message is sent.
+
+
+**FailedSendMessage**
+
+- requestId
+- reportingNodePublicKey
+- Signature{key=reportingNodePublicKey}(originalRequestSendMessage)
+
+
+requestId is the requestId of the original request. reportingNodePublicKey is
+the public key of the node who initiated the FailedSendMessage. This node
+should be one of the nodes on the nodeIdPath.
+
+
+TODO: Effects on balances when this message is sent.
 
 
 ## Interface with the Channeler
