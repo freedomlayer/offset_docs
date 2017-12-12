@@ -359,6 +359,7 @@ The dual localMaxDebt can only be set by the remote party.
     - paymentId     [?]
     - numCredits    [?]
     - signature     [?]
+- creditsToUse
 
 
 The LoadFunds transaction increases the balance of the sender by numCredits.
@@ -369,6 +370,15 @@ remotePendingRequests`.
 To send this message the sender first needs to send a payment to the remote
 node, getting back a receipt. Then the receipt is used to top up the balance in
 the Token Channel using a LoadFunds message.
+
+creditsToUse instructs the receiving Networker to use only creditsToUse credits
+from the paymentReceipt, allowing to use the rest of the credits from the
+receipt later, possibly in a different channel.
+
+This is useful in cases where the Networker has decided on an amount of credits
+to top up a Token Channel, however, the balance has changed until the request
+to send funds to the remote node has completed.
+
 
 EncContent
 
@@ -430,18 +440,50 @@ In case of a failure on delivering the request, only half the amount of credits
 proposed will be payed to the intermediate nodes. This is why the field name is
 is halfCreditsPerByteProposal, and not "creditsPerByteProposal".
 
+We define:
+
+```
+paymentOnSuccess(responseLength) := (length(request) + responseLength) * 
+        halfCreditsPerBytesProposal * 2 *
+        (amountOfNodesToDest - 1) + 
+    processingFeeProposal + 
+    length(request) +
+    (maxResponseLength - responseLength)
+```
+
+to be the payment received for a successful transaction (This payment happens
+when the transaction is completed: when a ResponseSendMessage is sent).
+amountOfNodesToDest is the amount of nodes on nodeIdPath from A to the
+destination node. If A is the destination node, amountOfNodesToDest = 1
+
+Note that destNode is incentivized to generate as small as possible response
+message. The payment promised for the destination node is:
+
+```
+processingFeeProposal + length(request) + (maxResponseLength - responseLength)
+```
+
+
 Whenever A's Networker sends a RequestSendMessage to B's Networker, A's
 Networker inserts the request into pendingRequests. In addition,
 localPendingRequests is increased by:
 
 ```
-processingFeeProposal + 
-    (length(request) + maxResponseLength) * halfCreditsPerBytesProposal * 2
+maxPaymentOnSuccess := 
+    max(paymentOnSuccess(minResponseLength), 
+        paymentOnSuccess(maxResponseLength))
 ```
+
+Note that the maximum of `paymentOnSuccess(x)` should be found on one of the
+edges of the boundary, because of linearity of `paymentOnSuccess`.
+
 
 Note that it is not possible to send this request message if this causes
 `balance - localPendingRequests` to be smaller than `-localMaxDebt`. Attempting
 to do so will cause a token channel inconsistency.
+
+Upon receipt of the RequestSendMessage message, B's Networker increases
+remotePendingRequests by the same amount.
 
 
 **ResponseSendMessage**
@@ -465,7 +507,21 @@ The total length of ResponseSendMessage must not exceed maxResponseLength as
 specified in the request.
 
 
-TODO: Effects on balances when this message is sent.
+Whenever A's Networker sends a ResponseSendMessage to B's Networker, A's
+Networker does the following:
+
+- Increases balance by `paymentOnSuccess`
+- Decreases localPendingRequests by `maxPaymentOnSuccess`.
+
+Upon receipt of the ResponseSendMessage by B's Networker, it does the
+following:
+
+- Removes the request from the pending requests list.
+- Decreases balance by `paymentOnSuccess`.
+- Decreases remotePendingRequests by `maxPaymentOnSuccess`.
+
+On the other hand, if the received ResponseSendMessage is invalid, an
+inconsistency occurs.
 
 
 **FailedSendMessage**
@@ -479,8 +535,61 @@ requestId is the requestId of the original request. reportingNodePublicKey is
 the public key of the node who initiated the FailedSendMessage. This node
 should be one of the nodes on the nodeIdPath.
 
+We define:
 
-TODO: Effects on balances when this message is sent.
+```
+paymentOnFailure := length(request) * halfCreditsPerBytesProposal *
+        amountOfNodesToReportingNode
+```
+
+Where amountOfNodesToReportingNode is the amount of nodes from A to the
+reporting Node in nodeIdPath. If A is the reporting node,
+amountOfNodesToReportingNode = 1.
+
+
+When A's Networker sends a FailedSendMessage to B's Networker, A's Networker
+does the following:
+
+- Increases balance by `paymentOnFailure`
+- Decreases localPendingRequests by `maxPaymentOnSuccess`.
+
+Upon receipt of the FailedSendMessage by B's Networker, it does the following:
+
+- Removes the request from the pending requests list.
+- Decreases balance by `paymentOnFailure`.
+- Decreases remotePendingRequests by `maxPaymentOnSuccess`.
+
+
+**ResetChannel**
+
+- newBalance
+
+newBalance is the new proposed balance for the channel from the point of view
+of the sender. (The receiver has to change the sign of this value).
+
+This message could be sent on two occasions:
+
+- To solve an inconsistency. The NeighborInconsistencyError specifies
+    currentToken, which should be used as oldToken in the MoveToken message
+    containing this ResetChannel transaction message. In addition, newBalance
+    should match the balanceForReset field of the NeighborInconsistencyError
+    message.
+
+- To clean up local pending requests. The remote Networker expects to earn
+    credit for fulfilling the pending requests in the future. It is possible to
+    pay the remote Networker now (by changing the balance) and ask him to
+    forget about all the pending requests. 
+
+
+After a valid newBalance transaction message is sent from A's Networker to B's
+Networker, the following values will be set from A's point of view:
+
+- lastNeighborMoveToken will be an outgoing ResetChannel message.
+- balance = newBalance
+- remoteMaxDebt = max(newBalance, 0)
+- localMaxDebt = min(newBalance, 0)
+- remotePendingRequests and localPendingRequests are empty.
+- pendingRequests list is empty.
 
 
 ## Interface with the Channeler
@@ -634,23 +743,18 @@ PluginManager component.
 
 
 
-
-
-
-
-
-
 TODO:
 
 - Service that Networker supplies to other components.
-- The protocol between Networkers (Transported using the Channeler)
-    - Dealing with invalid move token requests
 - Dependence on the Funder for transfer of funds, to free communication capacity.
+    - Keeping receipts on long term memory?
 - The Networker multiplexes incoming messages to: IndexerClient, Funder,
     PluginManager
 - Write about networker persistency
     - What should be persisted?
     - How to do this?
+        - sqlite3?
+        - transactions and safety against forced shutdown.
 
 
 
