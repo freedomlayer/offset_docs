@@ -275,19 +275,25 @@ sure that the remote side can not create a new valid NeighborMoveToken message
 before it has received a previous NeighborMoveToken message.
 
 
-Whenever a NeighborMoveToken message is received, the receiving party verifies the
-token hashes (As shown in the previous section).
+## Token Channel inconsistency
 
-If the oldToken value is invalid, or the newBalance doesn't match the
-calculated newBalance, an inconsistency is reported to the remote party and the
-PluginManager.
+Whenever a NeighborMoveToken message is received, the receiving party verifies the
+token hashes. In addition, all the transactions are verified.
+
+If the token hashes or any transaction are invalid, an inconsistency is
+reported to the remote party using a NeighborInconsistencyError, and to the
+PluginManager using an InvalidNeighborMoveToken message.
 
 Whenever a NeighborInconsistencyError message is received, the Networker
 passes the information about the inconsistency to the PluginManager. In
 addition, the token channel is marked as inconsistent in long term memory. It
 will not be able to receive any further messages, or be used to send messages.
 
-Any further message (That is not a ResetChannel or NeighborInconsistencyError
+Upon receipt of a first NeighborInconsistencyError, a node should also respond
+with a NeighborInconsistencyError message, specifying his terms for a channel
+reset.
+
+Any further message (That is not a ResetChannelTran or NeighborInconsistencyError
 message) to the inconsistent channel will have as a response a
 NeighborInconsistencyError message, containing the token channel index,
 currentToken equals the same currentToken received at the
@@ -296,13 +302,21 @@ required for channel reset, equals to `balance + remotePendingR`.
 
 Further incoming NeighborInconsistencyError messages will be ignored. 
 
-The channel may become operational again when a ResetChannel transaction inside
+The channel may become operational again when a ResetChannelTran transaction inside
 a MoveToken message is received with the required balance for reset (balance is
 from the point of view of the sender of the message). oldToken is expected to
 equal currentToken.
 
-Note that an inconsistency may occur again if both sides send a ResetChannel
-transaction at about the same time. 
+Note that an inconsistency may occur again if both sides send a
+ResetChannelTran transaction at about the same time. 
+
+
+A channel can be reset manually from the PluginManager using the message:
+
+ResetNeighborChannel
+
+- neighborPublicKey
+- tokenChannelIndex
 
 
 ## Token Channel Transaction types
@@ -310,17 +324,18 @@ transaction at about the same time.
 The following transactions types are available for sending inside the
 transactions field of a NeighborMoveToken message.
 
-- setRemoteMaxDebt
-- LoadFunds
-- RequestSendMessage
-- ResponseSendMessage
-- FailedSendMessage
-- ResetChannel
+- setRemoteMaxDebtTran
+- FundsRandNonceTran
+- LoadFundsTran
+- RequestSendMessageTran
+- ResponseSendMessageTran
+- FailedSendMessageTran
+- ResetChannelTran
 
 
 We describe here in detail each of those messages:
 
-**SetRemoteMaxDebt**
+**SetRemoteMaxDebtTran**
 
 - remoteMaxDebt [8 bytes]
 
@@ -331,27 +346,62 @@ remotePendingRequests <= remoteMaxDebt`, hence it is not possible to set
 The dual localMaxDebt can only be set by the remote party.
 
 
-**LoadFunds**
+**FundsRandNonceTran**
+
+- fundsRandNonce [16 bytes]
+
+
+Send to the remote party of the token channel a random funds nonce. 
+The fundsRandNonce is a countermeasure against replay attacks when topping up
+balance using the LoadFundsTran message.
+
+The remote party then uses this random nonce as follows:
+
+1. Send a payment to us with a message containing the random funds nonce.
+2. Receive a signed payment receipt.
+3. Send to us a LoadFundsTran message containing the signed receipt.
+
+Looking at the receipt attached to the LoadFundsTran message, we should be able to
+know that the payment receipt was never used before.
+
+After a payment receipt is used to top up balance in the token channel, the
+random nonce is invalidated. This makes sure that the same payment receipt will
+not be used again in the future.
+
+A new random nonce will be sent the the remote party using the FundsRandNonce
+message in the future.
+
+Note that sending two FundsRandNonce messages, when the first fundsRandNonce
+was never used will cause an inconsistency. This is because the remote party
+may have already begun a payment transaction using the old fundsRandNonce.
+
+
+**LoadFundsTran**
 
 - paymentReceipt (TODO: Find out real structure)
+    - fundsRandNonce
     - paymentId     [?]
     - numCredits    [?]
     - signature     [?]
-- creditsToUse
 
 
-The LoadFunds transaction increases the balance of the sender by numCredits.
+This message allows to top up the credit balance by using an external funds
+transfer. This is important because in most cases the credit balance between
+two neighbors will drift to one of the parties, as the two parties most likely
+don't send the same amount of messages in the same frequency.
+
+To send this message the sender first needs to send a payment to the remote
+node, getting back a receipt. Then the receipt is used to top up the balance in
+the Token Channel using a LoadFundsTran message.
+
+The LoadFundsTran transaction increases the balance of the sender by numCredits.
 Note that `balance + numCredits + remotePendingRequests` must be at most
 `remoteMaxDebt`, therefore `numCredits <= remoteMaxDebt - balance -
 remotePendingRequests`.
 
-To send this message the sender first needs to send a payment to the remote
-node, getting back a receipt. Then the receipt is used to top up the balance in
-the Token Channel using a LoadFunds message.
-
-creditsToUse instructs the receiving Networker to use only creditsToUse credits
-from the paymentReceipt, allowing to use the rest of the credits from the
-receipt later, possibly in a different channel.
+If numCredits is too large with respect to the current `remoteMaxDebt`, it is
+possible to send this message prefixed with a setRemoteMaxDebt message, to
+increase `remoteMaxDebt`.
 
 This is useful in cases where the Networker has decided on an amount of credits
 to top up a Token Channel, however, the balance has changed until the request
@@ -365,7 +415,7 @@ EncContent
 - encryptedContent: Encrypt{key=derivedSymmetricKey, nonce=random}(
     recipientTimestamp, senderTimestamp, messageContent)
 
-**RequestSendMessage**
+**RequestSendMessageTran**
 
 - requestId                     [16 bytes]
 - nodeIdPath
@@ -375,7 +425,7 @@ EncContent
 - halfCreditsPerByteProposal    [4 bytes]
 
 
-RequestSendMessage transaction message opens a communication transaction with a
+RequestSendMessageTran transaction message opens a communication transaction with a
 neighbor, requesting to pass a message to a remote node on the CSwitch network. 
 requestId is the identification number of request, generated randomly by
 the initiator of the request.
@@ -442,7 +492,7 @@ processingFeeProposal + length(request) + (maxResponseLength - responseLength)
 ```
 
 
-Whenever A's Networker sends a RequestSendMessage to B's Networker, A's
+Whenever A's Networker sends a RequestSendMessageTran to B's Networker, A's
 Networker inserts the request into pendingRequests. In addition,
 localPendingRequests is increased by:
 
@@ -460,15 +510,15 @@ Note that it is not possible to send this request message if this causes
 `balance - localPendingRequests` to be smaller than `-localMaxDebt`. Attempting
 to do so will cause a token channel inconsistency.
 
-Upon receipt of the RequestSendMessage message, B's Networker increases
+Upon receipt of the RequestSendMessageTran message, B's Networker increases
 remotePendingRequests by the same amount.
 
 
-**ResponseSendMessage**
+**ResponseSendMessageTran**
 
 - requestId
 - responseContent: EncContent
-- Signature{key=recipientKey}(originalRequestSendMessage || responseContent)
+- Signature{key=recipientKey}(originalRequestSendMessageTran || responseContent)
 
 TODO: Use some kind of HMAC to combine the two hashes instead of using simple
 concatenation. Those could cause security issues.
@@ -502,11 +552,11 @@ On the other hand, if the received ResponseSendMessage is invalid, an
 inconsistency occurs.
 
 
-**FailedSendMessage**
+**FailedSendMessageTran**
 
 - requestId
 - reportingNodePublicKey
-- Signature{key=reportingNodePublicKey}(originalRequestSendMessage)
+- Signature{key=reportingNodePublicKey}(originalRequestSendMessageTran)
 
 
 requestId is the requestId of the original request. reportingNodePublicKey is
@@ -538,7 +588,7 @@ Upon receipt of the FailedSendMessage by B's Networker, it does the following:
 - Decreases remotePendingRequests by `maxPaymentOnSuccess`.
 
 
-**ResetChannel**
+**ResetChannelTran**
 
 - newBalance
 
@@ -549,7 +599,7 @@ This message could be sent on two occasions:
 
 - To solve an inconsistency. The NeighborInconsistencyError specifies
     currentToken, which should be used as oldToken in the MoveToken message
-    containing this ResetChannel transaction message. In addition, newBalance
+    containing this ResetChannelTran transaction message. In addition, newBalance
     should match the balanceForReset field of the NeighborInconsistencyError
     message.
 
@@ -562,7 +612,7 @@ This message could be sent on two occasions:
 After a valid newBalance transaction message is sent from A's Networker to B's
 Networker, the following values will be set from A's point of view:
 
-- lastNeighborMoveToken will be an outgoing ResetChannel message.
+- lastNeighborMoveToken will be an outgoing ResetChannelTran message.
 - balance = newBalance
 - remoteMaxDebt = max(newBalance, 0)
 - localMaxDebt = min(newBalance, 0)
