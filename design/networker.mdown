@@ -1,6 +1,6 @@
 # Networker design
 
-10.12.2017
+19.12.2017
 Required prior reading: 0_credit_clearing.mdown
 
 
