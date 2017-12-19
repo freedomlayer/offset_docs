@@ -1,0 +1,58 @@
+
+# IndexerClient design
+
+19.12.2017
+Required prior reading: 1_routing.mdown
+
+
+## Introduction
+
+The CSwitch network allows nodes to send messages (or transfer funds) to remote
+nodes. The ability to find routes to remote nodes is critical for nodes to be
+able to send messages to remote nodes.
+
+Messages in the traditional Internet are forwarded on a hop by hop basis: Every
+message contains a destination address. On every hop along the path of the
+message, the node that currently has the message looks at the destination
+address on the message, and tries his best to forward the message to a
+neighbor to get the message closer to the destination.
+
+The CSwitch network works differently. A message contains in its header a full
+route describing a path from the source to the destination. Nodes then forward
+the message according the provided route. The route for the message is usually
+obtained from an indexing entity that has some global view of the network.
+
+
+The **IndexerClient** is a component designed to talk to indexing entities. Those
+are nodes called indexer nodes, belonging to indexing providers. 
+
+IndexerClient is first provided with a list of trusted indexing providers
+(Configured through the PluginManager). It then supports the following
+communication roles:
+
+- Obtain paths to authenticated close indexer nodes.
+- Request for neighbors or friends routes from close indexer nodes, usually on
+    behalf on some other component.
+- Respond to inquiries of indexer nodes about local network topology, for example:
+    list of online neighbors, current capacities against online friends etc.
+
+
+The IndexerClient relies on the Networker for communication with indexer nodes.
+It allows the Pather to request neighbors routes, and allows the Funder to
+request friends routes. The Networker and Funder send the IndexerClient
+information about structure changes.
+
+
+TODO:
+
+- Information kept by IndexerClient.
+- Define Notify Structure Change messages from Networker and Funder (Those are
+    probably different messages). Possibly give those messages different names.
+
+- Define interface with PluginManager:
+    - Add/Remove indexing provider.
+    - Request/Response indexing providers list.
+
+- Define Request/Response neighbors/friends route.
+
+- Protocol with indexers (Most of it already in 1_routing.mdown).
