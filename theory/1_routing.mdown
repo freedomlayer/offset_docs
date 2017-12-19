@@ -297,8 +297,10 @@ messages:
 
 - connectedNeighborsList
 - neighborsCommPublicKey
+- neighborsRecentTimestamp
 - connectedFriendsList (with available capacities)
 - friendsCommPublicKey
+- friendsRecentTimestamp
 
 
 An indexer node can send a message to any node, requesting local information.
@@ -337,6 +339,7 @@ The following messages are used for issuing such requests:
 
 - routes
 - destinationCommPublicKey
+- destinationRecentTimestamp
 
 
 **RequestFriendsRoute** (Node -> Indexer)
@@ -351,6 +354,7 @@ The following messages are used for issuing such requests:
 
 - routes
 - destinationCommPublicKey
+- destinationRecentTimestamp
 
 
 
