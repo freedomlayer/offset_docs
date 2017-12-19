@@ -57,16 +57,6 @@ whose turn to send a message the party that **holds the token**.
 
 If the party A that holds the token doesn't have anything to send, it will wait.
 This could block the remote party B (Who does not hold the token) from sending
-messages. The remote B party could request access to the token by sending A a
-message requesting the token:
-
-RequestToken
-
-- (empty)
-
-A will then respond with a MoveToken message, possibly with empty contents. If
-A believes that he does not own the token, A will send B the last MoveToken
-message he sent B.
 
 We call this form of communication between A and B a simple **Token Channel**.
 
@@ -113,7 +103,7 @@ FirstMoveTokenHigher {
 
 The following algorithm is used for a party A in a Token Channel:
 
-- Upon startup
+- Upon startup:
     - If MA is empty (Initialization of Token Channel):
         - If `hash(localPublicKey) < hash(remotePublicKey)`:
             - Set MA = MoveToken 
@@ -131,39 +121,36 @@ The following algorithm is used for a party A in a Token Channel:
     - ElseIf MA is an outgoing message:
         - Send MA
 
-- Upon request to send a message
+- Upon time tick:
+    - If MA is an outgoing message:
+        - If no activity happened for a while:
+            - Send MA
+
+- Upon request to send a message:
     - If MA is an incoming MoveToken:
         - Set MA = MoveToken(message) (outgoing)
         - Send MA
     - Else:
-        - Send RequestToken 
         - Report Not Ready
 
 - Upon data received:
-    - If data is MT := MoveToken(message):
-        - If MA is an incoming message:
-            - If MT == MA: 
-                - Discard message
+    - If MA is an incoming message:
+        - If MT == MA: 
+            - Discard message
+        - Else:
+            - Discard message
+            - Report inconsistency
+    - Else: (MA is an outgoing message)
+        - If MT.oldToken == hash(MA):
+                - process(MT)
+                - set MA = MT (incoming)
+                - Report message received (MT)
+        - Else:
+            - If MA.oldToken == hash(MT)
+                - Send MA
             - Else:
                 - Discard message
                 - Report inconsistency
-        - Else: (MA is an outgoing message)
-            - If MT.oldToken == hash(MA):
-                    - process(MT)
-                    - set MA = MT (incoming)
-                    - Report message received (MT)
-            - Else:
-                - If MA.oldToken == hash(MT)
-                    - Send MA
-                - Else:
-                    - Discard message
-                    - Report inconsistency
-    - Else (data is RequestToken):
-        - If MA is an outgoing message:
-            - Discard message
-        - Else: (MA is an incoming message)
-            - Set MA = MoveToken(emptyMessage) (outgoing)
-            - Send MA
 
 
 TODO: Add here a proof that the Token Channel algorithm is sound in the
@@ -241,10 +228,6 @@ Networkers communicate using Token Channels to ensure resistance to failure
 situations. The protocol used between Networkers is based on the ideas from the
 previous section, with a few enhancements. These are the messages used for
 Token Communication between Networkers of neighbor nodes:
-
-**NeighborRequestToken**
-
-- tokenIndex            [1 byte]
 
 
 **NeighborMoveToken**
