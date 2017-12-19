@@ -232,7 +232,7 @@ Token Communication between Networkers of neighbor nodes:
 
 **NeighborMoveToken**
 
-- tokenIndex            [1 byte]
+- tokenChannelIndex     [1 byte]
 - transactions
 - oldToken              [32 bytes]
 - randNonce             [32 bytes]
@@ -240,13 +240,13 @@ Token Communication between Networkers of neighbor nodes:
 
 **NeighborInconsistencyError**
 
-- tokenIndex            [1 byte]
+- tokenChannelIndex     [1 byte]
 - currentToken          [32 bytes]
 - balanceForReset       [8 bytes]
 
 
 
-tokenIndex is the current token channel in use.
+tokenChannelIndex is the current token channel in use.
 
 Using a single Token Channel for communication could be very inefficient. This
 is because only one message could be sent over the channel at any given time.
@@ -255,7 +255,7 @@ channel, we use multiple token channels.
 
 Therefore Networkers of neighbor nodes will usually communicate using a few
 token channels simultaneously. The amount of token channels to be used is
-configurable (It is configured through the plugin manager). tokenIndex
+configurable (It is configured through the plugin manager). tokenChannelIndex
 represents the current Token Channel in use.
 
 The transactions field may contain zero or more transactions. A transaction
