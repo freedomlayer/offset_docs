@@ -770,19 +770,123 @@ the Networker has to be configured every time it is started through the
 PluginManager component.
 
 
+## Service provided by the Networker
 
-TODO:
+The IndexerClient, Pather, Funder and PluginManager components rely on the
+Networker for networking service. That is: For sending and receiving messages
+to and from remote nodes.
 
-- Service that Networker supplies to other components.
-- Dependence on the Funder for transfer of funds, to free communication capacity.
-    - Keeping receipts on long term memory?
-- The Networker multiplexes incoming messages to: IndexerClient, Funder,
-    PluginManager
-- Write about networker persistency
-    - What should be persisted?
-    - How to do this?
-        - sqlite3?
-        - transactions and safety against forced shutdown.
 
+### NetworkerSenderClient
+
+The following interface is used for sending messages to a remote node:
+
+
+**RequestSendMessage** (User -> Networker)
+
+- requestId                     [16 bytes]
+- nodeIdPath
+- requestContent 
+- maxResponseLength             [4 bytes]
+- processingFeeProposal         [8 bytes]
+- halfCreditsPerByteProposal    [4 bytes]
+
+Where the fields in this message have the same description as the fields in the
+RequestSendMessage transaction.
+
+The following message will return from the Networker:
+
+**ResponseSendMessage** (Networker -> User)
+
+- requestId
+- one of:
+    - Success(responseContent)
+    - Failure
+
+
+It is possible that the request to send a message will block indefinately.
+A timeout should be used by the user of the Networker interface to avoid
+waiting for the delivery of a message forever.
+
+
+### NetworkerReceiverClient
+
+The following interface is used for receiving messages from remote nodes:
+
+
+**RequestReceived** (Networker -> User)
+
+- requestId
+- nodeIdPath
+- requestContent 
+- maxResponseLength             [4 bytes]
+- processingFeeProposal         [8 bytes]
+- halfCreditsPerByteProposal    [4 bytes]
+
+
+**RespondRequestReceived** (User -> Networker)
+
+- requestId
+- one of:
+    - Respond
+        - responseContent
+    - Discard
+
+
+### NetworkerSimpleReceiverClient
+
+The following interface is used for receiving messages from remote nodes using
+a simple interface. 
+
+When using this interface messages need not be approved by the receiver. The
+Networker automatically responds with an empty response to all valid incoming
+requests. The requestContent is then passed to the client. This allows faster
+processing but less control for the client.
+
+
+**RequestReceived** (Networker -> User)
+
+- remotePublicKey
+- requestContent 
+
+
+## Multiplexing Networker messages
+
+Messages received by the Networker might need to be forwarded to any of the
+components: IndexerClient, Funder, PluginManager. 
+
+The first byte of a request received by the Networker allows the Networker to
+decide which component should receive a message. This byte is called the
+muxByte.
+
+The Networker allows to generate new receiver clients
+(NetworkerReceiverClient and NetworkerSimpleReceiverClient) that are registered
+on a specific muxByte value. The mentioned components are registered on the
+following muxByte values:
+
+- 0: IndexerClient
+- 1: Funder
+- 2: PluginManager
+
+For example, a message with requestContent beginning with the byte `1` will be
+forwarded to the Funder. The funder will receive the requestContent stripped
+from the muxByte (the first byte).
+
+
+## Sending funds using Funder
+
+TODO: 
+
+- How to send funds using Funder
+- How do funder receipts look like?
+
+
+## Protocol against database
+
+TODO
+- What should be persisted?
+- How to do this?
+    - sqlite3?
+    - transactions and safety against forced shutdown.
 
 
