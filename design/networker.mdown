@@ -890,3 +890,7 @@ TODO
     - transactions and safety against forced shutdown.
 
 
+## Notifying IndexerClient about structure changes
+
+TODO
+
