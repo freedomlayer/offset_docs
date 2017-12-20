@@ -227,7 +227,9 @@ newOwnersPublicKeys.
 The first link in a chain could have a random value for previousStateHash.
 
 To provide a canonical form for a link in the states chain, each of the lists
-(newOwnersPublicKeys and signaturesByOldOwners) is sorted.
+(newOwnersPublicKeys and signaturesByOldOwners) is sorted. Note that only
+sorted canonical forms should be accepted. This is to make sure the hashes of
+chain links are consistent.
 
 A new link in an indexing provider states chain is valid only if signatures of
 at least 2/3 of the old owners are present and valid.
