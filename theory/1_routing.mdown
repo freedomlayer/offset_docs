@@ -257,9 +257,9 @@ recent state of their indexing providers:
 - knownIndexingProviderStateHash [32 bytes]
 
 
-**RouteToIndexer** (Indexer -> Node)
+**RoutesToIndexer** (Indexer -> Node)
 
-- routeToIndexer
+- routesToIndexer
 
 
 RequestUpdateState message is sent from an Indexer (belonging to indexing
@@ -276,8 +276,8 @@ be left unchanged. This could happen if A already had the most recent link of
 the chain, or in case the indexer has sent invalid new links.
 
 After the indexing provider has made sure the remote node A knows the current
-state of the indexing provider, he can send a RouteToIndexer message to the
-node A through any indexer node. This message will provide a route to an
+state of the indexing provider, he can send a RoutesToIndexer message to the
+node A through any indexer node. This message will provide routes to an
 indexer belonging to the indexing provider IndP.
 
 The node A can verify that an indexer belongs to the indexing provider IndP by
