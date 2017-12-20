@@ -333,8 +333,8 @@ The following messages are used for issuing such requests:
 
 **RequestNeighborsRoute** (Node -> Indexer)
 
-- sourceNode
-- destinationNode
+- sourceNodePublicKey
+- destinationNodePublicKey
 
 
 **ResponseNeighborsRoute** (Indexer -> Node)
@@ -346,10 +346,14 @@ The following messages are used for issuing such requests:
 
 **RequestFriendsRoute** (Node -> Indexer)
 
-- sourceNode
-- secondNode (Optional)
-- beforeLastNode (Optional)
-- destinationNode
+- one of:
+    - Direct
+        - sourceNodePublicKey
+        - destinationNodePublicKey
+    - LoopFromFriend 
+        - friendPublicKey
+    - LoopToFriend
+        - friendPublicKey
 
 
 **ResponseFriendsRoute** (Indexer -> Node)
@@ -361,14 +365,40 @@ The following messages are used for issuing such requests:
 
 
 Consider for example the message RequestNeighborsRoute (The message
-RequestFriendsRoute is similar). The request contains sourceNode and
-destinationNode. This means that the sending node is requesting routes between
-neighbors that begin from the sourceNode and end with the destinationNode.
+RequestFriendsRoute is similar). The request contains sourceNodePublicKey and
+destinationNodePublicKey. This means that the sending node is requesting routes
+between neighbors that begin from the source node and end with the
+destination node.
 
-secondNode and beforeLastNode are two extra optional fields that are specific
-for RequestFriendsRoute. It is possible to request a friends route that begins
-with two specific nodes and ends with two specific nodes. This can be useful in
-cases of rebalancing debts to direct neighbors. 
+RequestFriendsRoute contains extra options. The first option is the Direct
+route, which is similar to the RequestNeighborRoute message: A request for a
+route that begins with beings and ends with the specified nodes.
+
+The second option, LoopFromFriend, requests a route in the shape of a loop
+beginning from the requesting node through a given friend, back to the
+requesting node. This can be used for money rebalance when we owe the friend
+money.
+
+```
+requestingNode -> friend -> ... -> ... -> requestingNode
+```
+
+The third option, LoopToFriend, requests a route in the shape of a loop
+beginning from the requesting node through a given friend, back to the
+requesting node. This can be used for money rebalance when the friend owes us
+money.
+
+```
+requestingNode -> ... -> ... friend -> requestingNode
+```
+
+Note that both of those methods will not work if the provided loop is of the
+following form:
+
+```
+requestingNode -> friend -> requestingNode
+```
+
 
 For example, if a node A is planning to unfriend another node B, he may first
 push flow of credit through B back to himself, to acheive balanced credit
@@ -377,8 +407,6 @@ between A and B. Then A can unfriend B without leaving an unsettled debt.
 This method of balancing debts is not relevant for the communication layer
 (between neighbors), where rebalancing can be done by sending funds on the
 funds layer (between friends).
-
-
 
 
 
