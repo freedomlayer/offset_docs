@@ -43,16 +43,197 @@ request friends routes. The Networker and Funder send the IndexerClient
 information about structure changes.
 
 
-TODO:
+## Information kept by IndexerClient
 
-- Information kept by IndexerClient.
-- Define Notify Structure Change messages from Networker and Funder (Those are
-    probably different messages). Possibly give those messages different names.
 
-- Define interface with PluginManager:
-    - Add/Remove indexing provider.
-    - Request/Response indexing providers list.
+The IndexerClient keeps in memory a map of the registered indexing providers,
+having as keys the names of the indexing provider.
 
-- Define Request/Response neighbors/friends route.
+For each indexing provider the following information is kept:
 
-- Protocol with indexers (Most of it already in 1_routing.mdown).
+- recentState: The most recent known state of the indexing provider. This is
+    the last verified link in the states chain of the indexing provider.
+
+- A list of registered indexing nodes (derived from recentState) for this
+    indexing provider.
+
+- Routes to one or more registered indexers of the indexing provider.
+
+
+In addition, the IndexerClient keeps a recent snapshot of the current relations
+with neighbors and friends:
+
+- List of online neighbors.
+- A recent timestamp for communication with the Networker (Neighbors layer).
+- A recent communication public key for communication with the Networker.
+- List of online friends, with possible send and receive credit capacity for
+    each of them.
+- A recent timestamp for communication with the Funder (Friends layer).
+- A recent communication public key for communication with the Funder.
+
+
+## Notification about structure change
+
+The IndexerClient gets his updated information about current relations with
+neighbors and friends from the Networker and the Funder, through "notify
+structure change" messages.
+
+The Networker sends the IndexerClient updates of the following format:
+
+
+NotifyStructureChangeNeighbors:
+
+- one of:
+    - NeighborAdded(PublicKey),
+    - NeighborRemoved(PublicKey),
+    - TimestampUpdated(RandValue),
+    - CommPublicKeyUpdated(PublicKey),
+
+This message informs the IndexerClient about the a new neighbor that just got
+online, or about a neighbor that got offline. It can also inform about a new
+Networker timestamp or a newly issued Networker communication public key.
+
+The Funder sends the IndexerClient updates of the following format:
+
+FriendCapacity
+
+- send [8 bytes]
+- recv [8 bytes]
+
+NotifyStructureChangeFriends
+
+- one of:
+    - FriendUpdated
+        - public_key
+        - capacity: FriendCapacity
+    - FriendRemoved(PublicKey),
+    - TimestampUpdated(RandValue),
+    - CommPublicKeyUpdated(PublicKey),
+
+This message informs the IndexerClient about the a friend that just got online,
+a change to a friend's capacity for sending or receiving credits, or about a
+friend that got offline. It can also inform about a new Funder timestamp or
+a newly issued Funder communication public key.
+
+
+## Interface with PluginManager
+
+The IndexerClient can be configured through the PluginManager component, using
+the following messages:
+
+IndexingProviderInfo
+
+- indexingProviderName  [16 bytes]
+- previousStateHash     [32 bytes] 
+- newOwnersPublicKeys (List):
+    - ownerPublicKey [32 bytes]
+- newIndexersPublicKeys (List):
+    - indexerPublicKey [32 bytes]
+- signaturesByOldOwners (List):
+    - signature [64 bytes]
+
+
+AddIndexingProvider [PluginManager -> IndexerClient]
+
+- indexingProviderInfo: IndexingProviderInfo
+
+
+RemoveIndexingProvider [PluginManager -> IndexerClient]
+
+- indexingProviderName  [16 bytes]
+
+
+AddIndexingProvider allows to register a new indexing provider with the
+IndexerClient. The provided information is the name of the indexing provider,
+together with a recent link from the indexing provider's states chain.
+
+RemoveIndexingProvider allows to unregister an indexing provider from
+IndexerClient.
+
+
+IndexerClient keeps the PluginManager up to date with advances in the states
+chain of the registered indexing providers. This is important because the
+IndexerClient can not persist information, while the PluginManager can.
+
+Whenever an indexing provider's most recent states chain link is updated,
+IndexerClient sends the following message to PluginManager:
+
+
+IndexingProviderUpdated
+
+- indexingProviderInfo: IndexingProviderInfo
+
+
+## Handling requests for routes
+
+IndexerClient serves requests for routes from the Pather and
+the Funder. The Pather requests for neighbors routes, and the Funder requests
+for friends routes.
+
+Route requests from the Pather to the IndexerClient are as follows:
+
+RequestNeighborsRoute [Pather -> IndexerClient]
+
+- sourceNodePublicKey   [32 bytes]
+- destNodePublicKey     [32 bytes]
+
+
+ResponseNeighborsRoute  [IndexerClient -> Pather]
+
+- routes (List):
+    - neighborsRoute (List):
+        - neighborPublicKey     [32 bytes]
+- destCommPublicKey             [32 bytes]
+- destRecentTimestamp           [16 bytes]
+
+
+The request message RequestNeighborsRoute is a request for neighbor routes (in
+the neighbors layer) that begin with sourceNodePublicKey and end with
+destNodePublicKey.
+
+The response contains zero or more routes between the specified source node and
+destination node. In addition, it contains the destination's communication
+public key, and the destination's recent timestamp. 
+
+The communication public key is used for the half static diffie-hellman
+exchange, allowing to start an encrypted communication without a handshake.
+
+The destination's recent timestamp is used as a countermeasure by the
+destination, to avoid replay attacks.
+
+Having both the communication public key and the destination's recent timestamp
+allow us to send an encrypted message that will be successfuly received by the
+destination, without having to go through a previous handshake.
+
+
+Route requests from the Funder to the IndexerClient are as follows:
+
+RequestFriendsRoute:
+
+- one of:
+    - Direct
+        - sourceNodePublicKey
+        - destNodePublicKey
+    - LoopFromFriend
+        - friendPublicKey
+    - LoopToFriend {
+        - friendPublicKey
+
+ResponseFriendsRoute
+
+- routes (List):
+    - friendsRoute (List):
+        - friendPublicKey       [32 bytes]
+        - capacity              [8 bytes]
+- destCommPublicKey             [32 bytes]
+- destRecentTimestamp           [16 bytes]
+
+
+See 1_routing.mdown for more information about the different types of friends
+route requests.
+
+
+## Communication with remote indexer nodes
+
+See 1_routing.mdown.
+
