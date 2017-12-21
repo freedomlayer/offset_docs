@@ -38,7 +38,7 @@ communication roles:
 
 
 The IndexerClient relies on the Networker for communication with indexer nodes.
-It allows the Pather to request neighbors routes, and allows the Funder to
+It allows the Funder to request neighbors routes, and allows the Networker to
 request friends routes. The Networker and Funder send the IndexerClient
 information about structure changes.
 
@@ -166,19 +166,19 @@ IndexingProviderUpdated
 
 ## Handling requests for routes
 
-IndexerClient serves requests for routes from the Pather and
-the Funder. The Pather requests for neighbors routes, and the Funder requests
+IndexerClient serves requests for routes from the Networker and
+the Funder. The Funder requests for neighbors routes, and the Networker requests
 for friends routes.
 
-Route requests from the Pather to the IndexerClient are as follows:
+Route requests from the Funder to the IndexerClient are as follows:
 
-RequestNeighborsRoute [Pather -> IndexerClient]
+RequestNeighborsRoute [Funder -> IndexerClient]
 
 - sourceNodePublicKey   [32 bytes]
 - destNodePublicKey     [32 bytes]
 
 
-ResponseNeighborsRoute  [IndexerClient -> Pather]
+ResponseNeighborsRoute  [IndexerClient -> Funder]
 
 - routes (List):
     - neighborsRoute (List):
