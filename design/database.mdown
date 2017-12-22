@@ -1,0 +1,75 @@
+# Database design
+22.12.2017
+
+## Introduction 
+
+The CSwitch requires persistency to make sure the mutual credit management
+between neighbors and friends remain consistent, despite possible failures.
+
+The two main components that require persistency for this purpose are the
+Networker and the Funder.
+
+
+## Data model
+
+TODO: Explain how the data is stored in tables inside the database.
+
+
+## Interface with the Networker
+
+StoreInNeighborToken [Networker -> Database]
+
+- neighborPublicKey             [32 bytes]
+- tokenChannelIndex             [1 byte]
+- moveTokenMessage (incoming)
+- remoteMaxDebt                 [8 bytes]
+- localMaxDebt                  [8 bytes]
+- remotePendingDebt             [8 bytes]
+- localPendingDebt              [8 bytes]
+- balance                       [8 bytes]
+- closedLocalRequests (List)
+    - requestId                 [16 bytes]
+
+
+PendingLocalRequest
+
+- requestId                     [16 bytes]
+- nodeIdPath
+- requestContentHash = Sha512/256(requestContent)
+- maxResponseLength             [4 bytes]
+- processingFeeProposal         [8 bytes]
+- halfCreditsPerByteProposal    [4 bytes]
+
+
+
+StoreOutNeighborToken [Networker -> Database]
+
+- neighborPublicKey
+- tokenChannelIndex
+- moveTokenMessage (outgoing)
+- remoteMaxDebt                     [8 bytes]
+- localMaxDebt                      [8 bytes]
+- remotePendingDebt                 [8 bytes]
+- localPendingDebt                  [8 bytes]
+- balance                           [8 bytes]
+- openedLocalRequests (List of PendingLocalRequest)
+
+
+RequestLoadNeighborToken [Networker -> Database]
+
+- neighborPublicKey             [32 bytes]
+- tokenChannelIndex             [1 byte]
+
+
+ResponseLoadNeighborToken [Database -> Networker]
+
+- neighborPublicKey
+- tokenChannelIndex
+- moveTokenMessage (outgoing)
+- remoteMaxDebt                     [8 bytes]
+- localMaxDebt                      [8 bytes]
+- remotePendingDebt                 [8 bytes]
+- localPendingDebt                  [8 bytes]
+- balance                           [8 bytes]
+- pendingLocalRequests (List of PendingLocalRequest)
+
