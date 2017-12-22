@@ -163,16 +163,15 @@ fail-stop adversarial model:
 
 ## Persistent representation of a Token Channel
 
-A Networker Token Channel has a representation in long term memory of the
-following form:
+A Networker Token always keeps in long term memory the following:
 
 - lastNeighborMoveToken (incoming or outgoing)
 - remoteMaxDebt [8 bytes]
 - localMaxDebt [8 bytes]
-- remotePendingRequests [8 bytes]
-- localPendingRequests [8 bytes]
+- remotePendingDebt [8 bytes]
+- localPendingDebt [8 bytes]
 - balance [8 bytes]
-- pendingRequests (A list of requests)
+- localPendingRequests (A list of requests)
 - isInconsistent
     - Yes
         - inconsistentMessage (Sent\Received)
@@ -190,10 +189,10 @@ Initially this value equals 0.
 localMaxDebt is the maximum debt the local party can have in this channel.
 Initially this value equals 0.
 
-remotePendingRequests is the total required credit for payment of future
+remotePendingDebt is the total required credit for payment of future
 response messages from the remote party.
 
-localPendingRequests is the total amount of credit expected to be earned from
+localPendingDebt is the total amount of credit expected to be earned from
 future response messages sent to the remote party.
 
 
@@ -201,7 +200,7 @@ The relationship between the mentioned fields for a Token Channel:
 
 
 ```
-      balance - localPendingR  balance       balance + remotePendingR
+      balance - localPendingD  balance       balance + remotePendingD
                       |          |                |
     ----------[-------(----------*----------------)------------]--------->
               |                                                |
@@ -212,13 +211,13 @@ At all times:
 
 ```
 -localMaxDebt  
-    <= balance - localPendingRequests
+    <= balance - localPendingDebt
     <= balance
-    <= balance + remotePendingRequests
+    <= balance + remotePendingDebt
     <= remoteMaxDebt
 ```
 
-pendingRequests contain a list of all requests opened against the remote party
+localPendingRequests contain a list of all requests opened against the remote party
 but not yet completed.  TODO: Write about request fields.
 
 
@@ -340,8 +339,8 @@ We describe here in detail each of those messages:
 - remoteMaxDebt [8 bytes]
 
 Set the maximum debt possible for the remote party. Note that `balance +
-remotePendingRequests <= remoteMaxDebt`, hence it is not possible to set
-`remoteMaxDebt` to a value lower than `balance  + remotePendingRequests`.
+remotePendingDebt <= remoteMaxDebt`, hence it is not possible to set
+`remoteMaxDebt` to a value lower than `balance  + remotePendingDebt`.
 
 The dual localMaxDebt can only be set by the remote party.
 
@@ -395,9 +394,9 @@ node, getting back a receipt. Then the receipt is used to top up the balance in
 the Token Channel using a LoadFundsTran message.
 
 The LoadFundsTran transaction increases the balance of the sender by numCredits.
-Note that `balance + numCredits + remotePendingRequests` must be at most
+Note that `balance + numCredits + remotePendingDebt` must be at most
 `remoteMaxDebt`, therefore `numCredits <= remoteMaxDebt - balance -
-remotePendingRequests`.
+remotePendingDebt`.
 
 If numCredits is too large with respect to the current `remoteMaxDebt`, it is
 possible to send this message prefixed with a setRemoteMaxDebt message, to
@@ -493,8 +492,8 @@ processingFeeProposal + length(request) + (maxResponseLength - responseLength)
 
 
 Whenever A's Networker sends a RequestSendMessageTran to B's Networker, A's
-Networker inserts the request into pendingRequests. In addition,
-localPendingRequests is increased by:
+Networker inserts the request into localPendingRequests. In addition,
+localPendingDebt is increased by:
 
 ```
 maxPaymentOnSuccess := 
@@ -507,11 +506,11 @@ edges of the boundary, because of linearity of `paymentOnSuccess`.
 
 
 Note that it is not possible to send this request message if this causes
-`balance - localPendingRequests` to be smaller than `-localMaxDebt`. Attempting
+`balance - localPendingDebt` to be smaller than `-localMaxDebt`. Attempting
 to do so will cause a token channel inconsistency.
 
 Upon receipt of the RequestSendMessageTran message, B's Networker increases
-remotePendingRequests by the same amount.
+remotePendingDebt by the same amount.
 
 
 **ResponseSendMessageTran**
@@ -539,14 +538,14 @@ Whenever A's Networker sends a ResponseSendMessage to B's Networker, A's
 Networker does the following:
 
 - Increases balance by `paymentOnSuccess`
-- Decreases localPendingRequests by `maxPaymentOnSuccess`.
+- Decreases localPendingDebt by `maxPaymentOnSuccess`.
 
 Upon receipt of the ResponseSendMessage by B's Networker, it does the
 following:
 
 - Removes the request from the pending requests list.
 - Decreases balance by `paymentOnSuccess`.
-- Decreases remotePendingRequests by `maxPaymentOnSuccess`.
+- Decreases remotePendingDebt by `maxPaymentOnSuccess`.
 
 On the other hand, if the received ResponseSendMessage is invalid, an
 inconsistency occurs.
@@ -579,13 +578,13 @@ When A's Networker sends a FailedSendMessage to B's Networker, A's Networker
 does the following:
 
 - Increases balance by `paymentOnFailure`
-- Decreases localPendingRequests by `maxPaymentOnSuccess`.
+- Decreases localPendingDebt by `maxPaymentOnSuccess`.
 
 Upon receipt of the FailedSendMessage by B's Networker, it does the following:
 
 - Removes the request from the pending requests list.
 - Decreases balance by `paymentOnFailure`.
-- Decreases remotePendingRequests by `maxPaymentOnSuccess`.
+- Decreases remotePendingDebt by `maxPaymentOnSuccess`.
 
 
 **ResetChannelTran**
@@ -616,8 +615,8 @@ Networker, the following values will be set from A's point of view:
 - balance = newBalance
 - remoteMaxDebt = max(newBalance, 0)
 - localMaxDebt = min(newBalance, 0)
-- remotePendingRequests and localPendingRequests are empty.
-- pendingRequests list is empty.
+- remotePendingDebt and localPendingDebt are empty.
+- localPendingRequests list is empty.
 
 
 ## Interface with the Channeler
@@ -882,6 +881,15 @@ TODO:
 
 
 ## Protocol against database
+
+Database related events happen at the following moments:
+
+1. Receipt of a NeighborMoveToken message. The following should be updated:
+
+
+
+
+
 
 TODO
 - What should be persisted?
