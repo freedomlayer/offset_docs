@@ -47,11 +47,11 @@ StoreOutNeighborToken [Networker -> Database]
 - neighborPublicKey
 - tokenChannelIndex
 - moveTokenMessage (outgoing)
-- remoteMaxDebt                     [8 bytes]
-- localMaxDebt                      [8 bytes]
-- remotePendingDebt                 [8 bytes]
-- localPendingDebt                  [8 bytes]
-- balance                           [8 bytes]
+- remoteMaxDebt                 [8 bytes]
+- localMaxDebt                  [8 bytes]
+- remotePendingDebt             [8 bytes]
+- localPendingDebt              [8 bytes]
+- balance                       [8 bytes]
 - openedLocalRequests (List of PendingLocalRequest)
 
 
@@ -66,10 +66,10 @@ ResponseLoadNeighborToken [Database -> Networker]
 - neighborPublicKey
 - tokenChannelIndex
 - moveTokenMessage (outgoing)
-- remoteMaxDebt                     [8 bytes]
-- localMaxDebt                      [8 bytes]
-- remotePendingDebt                 [8 bytes]
-- localPendingDebt                  [8 bytes]
-- balance                           [8 bytes]
+- remoteMaxDebt                 [8 bytes]
+- localMaxDebt                  [8 bytes]
+- remotePendingDebt             [8 bytes]
+- localPendingDebt              [8 bytes]
+- balance                       [8 bytes]
 - pendingLocalRequests (List of PendingLocalRequest)
 
