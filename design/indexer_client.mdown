@@ -123,7 +123,7 @@ the following messages:
 
 IndexingProviderInfo
 
-- indexingProviderName  [16 bytes]
+- indexingProviderID  [16 bytes]
 - previousStateHash     [32 bytes] 
 - newOwnersPublicKeys (List):
     - ownerPublicKey [32 bytes]
@@ -140,7 +140,7 @@ AddIndexingProvider [PluginManager -> IndexerClient]
 
 RemoveIndexingProvider [PluginManager -> IndexerClient]
 
-- indexingProviderName  [16 bytes]
+- indexingProviderID  [16 bytes]
 
 
 AddIndexingProvider allows to register a new indexing provider with the

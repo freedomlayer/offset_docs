@@ -248,7 +248,7 @@ recent state of their indexing providers:
 
 **RequestUpdateState** (Indexer -> Node)
 
-- indexingProviderName [16 bytes]
+- indexingProviderID [16 bytes]
 - indexingProviderStatesChain
 
 
