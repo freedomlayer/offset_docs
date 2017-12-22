@@ -14,6 +14,16 @@ Networker and the Funder.
 
 TODO: Explain how the data is stored in tables inside the database.
 
+TODO: Some things to check:
+
+- How to store the long blobs (hashes, public keys, etc) in sqlite database?
+- How to store nodeIdPath list of public keys in sqlite database?
+    - Possibly as long blobs
+- Which rust library to use with sqlite?
+    - rusqlite
+    - r2d2?
+
+
 
 ## Interface with the Networker
 
