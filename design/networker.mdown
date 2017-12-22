@@ -163,7 +163,7 @@ fail-stop adversarial model:
 
 ## Persistent representation of a Token Channel
 
-A Networker Token always keeps in long term memory the following:
+A Networker Token Channel always keeps in long term memory the following:
 
 - lastNeighborMoveToken (incoming or outgoing)
 - remoteMaxDebt [8 bytes]
@@ -517,10 +517,15 @@ remotePendingDebt by the same amount.
 
 - requestId
 - responseContent: EncContent
-- Signature{key=recipientKey}(originalRequestSendMessageTran || responseContent)
+- Signature{key=recipientKey}(
+    requestId ||
+    sha512/256(nodeIdPath) ||
+    sha512/256(requestContent) ||
+    maxResponseLength ||
+    processingFeeProposal ||
+    halfCreditsPerBytesProposal || 
+    sha512/256(responseContent))
 
-TODO: Use some kind of HMAC to combine the two hashes instead of using simple
-concatenation. Those could cause security issues.
 
 The ResponseSendMessage transaction message can be created by the destination
 node of a request.
@@ -881,15 +886,6 @@ TODO:
 
 
 ## Protocol against database
-
-Database related events happen at the following moments:
-
-1. Receipt of a NeighborMoveToken message. The following should be updated:
-
-
-
-
-
 
 TODO
 - What should be persisted?
