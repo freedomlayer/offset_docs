@@ -521,6 +521,7 @@ remotePendingDebt by the same amount.
 - requestId
 - responseContent: EncContent
 - Signature{key=recipientKey}(
+    "MESSAGE_SUCCESS" ||
     requestId ||
     sha512/256(nodeIdPath) ||
     sha512/256(requestContent) ||
@@ -563,7 +564,14 @@ inconsistency occurs.
 
 - requestId
 - reportingNodePublicKey
-- Signature{key=reportingNodePublicKey}(originalRequestSendMessageTran)
+- Signature{key=reportingNodePublicKey}(
+    "MESSAGE_FAILURE" ||
+    requestId ||
+    sha512/256(nodeIdPath) ||
+    sha512/256(requestContent) ||
+    maxResponseLength ||
+    processingFeeProposal ||
+    halfCreditsPerBytesProposal)
 
 
 requestId is the requestId of the original request. reportingNodePublicKey is
