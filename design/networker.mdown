@@ -172,10 +172,13 @@ A Networker Token Channel always keeps in long term memory the following:
 - localPendingDebt [8 bytes]
 - balance [8 bytes]
 - localPendingRequests (A list of requests)
+
+<!--
 - isInconsistent
     - Yes
         - inconsistentMessage (Sent\Received)
     - No
+-->
 
 
 lastNeighborMoveToken is the last seen NeighborMoveToken message, either
