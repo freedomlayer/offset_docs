@@ -1,5 +1,5 @@
 # Database design
-22.12.2017
+23.12.2017
 
 ## Introduction 
 
@@ -12,13 +12,38 @@ Networker and the Funder.
 
 ## Data model
 
-TODO: Explain how the data is stored in tables inside the database.
+**NeighborTokenChannels** table
 
-TODO: Some things to check:
+- primary key pair
+    - neighborPublicKey (blob?)
+    - tokenIndex            [2 bytes?]
 
-- How to store the long blobs (hashes, public keys, etc) in sqlite database?
-- How to store nodeIdPath list of public keys in sqlite database?
-    - Possibly as long blobs
+- moveTokenType (incoming / outoing)
+- moveTokenTransactions     (blob?)
+- moveTokenOldToken         [32 bytes]
+- moveTokenRandNonce        [32 bytes]
+
+- remoteMaxDebt             [8 bytes]
+- localMaxDebt              [8 bytes]
+- remotePendingDebt         [8 bytes]
+- localPendingDebt          [8 bytes]
+- balance                   [8 bytes]
+
+
+
+**NeighborLocalRequests** table
+
+- neighborTokenChannel  (NeighborTokenChannel primary key)
+- requestId             (primary key)
+- nodeIdPath            (blob)
+- requestContentHash = Sha512/256(requestContent)  [32 bytes]
+- maxResponseLength             [4 bytes]
+- processingFeeProposal         [8 bytes]
+- halfCreditsPerByteProposal    [4 bytes]
+
+
+TODO: 
+
 - Which rust library to use with sqlite?
     - rusqlite
     - r2d2?
@@ -27,7 +52,7 @@ TODO: Some things to check:
 
 ## Interface with the Networker
 
-StoreInNeighborToken [Networker -> Database]
+**StoreInNeighborToken** [Networker -> Database]
 
 - neighborPublicKey             [32 bytes]
 - tokenChannelIndex             [1 byte]
@@ -45,17 +70,17 @@ PendingLocalRequest
 
 - requestId                     [16 bytes]
 - nodeIdPath
-- requestContentHash = Sha512/256(requestContent)
+- requestContentHash = Sha512/256(requestContent)  [32 bytes]
 - maxResponseLength             [4 bytes]
 - processingFeeProposal         [8 bytes]
 - halfCreditsPerByteProposal    [4 bytes]
 
 
 
-StoreOutNeighborToken [Networker -> Database]
+**StoreOutNeighborToken** [Networker -> Database]
 
-- neighborPublicKey
-- tokenChannelIndex
+- neighborPublicKey             [32 bytes]
+- tokenChannelIndex             [1 byte]
 - moveTokenMessage (outgoing)
 - remoteMaxDebt                 [8 bytes]
 - localMaxDebt                  [8 bytes]
@@ -65,17 +90,20 @@ StoreOutNeighborToken [Networker -> Database]
 - openedLocalRequests (List of PendingLocalRequest)
 
 
-RequestLoadNeighborToken [Networker -> Database]
+**RequestLoadNeighborToken** [Networker -> Database]
 
 - neighborPublicKey             [32 bytes]
 - tokenChannelIndex             [1 byte]
 
 
-ResponseLoadNeighborToken [Database -> Networker]
+**ResponseLoadNeighborToken** [Database -> Networker]
 
-- neighborPublicKey
-- tokenChannelIndex
-- moveTokenMessage (outgoing)
+- neighborPublicKey             [32 bytes]
+- tokenChannelIndex             [1 byte]
+- moveTokenMessageType
+    - incoming
+    - outgoing
+- moveTokenMessage (incoming/outgoing)
 - remoteMaxDebt                 [8 bytes]
 - localMaxDebt                  [8 bytes]
 - remotePendingDebt             [8 bytes]
