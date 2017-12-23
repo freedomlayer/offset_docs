@@ -117,3 +117,11 @@ PendingLocalRequest
 - balance                       [8 bytes]
 - pendingLocalRequests (List of PendingLocalRequest)
 
+
+## Friends Token Channel Data model
+
+TODO
+
+## Interface with the Funder
+
+TODO
