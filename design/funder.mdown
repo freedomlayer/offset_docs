@@ -102,13 +102,17 @@ the friendship.
 When a new Funder Token Channel is created, its state is RequestsDisabled by
 default.
 
-
 EncContent
 
-- senderPublicKey           [32 bytes]
+- senderEphemeralPublicKey  [32 bytes]
 - keyDerivationNonce        [32 bytes]
+- destCommPublicKeyHash     [8 bytes]
+- Signature{key=senderPublicKey}(
+    senderEphemeralPublicKey ||
+    keyDerivationNonce ||
+    destCommPublicKeyHash)  [64 bytes]
 - encryptedContent: Encrypt{key=derivedSymmetricKey, nonce=random}(
-    recipientTimestamp, senderTimestamp, messageContent)
+    recipientTimestamp, senderTimestamp, senderCommPublicKey, messageContent)
 
 
 **RequestSendFundTran**
@@ -199,6 +203,8 @@ TODO
 
 
 ## How to perform payments
+
+
 
 TODO: Explain about random generation of invoiceId, and how to construct a
 receipt.

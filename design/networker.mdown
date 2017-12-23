@@ -412,10 +412,15 @@ to send funds to the remote node has completed.
 
 EncContent
 
-- senderPublicKey           [32 bytes]
+- senderEphemeralPublicKey  [32 bytes]
 - keyDerivationNonce        [32 bytes]
+- destCommPublicKeyHash     [8 bytes]
+- Signature{key=senderPublicKey}(
+    senderEphemeralPublicKey ||
+    keyDerivationNonce ||
+    destCommPublicKeyHash)  [64 bytes]
 - encryptedContent: Encrypt{key=derivedSymmetricKey, nonce=random}(
-    recipientTimestamp, senderTimestamp, messageContent)
+    recipientTimestamp, senderTimestamp, senderCommPublicKey, messageContent)
 
 **RequestSendMessageTran**
 
@@ -441,16 +446,35 @@ The last node on the path is the destination node.
 requestContent contains an encrypted message to be sent to the remote node.
 It is of type EncContent. 
 
-EncContent contains the senderPublicKey and keyDerivationNonce. These are used
+EncContent contains the senderEphemeralPublicKey and keyDerivationNonce. These are used
 for static diffie-hellman between the originator of the request and the
-destination node. Together the two parties derive a symmetric key used for
+destination node. The destination node might be using a few different
+communication public keys, therefore the hash of the wanted communication
+public key is specified as destCommPublicKeyHash =
+sha512/256(destCommPublicKey)[0:8].
+
+Together the two parties derive a symmetric key used for
 encryption/decryption of messages from the originator of the request to the
 remote party. (The other side of communication will have a different symmetric
 key).
 
+A signature over the fields: {senderEphemeralPublicKey, keyDerivationNonce,
+destCommPublicKeyHash} using the senderPublicKey is also supplied. This
+signature proves to the receiver the identity of the sender of the message.
+Note that senderPublicKey is actually the first public key at the nodeIdPath
+list of public keys.
+
+The first part of EncContent, from senderEphemeralPublicKey to the Signature
+(Including the signature) could be cached, together with the derived key. This
+way the derived symmetric key and the Signature need not be calculated for
+every message sent to this specific destination.
+
 EncContent also contains encryptedContent: The actually encrypted message,
 together with a recent recipientTimestamp and the last senderTimestamp,
-mechanisms used to avoid replay attacks.
+mechanisms used to avoid replay attacks. It also contains the last
+senderCommPublicKey, to allow the recipient of the message to immediately send
+a message back, without having to look up the senderCommPublicKey using an
+indexer node.
 
 maxResponseLength is the maximum amount of bytes allowed for the response.
 There is a limit for this amount of bytes because credit is frozen when the
