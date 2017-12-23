@@ -1,0 +1,205 @@
+# Funder design
+23.12.2017
+
+Required prior reading: 
+
+- 0_credit_clearing.mdown
+- networker.mdown
+
+
+## Introduction
+
+TODO
+
+## Persistent representation of a Funder Token Channel
+
+A Funder Token Channel always keeps in long term memory the following:
+
+- lastFriendMoveToken (incoming or outgoing)
+- remoteMaxDebt [16 bytes]
+- localMaxDebt [16 bytes]
+- remotePendingDebt [16 bytes]
+- localPendingDebt [16 bytes]
+- balance [16 bytes]
+- localPendingRequests (A list of requests)
+- localState       (RequestsEnabled/RequestsDisabled)
+- remoteState      (RequestsEnabled/RequestsDisabled)
+
+The fields lastFriendMoveToken has a similar job to the lastNeighborMoveToken
+field in the Networker persistent representation.
+
+The fields remoteMaxDebt, localMaxDebt, remotePendingDebt, localPendingDebt,
+balance, localPendingRequests and the relationbships between them are explained
+in the Networker design document (networker.mdown).
+
+localState determines whether we take new requests from the remote friend.
+remoteState determines whether the remote friend takes new requests from us.
+
+
+## Funder Token Channels
+
+**FriendMoveToken**
+
+- transactions
+- oldToken              [32 bytes]
+- randNonce             [32 bytes]
+
+
+**FriendInconsistencyError**
+
+- currentToken          [32 bytes]
+- balanceForReset       [16 bytes]
+
+
+## Token Channel inconsistency
+
+Handled similarly to the Networker.
+
+
+## Funder Token Channel Transaction types
+
+The following transactions types are available for sending inside the
+transactions field of a FriendMoveToken message:
+
+- SetStateTran
+- setRemoteMaxDebtTran
+- FundsRandNonceTran
+- RequestSendFundTran
+- ResponseSendFundTran
+- FailedSendFundTran
+- ResetChannelTran
+
+
+Compared with the Networker Token Channel, the transaction LoadFundsTran was
+removed. The transaction SetState was added. RequestSendFunTran,
+ResponseSendFundTran and FailedSendFundTran are the dual of their Networker's
+counterparts. They are explained below.
+
+**SetStateTran**
+
+- newState: (RequestsEnabled / RequestsDisabled)
+
+
+SetStateTran sets the current state for the sender of the transaction.
+If the local state is RequestsDisabled, the remote side may not send
+RequestSendFundTran transactions.  If the local state is RequestsEnabled, the
+remote side may send RequestSendFunTran transactions.
+
+The purpose of the SetStateTran transaction is to allow one party of a friends
+token channel to have more control over the mutual credit balance. 
+
+For example, consider a credit friendship between two nodes A and B.
+If A wants to leave the friendship gracefully, he somehow needs to acheive a
+zero balance in the mutual credit (Note that this is not always possible).
+If B keeps opening new requests, it could be difficult for A to acheive neutral
+balance. 
+
+To gain more control over the balance of the channel, A will send a
+DisableRequestTran transaction. This will stop B from sending new requests,
+possibly allowing A to acheive zero credit balance with B, and then leaving
+the friendship.
+
+When a new Funder Token Channel is created, its state is RequestsDisabled by
+default.
+
+
+EncContent
+
+- senderPublicKey           [32 bytes]
+- keyDerivationNonce        [32 bytes]
+- encryptedContent: Encrypt{key=derivedSymmetricKey, nonce=random}(
+    recipientTimestamp, senderTimestamp, messageContent)
+
+
+**RequestSendFundTran**
+
+- requestId                     [16 bytes]
+- nodeIdPath
+- requestContent: EncContent
+- destinationPayment            [16 bytes]
+- mediatorPaymentProposal       [8 bytes]
+
+
+Where messageContent inside requestContent is of the form:
+
+- invoiceId [32 bytes]
+
+
+TODO: Add explanation about rest of RequestSendFundTran fields
+
+
+**ResponseSendFundTran**
+
+- requestId
+- responseContent: EncContent
+- Signature{key=recipientKey}(
+    "FUND_SUCCESS" ||
+    requestId ||
+    sha512/256(nodeIdPath) ||
+    sha512/256(requestContent) ||
+    destinationPayment ||
+    mediatorPaymentProposal)
+
+Where messageContent inside responseContent is of the form:
+
+- receiptRandNonce [32 bytes]
+- Signature{key=recipientKey}(
+    "FUND_RECEIPT" ||
+    receiptRandNonce ||
+    invoiceId)
+
+
+Using responseContent, a receipt could be constructed by the sender of
+the RequestSendFundTran transaction, as follows:
+
+Receipt
+
+- invoiceId             [32 bytes]
+- receiptRandNonce      [32 bytes]
+- Signature{key=recipientKey}(
+    "FUND_RECEIPT" ||
+    receiptRandNonce ||
+    invoiceId)
+
+
+TODO: Add explanation about fields of ResponseSendFundTran
+
+
+**FailedSendFundTran**
+
+- requestId
+- reportingNodePublicKey
+- Signature{key=reportingNodePublicKey}(
+    "FUND_FAILURE" ||
+    requestId ||
+    sha512/256(nodeIdPath) ||
+    sha512/256(requestContent) ||
+    destinationPayment ||
+    mediatorPaymentProposal)
+
+
+TODO: Add explanation about fields
+
+
+## Interface with the Networker
+
+
+TODO: 
+
+
+## Funder configuration from the PluginManager
+
+TODO
+- How to remove a friend gracefully?
+
+
+## Service provided by the Funder
+
+TODO
+
+
+## How to perform payments
+
+TODO: Explain about random generation of invoiceId, and how to construct a
+receipt.
+
