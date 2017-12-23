@@ -161,7 +161,7 @@ fail-stop adversarial model:
     corrupted.
 
 
-## Persistent representation of a Token Channel
+## Persistent representation of a Networker Token Channel
 
 A Networker Token Channel always keeps in long term memory the following:
 
@@ -318,10 +318,10 @@ ResetNeighborChannel
 - tokenChannelIndex
 
 
-## Token Channel Transaction types
+## Networker Token Channel Transaction types
 
 The following transactions types are available for sending inside the
-transactions field of a NeighborMoveToken message.
+transactions field of a NeighborMoveToken message:
 
 - setRemoteMaxDebtTran
 - FundsRandNonceTran
