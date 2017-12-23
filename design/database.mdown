@@ -10,7 +10,13 @@ The two main components that require persistency for this purpose are the
 Networker and the Funder.
 
 
-## Data model
+## Initialization
+
+The database is initialized given a path to a database.
+This path will probably of a form similar to: ..../db_{public_key}.db
+
+
+## Neighbors Token Channel Data model
 
 **NeighborTokenChannels** table
 
