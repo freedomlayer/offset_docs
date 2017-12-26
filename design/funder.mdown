@@ -157,6 +157,10 @@ Receipt
     randNonce)   [64 bytes]
 
 
+Where responseHash = 
+    sha512/256(requestId || sha512/256(nodeIdPath) || mediatorPaymentProposal)
+
+
 TODO: Add explanation about fields of ResponseSendFundTran
 
 TODO: Do we need any replay counter measure in the
