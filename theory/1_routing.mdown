@@ -261,6 +261,7 @@ recent state of their indexing providers:
 
 - routesToIndexers: List of:
     - List(PublicKey)
+    - appPort                   [32 bytes]
 - requestPrice                  [8 bytes]
 
 
@@ -289,6 +290,12 @@ newIndexersPublicKeys.
 The RoutesToIndexers message is sent from an Indexer node to a node,
 specifiying a list of routes to indexer nodes, and the price of a request for
 routes.
+
+Every route also contains appPort. This port should be used as
+PluginManagerPort(addPort) by the node when sending messages to the destination
+indexer node. The indexer node logic will always be behind the PluginManager,
+therefore only this type of destination port is supported.
+
 
 TODO: How to deal with changes of requestPrice? Will the Indexer node still
 accept the old price for a while? 
