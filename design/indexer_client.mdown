@@ -224,9 +224,7 @@ ResponseFriendsRoute
 - routes (List):
     - friendsRoute (List):
         - friendPublicKey       [32 bytes]
-        - capacity              [8 bytes]
-- destCommPublicKey             [32 bytes]
-- destRecentTimestamp           [16 bytes]
+    - capacity                  [8 bytes]
 
 
 See 1_routing.mdown for more information about the different types of friends
