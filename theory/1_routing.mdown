@@ -261,7 +261,7 @@ recent state of their indexing providers:
 
 - routesToIndexers: List of:
     - List(PublicKey)
-- requestPrice
+- requestPrice                  [4 bytes]
 
 
 RequestUpdateState message is sent from an Indexer (belonging to indexing
