@@ -119,14 +119,10 @@ EncContent
 
 - requestId                     [16 bytes]
 - nodeIdPath
-- requestContent: EncContent
-- destinationPayment            [16 bytes]
 - mediatorPaymentProposal       [8 bytes]
+- invoiceId                     [32 bytes]
+- destinationPayment            [16 bytes]
 
-
-Where messageContent inside requestContent is of the form:
-
-- invoiceId [32 bytes]
 
 
 TODO: Add explanation about rest of RequestSendFundTran fields
@@ -134,23 +130,14 @@ TODO: Add explanation about rest of RequestSendFundTran fields
 
 **ResponseSendFundTran**
 
-- requestId
-- responseContent: EncContent
+- requestId                     [16 bytes]
+- randNonce                     [32 bytes]
 - Signature{key=recipientKey}(
     "FUND_SUCCESS" ||
-    requestId ||
-    sha512/256(nodeIdPath) ||
-    sha512/256(requestContent) ||
+    sha512/256(requestId || sha512/256(nodeIdPath) || mediatorPaymentProposal) ||
+    invoiceId ||
     destinationPayment ||
-    mediatorPaymentProposal)
-
-Where messageContent inside responseContent is of the form:
-
-- receiptRandNonce [32 bytes]
-- Signature{key=recipientKey}(
-    "FUND_RECEIPT" ||
-    receiptRandNonce ||
-    invoiceId)
+    randNonce)                  [64 bytes]
 
 
 Using responseContent, a receipt could be constructed by the sender of
@@ -158,28 +145,35 @@ the RequestSendFundTran transaction, as follows:
 
 Receipt
 
+- responseHash          [32 bytes]
 - invoiceId             [32 bytes]
-- receiptRandNonce      [32 bytes]
+- destinationPayment    [16 bytes]
+- randNonce             [32 bytes]
 - Signature{key=recipientKey}(
-    "FUND_RECEIPT" ||
-    receiptRandNonce ||
-    invoiceId)
+    "FUND_SUCCESS" ||
+    sha512/256(requestId || sha512/256(nodeIdPath) || mediatorPaymentProposal) ||
+    invoiceId ||
+    destinationPayment ||
+    randNonce)   [64 bytes]
 
 
 TODO: Add explanation about fields of ResponseSendFundTran
 
+TODO: Do we need any replay counter measure in the
+RequestSendFundTran/ResponseSendFunTran process?
+
 
 **FailedSendFundTran**
 
-- requestId
-- reportingNodePublicKey
-- Signature{key=reportingNodePublicKey}(
+- requestId                 [16 bytes]
+- reportingNodePublicKey    [32 bytes]
+- randNonce                 [32 bytes]
+- Signature{key=recipientKey}(
     "FUND_FAILURE" ||
-    requestId ||
-    sha512/256(nodeIdPath) ||
-    sha512/256(requestContent) ||
+    sha512/256(requestId || sha512/256(nodeIdPath) || mediatorPaymentProposal) ||
+    invoiceId ||
     destinationPayment ||
-    mediatorPaymentProposal)
+    randNonce)              [64 bytes]
 
 
 TODO: Add explanation about fields
@@ -208,4 +202,11 @@ TODO
 
 TODO: Explain about random generation of invoiceId, and how to construct a
 receipt.
+
+
+
+
+TODO:
+
+- How to approximate the cost of 
 
