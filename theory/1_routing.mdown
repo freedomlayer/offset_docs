@@ -259,7 +259,9 @@ recent state of their indexing providers:
 
 **RoutesToIndexers** (Indexer -> Node)
 
-- routesToIndexers
+- routesToIndexers: List of:
+    - List(PublicKey)
+- requestPrice
 
 
 RequestUpdateState message is sent from an Indexer (belonging to indexing
@@ -284,6 +286,12 @@ The node A can verify that an indexer belongs to the indexing provider IndP by
 looking at his current state of the indexing provider IndP, in the list of
 newIndexersPublicKeys.
 
+The RoutesToIndexers message is sent from an Indexer node to a node,
+specifiying a list of routes to indexer nodes, and the price of a request for
+routes.
+
+TODO: How to deal with changes of requestPrice? Will the Indexer node still
+accept the old price for a while? 
 
 ## Information collection by indexers
 
