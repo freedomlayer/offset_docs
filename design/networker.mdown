@@ -907,10 +907,13 @@ following muxByte values:
 - 1: Funder
 - 2: PluginManager
 
-For example, a message with requestContent beginning with the byte `1` will be
+For example, a message with requestContent beginning with the byte 0x1 will be
 forwarded to the Funder. The funder will receive the requestContent stripped
 from the muxByte (the first byte).
 
+Whenever a message is sent using the Networker, a "destination port" has to be
+specified, so that the remote Networker will be able to forward the message to
+the relevant component.
 
 ## Sending funds using Funder
 
