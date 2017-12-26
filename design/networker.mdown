@@ -934,5 +934,13 @@ TODO
 
 ## Notifying IndexerClient about structure changes
 
-TODO
+Networker -> IndexerClient
+```
+enum NotifyStructureChangeNeighbors {
+    NeighborAdded(PublicKey),
+    NeighborRemoved(PublicKey),
+    TimestampUpdated(RandValue),
+    CommPublicKeyUpdated(PublicKey),
+}
+```
 
