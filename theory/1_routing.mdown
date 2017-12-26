@@ -345,7 +345,8 @@ The following messages are used for issuing such requests:
 
 **ResponseNeighborsRoute** (Indexer -> Node)
 
-- routes
+- routes: List of:
+    - List(PublicKey))
 - destinationCommPublicKey
 - destinationRecentTimestamp
 
@@ -364,7 +365,9 @@ The following messages are used for issuing such requests:
 
 **ResponseFriendsRoute** (Indexer -> Node)
 
-- routes
+- routes: List of:
+    - capacity
+    - List(PublicKey)
 
 
 
