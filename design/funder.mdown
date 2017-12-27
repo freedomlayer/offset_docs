@@ -63,7 +63,6 @@ transactions field of a FriendMoveToken message:
 
 - SetStateTran
 - setRemoteMaxDebtTran
-- FundsRandNonceTran
 - RequestSendFundTran
 - ResponseSendFundTran
 - FailedSendFundTran
@@ -101,18 +100,6 @@ the friendship.
 
 When a new Funder Token Channel is created, its state is RequestsDisabled by
 default.
-
-EncContent
-
-- senderEphemeralPublicKey  [32 bytes]
-- keyDerivationNonce        [32 bytes]
-- destCommPublicKeyHash     [8 bytes]
-- Signature{key=senderPublicKey}(
-    senderEphemeralPublicKey ||
-    keyDerivationNonce ||
-    destCommPublicKeyHash)  [64 bytes]
-- encryptedContent: Encrypt{key=derivedSymmetricKey, nonce=random}(
-    recipientTimestamp, senderTimestamp, senderCommPublicKey, messageContent)
 
 
 **RequestSendFundTran**
