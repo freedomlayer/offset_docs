@@ -303,8 +303,8 @@ accept the old price for a while?
 
 ## Information collection by indexers
 
-Information about the network topology may be collected using the two protocol
-messages:
+Information about the network topology may be collected using the following
+protocol messages:
 
 
 **RequestNodeNeighborsInfo** (Indexer -> Node::Networker)
