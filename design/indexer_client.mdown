@@ -72,50 +72,6 @@ with neighbors and friends:
 - A recent communication public key for communication with the Funder.
 
 
-## Notification about structure change
-
-The IndexerClient gets his updated information about current relations with
-neighbors and friends from the Networker and the Funder, through "notify
-structure change" messages.
-
-The Networker sends the IndexerClient updates of the following format:
-
-
-NotifyStructureChangeNeighbors:
-
-- one of:
-    - NeighborAdded(PublicKey),
-    - NeighborRemoved(PublicKey),
-    - TimestampUpdated(RandValue),
-    - CommPublicKeyUpdated(PublicKey),
-
-This message informs the IndexerClient about the a new neighbor that just got
-online, or about a neighbor that got offline. It can also inform about a new
-Networker timestamp or a newly issued Networker communication public key.
-
-The Funder sends the IndexerClient updates of the following format:
-
-FriendCapacity
-
-- send [8 bytes]
-- recv [8 bytes]
-
-NotifyStructureChangeFriends
-
-- one of:
-    - FriendUpdated
-        - public_key
-        - capacity: FriendCapacity
-    - FriendRemoved(PublicKey),
-    - TimestampUpdated(RandValue),
-    - CommPublicKeyUpdated(PublicKey),
-
-This message informs the IndexerClient about the a friend that just got online,
-a change to a friend's capacity for sending or receiving credits, or about a
-friend that got offline. It can also inform about a new Funder timestamp or
-a newly issued Funder communication public key.
-
-
 ## Interface with PluginManager
 
 The IndexerClient can be configured through the PluginManager component, using
@@ -183,8 +139,6 @@ ResponseNeighborsRoute  [IndexerClient -> Funder]
 - routes (List):
     - neighborsRoute (List):
         - neighborPublicKey     [32 bytes]
-- destCommPublicKey             [32 bytes]
-- destRecentTimestamp           [16 bytes]
 
 
 The request message RequestNeighborsRoute is a request for neighbor routes (in
