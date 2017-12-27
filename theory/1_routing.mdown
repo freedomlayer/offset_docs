@@ -300,29 +300,44 @@ therefore only this type of destination port is supported.
 TODO: How to deal with changes of requestPrice? Will the Indexer node still
 accept the old price for a while? 
 
+
 ## Information collection by indexers
 
 Information about the network topology may be collected using the two protocol
 messages:
 
-**RequestIndexerInfo** (Indexer -> Node)
+**RequestNodeCommMeans** (Indexer -> Node::Networker)
+(Unencrypted request)
+
+- (empty)
+
+**ResponseNodeCommMeans** (Node::Networker -> Indexer)
+(Unencrypted response)
+
+- commPublicKey
+- recentTimestamp
+
+
+**RequestNodeNeighborsInfo** (Indexer -> Node::Networker)
 
 - (empty)
 
 
-**ResponseIndexerInfo** (Node -> Indexer)
+**ResponseNodeNeighborsInfo** (Node::Networker -> Indexer)
 
 - connectedNeighborsList
-- neighborsCommPublicKey
-- neighborsRecentTimestamp
+
+
+**RequestNodeFriendsInfo** (Indexer -> Node::Funder)
+
+- (Empty)
+
+
+**ResponseNodeFriendsInfo** (Node::Funder -> Indexer)
+
 - connectedFriendsList (with available capacities)
 
 
-An indexer node can send a message to any node, requesting local information.
-The node that responds with information about currently connected neighbors,
-his communication public key for neighbors, the currently connected friends
-(And their current capacity for pushing funds), and a communication public key
-for friends.
 
 Note that the indexer I sending the RequestIndexerInfo message does not need to
 identify himself against the receiving node A. The indexer I may belong to an
@@ -330,7 +345,7 @@ indexing provider that A is not associated with. The message RequestIndexerInfo
 can also be sent by nodes that are not indexers (TODO: Privacy implications of
 this?)
 
-Nodes are incentivized to respond to RequestIndexerInfo messages. Those
+Nodes are incentivized to respond to RequestNodeXYZ messages. Those
 messages are sent over the communication channel (between neighbors) and they
 contain a promise for credit. However, there is no guarantee that the responses
 to those messages contain true information. (TODO: What are the implications of
