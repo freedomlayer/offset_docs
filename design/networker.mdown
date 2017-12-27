@@ -410,6 +410,13 @@ to top up a Token Channel, however, the balance has changed until the request
 to send funds to the remote node has completed.
 
 
+RequestContent
+
+- contentType (CommMeans, EncContent)
+- data
+
+CommMeans is an empty message.
+
 EncContent
 
 - senderEphemeralPublicKey  [32 bytes]
@@ -426,7 +433,7 @@ EncContent
 
 - requestId                     [16 bytes]
 - nodeIdPath
-- requestContent: EncContent
+- requestContent: RequestContent
 - maxResponseLength             [4 bytes]
 - processingFeeProposal         [8 bytes]
 - halfCreditsPerByteProposal    [4 bytes]
