@@ -130,6 +130,7 @@ TODO
 
 - indexingProviderId (blob 16 bytes, Primary key)
 - chainLink (blob)
+- lastRoutes (blob)
 
 TODO: Should we split the chain link into its components?
 
@@ -152,5 +153,12 @@ TODO: Should we split the chain link into its components?
 
 - List:
     - indexingProviderId [16 bytes]
+    - lastRoutes
     - chainLink
+
+
+**StoreRoute** [IndexerClient -> Database]
+
+- indexingProviderId [16 bytes]
+- route
 
