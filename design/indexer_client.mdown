@@ -189,3 +189,7 @@ route requests.
 
 See 1_routing.mdown.
 
+
+## Interface with database
+
+See design/database.mdown.
