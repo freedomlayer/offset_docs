@@ -38,7 +38,7 @@ This path will probably of a form similar to: ..../db_{public_key}.db
 
 - neighborTokenChannel  (NeighborTokenChannel primary key)
 - requestId             (primary key)
-- nodeIdPath            (blob)
+- route                 (blob)
 - requestContentHash = Sha512/256(requestContent)  [32 bytes]
 - maxResponseLength             [4 bytes]
 - processingFeeProposal         [8 bytes]
@@ -72,7 +72,7 @@ TODO:
 PendingLocalRequest
 
 - requestId                     [16 bytes]
-- nodeIdPath
+- route
 - requestContentHash = Sha512/256(requestContent)  [32 bytes]
 - maxResponseLength             [4 bytes]
 - processingFeeProposal         [8 bytes]
