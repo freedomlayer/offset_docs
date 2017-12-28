@@ -358,8 +358,6 @@ The following messages are used for issuing such requests:
 
 - routes: List of:
     - List(PublicKey))
-- destinationCommPublicKey
-- destinationRecentTimestamp
 
 
 **RequestFriendsRoute** (Node -> Indexer)
