@@ -6,9 +6,6 @@
 The CSwitch requires persistency to make sure the mutual credit management
 between neighbors and friends remain consistent, despite possible failures.
 
-The two main components that require persistency for this purpose are the
-Networker and the Funder.
-
 
 ## Initialization
 
