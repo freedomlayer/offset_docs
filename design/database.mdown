@@ -137,18 +137,18 @@ TODO: Should we split the chain link into its components?
 ## Interface with the IndexerClient
 
 
-**StoreIndexingProvider**
+**StoreIndexingProvider** [IndexerClient -> Database]
 
 - indexingProviderId    [16 bytes]
 - chainLink
 
 
-**RequestLoadIndexingProviders**
+**RequestLoadIndexingProviders** [IndexerClient -> Database]
 
 - (empty)
 
 
-**ResponseLoadIndexingProviders**
+**ResponseLoadIndexingProviders** [Database -> IndexerClient]
 
 - List:
     - indexingProviderId [16 bytes]
