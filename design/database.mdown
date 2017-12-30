@@ -42,6 +42,7 @@ This path will probably of a form similar to: ..../db_{public_key}.db
 - neighborTokenChannel  (NeighborTokenChannel primary key)
 - requestId             (primary key)
 - route                 (blob)
+- requestType           (CommMeans / Encrypted)
 - requestContentHash = Sha512/256(requestContent)  [32 bytes]
 - maxResponseLength             [4 bytes]
 - processingFeeProposal         [8 bytes]
