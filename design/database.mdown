@@ -15,10 +15,22 @@ This path will probably of a form similar to: ..../db_{public_key}.db
 
 ## Neighbors Token Channel Data model
 
+**Neighbors** table
+
+- neighborPublicKey         (blob, primary key)
+- remoteMaxDebt             [8 bytes]
+- maxChannels               [8 bytes]
+- channelCapacity           [8 bytes]
+- status (Enabled/Disabled)
+
+Removal of a Neighbor entry should cause removal of the relevant
+NeighbotTokenChannels entries. TODO: Can this be done in sqlite?
+
+
 **NeighborTokenChannels** table
 
 - primary key pair
-    - neighborPublicKey (blob?)
+    - neighborPublicKey     (foreign key to Neighbors)
     - tokenIndex            [2 bytes?]
 
 - moveTokenType (incoming / outoing)
@@ -35,6 +47,11 @@ This path will probably of a form similar to: ..../db_{public_key}.db
 - localFundsRandNonce       [32 bytes]  (Can be null)
 - remoteFundsRandNonce      [32 bytes]  (Can be null)
 
+Removal of a NeighborTokenChannels entry should cause removal of the relevant
+NeighborLocalRequests entries. TODO: Can this be done in sqlite?
+
+TODO: Is it possible to use a foreign key as part of a primary key? (See
+primary key pair of NEighborTokenChannels) Is there a simpler way to do this?
 
 
 **NeighborLocalRequests** table
@@ -57,6 +74,9 @@ TODO:
 
 
 ## Interface with the Networker
+
+TODO: Add interface to manage the Neighbors table.
+
 
 **StoreInNeighborToken** [Networker -> Database]
 
