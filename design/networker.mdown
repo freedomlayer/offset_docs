@@ -434,7 +434,7 @@ EncContent
 **RequestSendMessageTran**
 
 - requestId                     [16 bytes]
-- nodeIdPath
+- route
 - requestContent: RequestContent
 - maxResponseLength             [4 bytes]
 - processingFeeProposal         [8 bytes]
@@ -446,7 +446,7 @@ neighbor, requesting to pass a message to a remote node on the CSwitch network.
 requestId is the identification number of request, generated randomly by
 the initiator of the request.
 
-nodeIdPath is a path of nodes. Each node is stored as
+route is a path of nodes. Each node is stored as
 `sha512(nodePublicKey)[0:8]`, the first 8 bytes of the hash the node's public
 key. This makes the representation of nodes shorter on the path of nodes, while
 still making it very unlikely to have a collision between nodes' representations.
@@ -470,7 +470,7 @@ key).
 A signature over the fields: {senderEphemeralPublicKey, keyDerivationNonce,
 destCommPublicKeyHash} using the senderPublicKey is also supplied. This
 signature proves to the receiver the identity of the sender of the message.
-Note that senderPublicKey is actually the first public key at the nodeIdPath
+Note that senderPublicKey is actually the first public key at the route
 list of public keys.
 
 The first part of EncContent, from senderEphemeralPublicKey to the Signature
@@ -497,7 +497,7 @@ destination node (For example: Having to calculate something).
 
 halfCreditsPerByteProposal is half the amount of credits proposed for sending
 one byte of this request. All the bytes of the request are counted (including
-the requestId field, the nodeIdPath field etc).
+the requestId field, the route field etc).
 
 In case of a failure on delivering the request, only half the amount of credits
 proposed will be payed to the intermediate nodes. This is why the field name is
@@ -516,7 +516,7 @@ paymentOnSuccess(responseLength) := (length(request) + responseLength) *
 
 to be the payment received for a successful transaction (This payment happens
 when the transaction is completed: when a ResponseSendMessage is sent).
-amountOfNodesToDest is the amount of nodes on nodeIdPath from A to the
+amountOfNodesToDest is the amount of nodes on route from A to the
 destination node. If A is the destination node, amountOfNodesToDest = 1
 
 Note that destNode is incentivized to generate as small as possible response
@@ -556,7 +556,7 @@ remotePendingDebt by the same amount.
 - Signature{key=recipientKey}(
     "MESSAGE_SUCCESS" ||
     requestId ||
-    sha512/256(nodeIdPath) ||
+    sha512/256(route) ||
     sha512/256(requestContent) ||
     maxResponseLength ||
     processingFeeProposal ||
@@ -600,7 +600,7 @@ inconsistency occurs.
 - Signature{key=reportingNodePublicKey}(
     "MESSAGE_FAILURE" ||
     requestId ||
-    sha512/256(nodeIdPath) ||
+    sha512/256(route) ||
     sha512/256(requestContent) ||
     maxResponseLength ||
     processingFeeProposal ||
@@ -609,7 +609,7 @@ inconsistency occurs.
 
 requestId is the requestId of the original request. reportingNodePublicKey is
 the public key of the node who initiated the FailedSendMessage. This node
-should be one of the nodes on the nodeIdPath.
+should be one of the nodes on the route.
 
 We define:
 
@@ -619,7 +619,7 @@ paymentOnFailure := length(request) * halfCreditsPerBytesProposal *
 ```
 
 Where amountOfNodesToReportingNode is the amount of nodes from A to the
-reporting Node in nodeIdPath. If A is the reporting node,
+reporting Node in route. If A is the reporting node,
 amountOfNodesToReportingNode = 1.
 
 
@@ -833,7 +833,7 @@ The following interface is used for sending messages to a remote node:
 **RequestSendMessage** (User -> Networker)
 
 - requestId                     [16 bytes]
-- nodeIdPath
+- route
 - requestContent 
 - maxResponseLength             [4 bytes]
 - processingFeeProposal         [8 bytes]
@@ -865,7 +865,7 @@ The following interface is used for receiving messages from remote nodes:
 **RequestReceived** (Networker -> User)
 
 - requestId
-- nodeIdPath
+- route
 - requestContent 
 - maxResponseLength             [4 bytes]
 - processingFeeProposal         [8 bytes]
