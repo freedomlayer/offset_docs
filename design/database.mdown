@@ -158,6 +158,7 @@ TODO
 - indexingProviderId (blob 16 bytes, Primary key)
 - chainLink (blob)
 - lastRoutes (blob)
+- status (Enabled/Disabled)
 
 TODO: Should we split the chain link into its components?
 
@@ -169,6 +170,7 @@ TODO: Should we split the chain link into its components?
 
 - indexingProviderId    [16 bytes]
 - chainLink
+- status (Enabled/Disabled)
 
 
 **RequestLoadIndexingProviders** [IndexerClient -> Database]
