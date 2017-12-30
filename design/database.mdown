@@ -32,6 +32,9 @@ This path will probably of a form similar to: ..../db_{public_key}.db
 - localPendingDebt          [8 bytes]
 - balance                   [8 bytes]
 
+- localFundsRandNonce       [32 bytes]  (Can be null)
+- remoteFundsRandNonce      [32 bytes]  (Can be null)
+
 
 
 **NeighborLocalRequests** table
@@ -52,7 +55,6 @@ TODO:
     - r2d2?
 
 
-
 ## Interface with the Networker
 
 **StoreInNeighborToken** [Networker -> Database]
@@ -65,6 +67,8 @@ TODO:
 - remotePendingDebt             [8 bytes]
 - localPendingDebt              [8 bytes]
 - balance                       [8 bytes]
+- localFundsRandNonce           [32 bytes]  (Can be null)
+- remoteFundsRandNonce          [32 bytes]  (Can be null)
 - closedLocalRequests (List)
     - requestId                 [16 bytes]
 
@@ -90,6 +94,8 @@ PendingLocalRequest
 - remotePendingDebt             [8 bytes]
 - localPendingDebt              [8 bytes]
 - balance                       [8 bytes]
+- localFundsRandNonce           [32 bytes]  (Can be null)
+- remoteFundsRandNonce          [32 bytes]  (Can be null)
 - openedLocalRequests (List of PendingLocalRequest)
 
 

@@ -171,6 +171,8 @@ A Networker Token Channel always keeps in long term memory the following:
 - remotePendingDebt [8 bytes]
 - localPendingDebt [8 bytes]
 - balance [8 bytes]
+- localFundsRandNonce [32 bytes] (Possibly empty)
+- remoteFundsRandNonce [32 bytes] (Possibly empty)
 - localPendingRequests (A list of requests)
 
 <!--
@@ -350,7 +352,7 @@ The dual localMaxDebt can only be set by the remote party.
 
 **FundsRandNonceTran**
 
-- fundsRandNonce [16 bytes]
+- fundsRandNonce [32 bytes]
 
 
 Send to the remote party of the token channel a random funds nonce. 
