@@ -286,10 +286,10 @@ token hashes. In addition, all the transactions are verified.
 
 If the token hashes or any transaction are invalid, an inconsistency is
 reported to the remote party using a NeighborInconsistencyError, and to the
-PluginManager using an InvalidNeighborMoveToken message.
+AppManager using an InvalidNeighborMoveToken message.
 
 Whenever a NeighborInconsistencyError message is received, the Networker
-passes the information about the inconsistency to the PluginManager. In
+passes the information about the inconsistency to the AppManager. In
 addition, the token channel is marked as inconsistent in long term memory. It
 will not be able to receive any further messages, or be used to send messages.
 
@@ -315,7 +315,7 @@ Note that an inconsistency may occur again if both sides send a
 ResetChannelTran transaction at about the same time. 
 
 
-A channel can be reset manually from the PluginManager using the message:
+A channel can be reset manually from the AppManager using the message:
 
 ResetNeighborChannel
 
@@ -779,7 +779,7 @@ parameter.
 ## Basic Networker configuration
 
 
-The networker can be configured through the PluginManager component using the
+The networker can be configured through the AppManager component using the
 following messages:
 
 
@@ -815,12 +815,12 @@ channelCapacity of the token channels.
 
 The Networker's configuration does not persist (It is kept on RAM). Therefore
 the Networker has to be configured every time it is started through the
-PluginManager component.
+AppManager component.
 
 
 ## Service provided by the Networker
 
-The IndexerClient, Pather, Funder and PluginManager components rely on the
+The IndexerClient, Pather, Funder and AppManager components rely on the
 Networker for networking service. That is: For sending and receiving messages
 to and from remote nodes.
 
@@ -833,7 +833,7 @@ See `src/inner_messages.rs` (Networker interface).
 ## Multiplexing Networker messages
 
 Messages received by the Networker might need to be forwarded to any of the
-components: IndexerClient, Funder, PluginManager. 
+components: IndexerClient, Funder, AppManager. 
 
 The first byte of a request received by the Networker allows the Networker to
 decide which component should receive a message. This byte is called the
@@ -846,7 +846,7 @@ following muxByte values:
 
 - 0: IndexerClient
 - 1: Funder
-- 2: PluginManager
+- 2: AppManager
 
 For example, a message with requestContent beginning with the byte 0x1 will be
 forwarded to the Funder. The funder will receive the requestContent stripped
