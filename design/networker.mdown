@@ -1,6 +1,6 @@
 # Networker design
 
-19.12.2017
+30.12.2017
 Required prior reading: 0_credit_clearing.mdown
 
 
@@ -452,8 +452,12 @@ key. This makes the representation of nodes shorter on the path of nodes, while
 still making it very unlikely to have a collision between nodes' representations.
 The last node on the path is the destination node.
 
+TODO: Should we use this optimization?
+
 requestContent contains an encrypted message to be sent to the remote node.
-It is of type EncContent. 
+It is of one of two types: 
+- CommMeans: A request for communication means (Empty)
+- EncMessage: An encrypted message.
 
 EncContent contains the senderEphemeralPublicKey and keyDerivationNonce. These are used
 for static diffie-hellman between the originator of the request and the
@@ -549,10 +553,18 @@ Upon receipt of the RequestSendMessageTran message, B's Networker increases
 remotePendingDebt by the same amount.
 
 
+struct ResponseNodeCommMeans {
+        commPublicKey @0: CustomUInt256;
+        # diffie-hellman Public key used for communication.
+        recentTimestamp @1: CustomUInt128;
+        # A recent timestamp to be used for communication.
+}
+
+
 **ResponseSendMessageTran**
 
 - requestId
-- responseContent: EncContent
+- responseContent: EncContent/ResponseNodeCommMeans
 - Signature{key=recipientKey}(
     "MESSAGE_SUCCESS" ||
     requestId ||
@@ -570,9 +582,10 @@ node of a request.
 requestId is the requestId of the original received request.
 
 responseContent is an encrypted message sent back to the originator of the
-request. 
+request, or a plain message containing communication means
+(ResponseNodeCommMeans).
 
-The total length of ResponseSendMessage must not exceed maxResponseLength as
+The total length of ResponseSendMessageTran must not exceed maxResponseLength as
 specified in the request.
 
 
