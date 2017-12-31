@@ -101,7 +101,8 @@ FirstMoveTokenHigher {
 
 
 
-The following algorithm is used for a party A in a Token Channel:
+The following algorithm is used for a party A in a Token Channel.
+Here MA is the last MoveToken message sent or received by A.
 
 - Upon startup:
     - If MA is empty (Initialization of Token Channel):
@@ -133,7 +134,7 @@ The following algorithm is used for a party A in a Token Channel:
     - Else:
         - Report Not Ready
 
-- Upon data received:
+- Upon MoveToken MT message received:
     - If MA is an incoming message:
         - If MT == MA: 
             - Discard message
