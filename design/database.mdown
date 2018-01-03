@@ -68,7 +68,31 @@ primary key pair of NeighborTokenChannels). Is there a simpler way to do this?
 
 ## Interface with the Networker
 
-TODO: Add interface to manage the Neighbors table.
+
+**StoreNeighbor** [Networker -> Database]
+
+- neighborPublicKey         [32 bytes]
+- wantedRemoteMaxDebt       [8 bytes]
+- wantedMaxChannels         [4 bytes]
+- status                    (Enabled/Disabled)
+
+**RemoveNeighbor** [Networker -> Database]
+
+- neighborPublicKey         [32 bytes]
+
+
+**RequestLoadNeighbors** [Networker -> Database]
+
+- (empty)
+
+
+**ResponseLoadNeighbors** [Database -> Networker]
+
+- List
+    - neighborPublicKey         [32 bytes]
+    - wantedRemoteMaxDebt       [8 bytes]
+    - wantedMaxChannels         [4 bytes]
+    - status                    (Enabled/Disabled)
 
 
 **StoreInNeighborToken** [Networker -> Database]
