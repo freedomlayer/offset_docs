@@ -172,11 +172,137 @@ PendingLocalNeighborRequest
 
 ## Friends Token Channel Data model
 
-TODO
+**Friends** table
+
+- friendPublicKey           (blob, primary key)
+- wantedRemoteMaxDebt       [16 bytes]
+- status                    (Enabled/Disabled)
+
+**FriendTokenChannels**
+
+- friendPublicKey           (blob, link to Friends, primary key)
+- moveTokenType             (incoming / outoing)
+- moveTokenTransactions     (blob?)
+- moveTokenOldToken         [32 bytes]
+- moveTokenRandNonce        [32 bytes]
+- remoteMaxDebt             [8 bytes]
+- localMaxDebt              [8 bytes]
+- remotePendingDebt         [8 bytes]
+- localPendingDebt          [8 bytes]
+- balance                   [8 bytes]
+- localState                (RequestsEnabled/RequestsDisabled)
+- remoteState               (RequestsEnabled/RequestsDisabled)
+
+
+Removal of a Friends entry should cause removal of the relevant
+FriendLocalRequests entries. TODO: Can this be done in sqlite?
+
+
+**FriendLocalRequests** table
+
+- friendPublicKey               (link to Friends)
+- requestId                     (primary key)
+- route                         (blob)
+- mediatorPaymentProposal       [8 bytes]
+- invoiceId                     [32 bytes]
+- destinationPayment            [16 bytes]
+
 
 ## Interface with the Funder
 
-TODO
+**StoreFriend** [Funder -> Database]
+
+- friendPublicKey           [32 bytes]
+- wantedRemoteMaxDebt       [16 bytes]
+- status                    (Enabled/Disabled)
+
+
+**RemoveFriend** [Funder -> Database]
+
+- friendPublicKey           [32 bytes]
+
+
+**RequestLoadFriends** [Funder -> Database]
+
+- (empty)
+
+
+**ResponseLoadFriends** [Database -> Funder]
+
+- List
+    - friendPublicKey           [32 bytes]
+    - wantedRemoteMaxDebt       [16 bytes]
+    - status                    (Enabled/Disabled)
+
+
+**StoreInFriendToken** [Funder -> Database]
+
+- friendPublicKey           [32 bytes]
+- moveTokenMessage
+    - moveTokenTransactions     (blob?)
+    - moveTokenOldToken         [32 bytes]
+    - moveTokenRandNonce        [32 bytes]
+- remoteMaxDebt                 [8 bytes]
+- localMaxDebt                  [8 bytes]
+- remotePendingDebt             [8 bytes]
+- localPendingDebt              [8 bytes]
+- balance                       [8 bytes]
+- localState                    (RequestsEnabled/RequestsDisabled)
+- remoteState                   (RequestsEnabled/RequestsDisabled)
+- closedLocalRequests (List)
+    - requestId                 [16 bytes]
+
+
+PendingLocalFriendRequest
+
+- requestId                     [16 bytes]
+- route
+- mediatorPaymentProposal       [8 bytes]
+- invoiceId                     [32 bytes]
+- destinationPayment            [16 bytes]
+
+
+**StoreOutFriendToken** [Funder -> Database]
+
+- friendPublicKey           [32 bytes]
+- moveTokenMessage
+    - moveTokenTransactions     (blob?)
+    - moveTokenOldToken         [32 bytes]
+    - moveTokenRandNonce        [32 bytes]
+- remoteMaxDebt                 [8 bytes]
+- localMaxDebt                  [8 bytes]
+- remotePendingDebt             [8 bytes]
+- localPendingDebt              [8 bytes]
+- balance                       [8 bytes]
+- localState                    (RequestsEnabled/RequestsDisabled)
+- remoteState                   (RequestsEnabled/RequestsDisabled)
+- openedLocalRequests (List of PendingLocalFriendRequest)
+
+
+**RequestLoadFriendToken** [Funder -> Database]
+
+- friendPublicKey           [32 bytes]
+
+
+**ResponseLoadFriendToken** [Database -> Funder]
+
+- friendPublicKey           [32 bytes]
+- moveTokenMessageType
+    - incoming
+    - outgoing
+- moveTokenMessage
+    - moveTokenTransactions     (blob?)
+    - moveTokenOldToken         [32 bytes]
+    - moveTokenRandNonce        [32 bytes]
+- remoteMaxDebt                 [8 bytes]
+- localMaxDebt                  [8 bytes]
+- remotePendingDebt             [8 bytes]
+- localPendingDebt              [8 bytes]
+- balance                       [8 bytes]
+- localState                    (RequestsEnabled/RequestsDisabled)
+- remoteState                   (RequestsEnabled/RequestsDisabled)
+- pendingLocalRequests (List of PendingLocalFriendRequest)
+
 
 
 ## Indexer client data model
