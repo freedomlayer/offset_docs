@@ -66,12 +66,6 @@ primary key pair of NEighborTokenChannels) Is there a simpler way to do this?
 - halfCreditsPerByteProposal    [4 bytes]
 
 
-TODO: 
-
-- Which rust library to use with sqlite?
-    - rusqlite
-    - r2d2?
-
 
 ## Interface with the Networker
 
