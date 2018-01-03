@@ -105,7 +105,7 @@ default.
 **RequestSendFundTran**
 
 - requestId                     [16 bytes]
-- nodeIdPath
+- route
 - mediatorPaymentProposal       [8 bytes]
 - invoiceId                     [32 bytes]
 - destinationPayment            [16 bytes]
@@ -121,7 +121,7 @@ TODO: Add explanation about rest of RequestSendFundTran fields
 - randNonce                     [32 bytes]
 - Signature{key=recipientKey}(
     "FUND_SUCCESS" ||
-    sha512/256(requestId || sha512/256(nodeIdPath) || mediatorPaymentProposal) ||
+    sha512/256(requestId || sha512/256(route) || mediatorPaymentProposal) ||
     invoiceId ||
     destinationPayment ||
     randNonce)                  [64 bytes]
@@ -138,14 +138,14 @@ Receipt
 - randNonce             [32 bytes]
 - Signature{key=recipientKey}(
     "FUND_SUCCESS" ||
-    sha512/256(requestId || sha512/256(nodeIdPath) || mediatorPaymentProposal) ||
+    sha512/256(requestId || sha512/256(route) || mediatorPaymentProposal) ||
     invoiceId ||
     destinationPayment ||
     randNonce)   [64 bytes]
 
 
 Where responseHash = 
-    sha512/256(requestId || sha512/256(nodeIdPath) || mediatorPaymentProposal)
+    sha512/256(requestId || sha512/256(route) || mediatorPaymentProposal)
 
 
 TODO: Add explanation about fields of ResponseSendFundTran
@@ -161,7 +161,7 @@ RequestSendFundTran/ResponseSendFunTran process?
 - randNonce                 [32 bytes]
 - Signature{key=recipientKey}(
     "FUND_FAILURE" ||
-    sha512/256(requestId || sha512/256(nodeIdPath) || mediatorPaymentProposal) ||
+    sha512/256(requestId || sha512/256(route) || mediatorPaymentProposal) ||
     invoiceId ||
     destinationPayment ||
     randNonce)              [64 bytes]
