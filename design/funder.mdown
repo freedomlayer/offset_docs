@@ -141,7 +141,7 @@ Receipt
     sha512/256(requestId || sha512/256(route) || mediatorPaymentProposal) ||
     invoiceId ||
     destinationPayment ||
-    randNonce)   [64 bytes]
+    randNonce)          [64 bytes]
 
 
 Where responseHash = 
