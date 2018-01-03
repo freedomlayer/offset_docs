@@ -98,8 +98,11 @@ primary key pair of NeighborTokenChannels). Is there a simpler way to do this?
 **StoreInNeighborToken** [Networker -> Database]
 
 - neighborPublicKey             [32 bytes]
-- tokenChannelIndex             [1 byte]
+- tokenChannelIndex             [4 byte]
 - moveTokenMessage (incoming)
+    - moveTokenTransactions     (blob?)
+    - moveTokenOldToken         [32 bytes]
+    - moveTokenRandNonce        [32 bytes]
 - remoteMaxDebt                 [8 bytes]
 - localMaxDebt                  [8 bytes]
 - remotePendingDebt             [8 bytes]
@@ -111,7 +114,7 @@ primary key pair of NeighborTokenChannels). Is there a simpler way to do this?
     - requestId                 [16 bytes]
 
 
-PendingLocalRequest
+PendingLocalNeighborRequest
 
 - requestId                     [16 bytes]
 - route
@@ -125,8 +128,11 @@ PendingLocalRequest
 **StoreOutNeighborToken** [Networker -> Database]
 
 - neighborPublicKey             [32 bytes]
-- tokenChannelIndex             [1 byte]
+- tokenChannelIndex             [4 byte]
 - moveTokenMessage (outgoing)
+    - moveTokenTransactions     (blob?)
+    - moveTokenOldToken         [32 bytes]
+    - moveTokenRandNonce        [32 bytes]
 - remoteMaxDebt                 [8 bytes]
 - localMaxDebt                  [8 bytes]
 - remotePendingDebt             [8 bytes]
@@ -134,28 +140,33 @@ PendingLocalRequest
 - balance                       [8 bytes]
 - localFundsRandNonce           [32 bytes]  (Can be null)
 - remoteFundsRandNonce          [32 bytes]  (Can be null)
-- openedLocalRequests (List of PendingLocalRequest)
+- openedLocalRequests (List of PendingLocalNeighborRequest)
 
 
 **RequestLoadNeighborToken** [Networker -> Database]
 
 - neighborPublicKey             [32 bytes]
-- tokenChannelIndex             [1 byte]
+- tokenChannelIndex             [4 byte]
 
 
 **ResponseLoadNeighborToken** [Database -> Networker]
 
 - neighborPublicKey             [32 bytes]
-- tokenChannelIndex             [1 byte]
+- tokenChannelIndex             [4 byte]
 - moveTokenMessageType
     - incoming
     - outgoing
 - moveTokenMessage (incoming/outgoing)
+    - moveTokenTransactions     (blob?)
+    - moveTokenOldToken         [32 bytes]
+    - moveTokenRandNonce        [32 bytes]
 - remoteMaxDebt                 [8 bytes]
 - localMaxDebt                  [8 bytes]
 - remotePendingDebt             [8 bytes]
 - localPendingDebt              [8 bytes]
 - balance                       [8 bytes]
+- localFundsRandNonce           [32 bytes]  (Can be null)
+- remoteFundsRandNonce          [32 bytes]  (Can be null)
 - pendingLocalRequests (List of PendingLocalRequest)
 
 
