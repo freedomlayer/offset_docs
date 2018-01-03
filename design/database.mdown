@@ -24,7 +24,7 @@ This path will probably of a form similar to: ..../db_{public_key}.db
 - status (Enabled/Disabled)
 
 Removal of a Neighbor entry should cause removal of the relevant
-NeighbotTokenChannels entries. TODO: Can this be done in sqlite?
+NeighborTokenChannels entries. TODO: Can this be done in sqlite?
 
 
 **NeighborTokenChannels** table
@@ -51,7 +51,7 @@ Removal of a NeighborTokenChannels entry should cause removal of the relevant
 NeighborLocalRequests entries. TODO: Can this be done in sqlite?
 
 TODO: Is it possible to use a foreign key as part of a primary key? (See
-primary key pair of NEighborTokenChannels) Is there a simpler way to do this?
+primary key pair of NeighborTokenChannels). Is there a simpler way to do this?
 
 
 **NeighborLocalRequests** table
