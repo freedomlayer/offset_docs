@@ -343,6 +343,7 @@ TODO: Should we split the chain link into its components?
     - indexingProviderId [16 bytes]
     - lastRoutes
     - chainLink
+    - status
 
 
 **StoreRoute** [IndexerClient -> Database]
