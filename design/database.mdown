@@ -327,6 +327,11 @@ TODO: Should we split the chain link into its components?
 - status (Enabled/Disabled)
 
 
+**RemoveIndexingProvider** [IndexerClient -> Database]
+
+- indexingProviderId    [16 bytes]
+
+
 **RequestLoadIndexingProviders** [IndexerClient -> Database]
 
 - (empty)
