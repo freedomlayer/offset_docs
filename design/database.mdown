@@ -18,10 +18,9 @@ This path will probably of a form similar to: ..../db_{public_key}.db
 **Neighbors** table
 
 - neighborPublicKey         (blob, primary key)
-- remoteMaxDebt             [8 bytes]
-- maxChannels               [8 bytes]
-- channelCapacity           [8 bytes]
-- status (Enabled/Disabled)
+- wantedRemoteMaxDebt       [8 bytes]
+- wantedMaxChannels         [4 bytes]
+- status                    (Enabled/Disabled)
 
 Removal of a Neighbor entry should cause removal of the relevant
 NeighborTokenChannels entries. TODO: Can this be done in sqlite?
