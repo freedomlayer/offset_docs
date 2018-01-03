@@ -16,11 +16,11 @@ TODO
 A Funder Token Channel always keeps in long term memory the following:
 
 - lastFriendMoveToken (incoming or outgoing)
-- remoteMaxDebt [16 bytes]
-- localMaxDebt [16 bytes]
-- remotePendingDebt [16 bytes]
-- localPendingDebt [16 bytes]
-- balance [16 bytes]
+- remoteMaxDebt                 [16 bytes]
+- localMaxDebt                  [16 bytes]
+- remotePendingDebt             [16 bytes]
+- localPendingDebt              [16 bytes]
+- balance                       [16 bytes]
 - localPendingRequests (A list of requests)
 - localState       (RequestsEnabled/RequestsDisabled)
 - remoteState      (RequestsEnabled/RequestsDisabled)
