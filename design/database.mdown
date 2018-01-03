@@ -30,7 +30,7 @@ NeighborTokenChannels entries. TODO: Can this be done in sqlite?
 
 - primary key pair
     - neighborPublicKey     (foreign key to Neighbors)
-    - tokenIndex            [2 bytes?]
+    - tokenChannelIndex            [4 bytes?]
 
 - moveTokenType (incoming / outoing)
 - moveTokenTransactions     (blob?)
