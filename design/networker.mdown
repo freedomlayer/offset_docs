@@ -439,7 +439,7 @@ EncContent
 - requestContent: RequestContent
 - maxResponseLength             [4 bytes]
 - processingFeeProposal         [8 bytes]
-- creditsPerByteProposal    [4 bytes]
+- creditsPerByteProposal        [4 bytes]
 
 
 RequestSendMessageTran transaction message opens a communication transaction with a
