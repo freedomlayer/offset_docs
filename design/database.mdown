@@ -28,9 +28,10 @@ NeighborTokenChannels entries. TODO: Can this be done in sqlite?
 
 **NeighborTokenChannels** table
 
-- primary key pair
+- primary key               (Automatic incremental id?)
+- unique pair:
     - neighborPublicKey     (foreign key to Neighbors)
-    - tokenChannelIndex            [4 bytes?]
+    - tokenChannelIndex     [4 bytes?]
 
 - moveTokenType (incoming / outoing)
 - moveTokenTransactions     (blob?)
@@ -53,20 +54,20 @@ TODO: Is it possible to use a foreign key as part of a primary key? (See
 primary key pair of NeighborTokenChannels). Is there a simpler way to do this?
 
 
-**NeighborLocalRequests** table
+**NeighborRequests** table
 
-(Requests that were initiated locally)
-
-- neighborTokenChannel  (NeighborTokenChannel primary key)
 - requestId             (primary key)
+- fromNeighborTokenChannel  (link to NeighborTokenChannels, could be None)
+- toNeighborTokenChannel    (link to NeighborTokenChannels, could be None)
 - route                 (blob)
 - requestType           (CommMeans / Encrypted)
 - requestContentHash = Sha512/256(requestContent)  [32 bytes]
 - maxResponseLength             [4 bytes]
 - processingFeeProposal         [8 bytes]
-- creditsPerByteProposal    [4 bytes]
+- creditsPerByteProposal        [4 bytes]
 
-
+A row should be automatically deleted if both fromNeighborTokenChannel and
+toNeighborTokenChannel are None. How to do this?
 
 
 ## Interface with the Networker
@@ -115,16 +116,19 @@ primary key pair of NeighborTokenChannels). Is there a simpler way to do this?
 - remoteFundsRandNonce          [32 bytes]  (Can be null)
 - closedLocalRequests (List)
     - requestId                 [16 bytes]
+- openedRemoteRequests (List of PendingNeighborRequest)
 
 
-PendingLocalNeighborRequest
+
+PendingNeighborRequest
 
 - requestId                     [16 bytes]
 - route
+- requestType           (CommMeans / Encrypted)
 - requestContentHash = Sha512/256(requestContent)  [32 bytes]
 - maxResponseLength             [4 bytes]
 - processingFeeProposal         [8 bytes]
-- creditsPerByteProposal    [4 bytes]
+- creditsPerByteProposal        [4 bytes]
 
 
 
@@ -143,7 +147,9 @@ PendingLocalNeighborRequest
 - balance                       [8 bytes]
 - localFundsRandNonce           [32 bytes]  (Can be null)
 - remoteFundsRandNonce          [32 bytes]  (Can be null)
-- openedLocalRequests (List of PendingLocalNeighborRequest)
+- openedLocalRequests (List of PendingNeighborRequest)
+- closedRemoteRequests (List)
+    - requestId
 
 
 **RequestLoadNeighborToken** [Networker -> Database]
@@ -169,7 +175,8 @@ PendingLocalNeighborRequest
 - balance                       [8 bytes]
 - localFundsRandNonce           [32 bytes]  (Can be null)
 - remoteFundsRandNonce          [32 bytes]  (Can be null)
-- pendingLocalRequests (List of PendingLocalRequest)
+- pendingLocalRequests          (List of PendingNeighborRequest)
+- pendingRemoteRequests         (List of PendingNeighborRequest)
 
 
 ## Friends Token Channel Data model
