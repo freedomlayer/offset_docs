@@ -152,7 +152,6 @@ PendingLocalNeighborRequest
 **ResponseLoadNeighborToken** [Database -> Networker]
 
 - neighborPublicKey             [32 bytes]
-- tokenChannelIndex             [4 byte]
 - moveTokenMessageType
     - incoming
     - outgoing
