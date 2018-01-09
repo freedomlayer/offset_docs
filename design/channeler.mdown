@@ -371,8 +371,12 @@ RemoveNeighbor and SetMaxChannels. This configuration is required every time
 CSwitch is restarted, because the Channeler has no long term memory.
 
 The Networker is notified about opened channels by the message ChannelOpened
-from the Channeler. Dually, it is being notified about closed channels by the
-message ChannelClosed from the Channeler.
+from the Channeler. ChannelOpened message should be sent to the Networker right
+after the diffie-hellman exchange in a new TCP Channeler connection. 
+
+Dually, the Networker is being notified about closed channels by the
+message ChannelClosed from the Channeler. ChannelClosed should be sent to the
+Networker right after a Channeler TCP connection was closed.
 
 The Networker can send a message to a remote Networker over a token channel
 by sending SendChannelMessage to the Channeler. A message may be sent only to
@@ -387,7 +391,7 @@ message is on its way from the Channeler to the Networker.
 To be sure a message is sent to the remote side, whenever a ChannelOpened
 message is received at the Networker side, the Networker will attempt to resend
 the last sent message through that Channel. This is related to the Networker's
-logic and will have further explanation there.
+logic and should be discussed in the Networker's documentation.
 
 
 ## Public CSwitch gateway nodes
