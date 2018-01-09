@@ -162,15 +162,16 @@ connections from B.
 
 Once a TCP connection is initiated, both sides send the InitChannel message:
 
-**InitChannel**
-
-- neighborPublicKey [256 bit]
-    (The identity public key of the sender of this message)
-
-- channelRandValue [128 bit]
-    (An initial random value. This will be later used for the key exchange as a nonce.
-    A nonce is required to avoid replay of the signature.)
-
+```capnp
+struct InitChannel {
+        neighborPublicKey @0: CustomUInt256;
+        # The identity public key of the sender of this message.
+        channelRandValue @1: CustomUInt128;
+        # An initial random value.
+        # This will be later used for the key exchange as a nonce.
+        # A nonce is required to avoid replay of the signature.
+}
+```
 
 In this message every node declares his public key, and adds a random value to
 be used with a signature in the next message, Exchange.
@@ -192,20 +193,19 @@ Next, both sides initiate a
 exchange. Every side generates a private, public communication key pair for
 diffie-hellman exchange. Then the Exchange message is sent:
 
-**Exchange**
-
-- commPublicKey [256 bit]
-    (Communication public key (Generated for the new channel)
-    Using diffie-hellman we will use the communication keys to generate a
-    symmetric encryption key for this channel.)
-
-- keySalt [256 bit]
-    (A salt for the generation of a shared symmetric encryption key)
-
-- signature [512 bit]
-    (Signature over (channelRandValue || commPublicKey || keySalt)
-    Signed using neighborPublicKey.)
-
+```capnp
+struct Exchange {
+        commPublicKey @0: CustomUInt256;
+        # Communication public key (Generated for the new channel)
+        # Using diffie-hellman we will use the communication keys to generate a
+        # symmetric encryption key for this channel.
+        keySalt @1: CustomUInt256;
+        # A salt for the generation of a shared symmetric encryption key.
+        signature @2: CustomUInt512;
+        # Signature over (channelRandValue || commPublicKey || keySalt)
+        # Signed using NeighborPublicKey.
+}
+```
 
 
 When a Channeler receives an Exchange message he does the following:
@@ -220,10 +220,7 @@ When a Channeler receives an Exchange message he does the following:
 - Combine his private key with the received commPublicKey and received keySalt,
     to obtain a symmetric key for receiving data.
 
-- If this is the only successful connection between the two sides, notify the
-    Networker using a ChannelOpened message that a channel was opened.
-    The Networker doesn't care about how many TCP connections are between the
-    two hosts. He only wants to know that there exists a way to communicate.
+- Notify the Networker using a ChannelOpened message that a channel was opened.
 
 
 This means that after the exchange, every side should have two symmetric keys:
@@ -238,12 +235,14 @@ exchange was already made, the connection will be closed.
 
 An encrypted message has the following form:
 
-**EncMessage**
-
-- incCounter        [128 bit]
-- randPadding       [Some length between 0 and 32 bytes]
-- messageType       [1 byte]
-- content
+```capnp
+struct EncryptMessage {
+   incCounter  @0: UInt64;
+   randPadding @1: Data;
+   messageType @2: MessageType;
+   content     @3: Data;
+}
+```
 
 The whole message is encrypted.
 
@@ -304,19 +303,16 @@ efficiency is caused when using TCP for the transport of a token channel.
 However, if one wants to transport multiple token channels, using a single TCP
 channel may not be efficient. 
 
-Assume that A communicates with B using two token channels TC1, TC2. Consider the case where A
-sends a message M1 on TC1 and then a message M2 on TC2, but the message M1 is
-lost. If we use a single TCP connection to transport both token channels, the
-delivery of the message M2 will be delayed until the message M1 is
-retransmitted.
+Assume that A communicates with B using two token channels TC1, TC2. Consider
+the case where A sends a message M1 on TC1 and then a message M2 on TC2, but
+the message M1 is lost. If we use a single TCP connection to transport both
+token channels, the delivery of the message M2 will be delayed until the
+message M1 is retransmitted.
 
 If instead we used two TCP connections, one TCP connection to transport the token
 channel TC1 and one TCP connection to transport the token channel TC2, even if
 a message sent over TC1 is lost and retransmitted, messages sent over TC2 will
 not be delayed.
-
-Therefore the channeler should strive to have about the same amount of TCP
-connections as the amount of token channels used in the Networker.
 
 If we had a protocol that operates like UDP but is reliable (Does not promise
 order of messages but allows reliable sending of large messages), we could use
@@ -326,12 +322,72 @@ difficulties with [flow](https://en.wikipedia.org/wiki/Flow_control_(data)) and
 congestion control. Hence we currently use the practical compromise of multiple
 TCP connections to the same host.
 
+## Interface with Networker
 
-To help the Channeler with deciding which TCP connection should be used for
-sending a message, the Networker should specify in every SendChannelMessage
-message to the Channeler a token channel index. The Channeler will use this
-index to pick a TCP connection for sending the message by calculating `index %
-numOfTcpConnections`. Usually `numOfTcpConnections` should equal maxChannels.
+```rust
+// Channeler -> Networker
+pub struct ChannelOpened {
+    pub remote_public_key: PublicKey, // Public key of remote side
+    pub channel_index: u32,             // >> design changed here
+    // Removed locally_initialized      // >> design changed here
+}
+
+// Channeler -> Networker
+pub struct ChannelClosed {
+    pub remote_public_key: PublicKey,
+    pub channel_index: u32,             // >> design changed here
+}
+
+// Channeler -> Networker
+pub struct ChannelMessageReceived {
+    pub remote_public_key: PublicKey,
+    pub channel_index: u32,             // >> design changed here
+    pub message_content: Vec<u8>,
+}
+
+
+// Networker -> Channeler
+pub enum NetworkerToChanneler {
+    SendChannelMessage {
+        neighbor_public_key: PublicKey,
+        channel_index: u32,             // >> design changed here
+        content: Vec<u8>,
+    },
+    AddNeighbor {
+        neighbor_info: ChannelerNeighborInfo,
+    },
+    RemoveNeighbor {
+        neighbor_public_key: PublicKey,
+    },
+    SetMaxChannels {
+        neighbor_public_key: PublicKey,
+        max_channels: u32,
+    },
+}
+```
+
+The Networker configures the Channeler using the messages: AddNeighbor,
+RemoveNeighbor and SetMaxChannels. This configuration is required every time
+CSwitch is restarted, because the Channeler has no long term memory.
+
+The Networker is notified about opened channels by the message ChannelOpened
+from the Channeler. Dually, it is being notified about closed channels by the
+message ChannelClosed from the Channeler.
+
+The Networker can send a message to a remote Networker over a token channel
+by sending SendChannelMessage to the Channeler. A message may be sent only to
+an open channel. The Channeler will do its best effort to send this message
+over the TCP connection, however, it is possible that the message will not
+arrive. 
+
+For example, it is possible that during the sending of SendChannelMessage from
+Networker to Channeler, a channel on Channeler was closed and a ClosedChannel
+message is on its way from the Channeler to the Networker.
+
+To be sure a message is sent to the remote side, whenever a ChannelOpened
+message is received at the Networker side, the Networker will attempt to resend
+the last sent message through that Channel. This is related to the Networker's
+logic and will have further explanation there.
 
 
 ## Public CSwitch gateway nodes
