@@ -99,8 +99,8 @@ primary key pair of NeighborTokenChannels). Is there a simpler way to do this?
 **StoreInNeighborToken** [Networker -> Database]
 
 - neighborPublicKey             [32 bytes]
-- tokenChannelIndex             [4 byte]
 - moveTokenMessage (incoming)
+    - tokenChannelIndex         [4 bytes]
     - moveTokenTransactions     (blob?)
     - moveTokenOldToken         [32 bytes]
     - moveTokenRandNonce        [32 bytes]
@@ -129,8 +129,8 @@ PendingLocalNeighborRequest
 **StoreOutNeighborToken** [Networker -> Database]
 
 - neighborPublicKey             [32 bytes]
-- tokenChannelIndex             [4 byte]
 - moveTokenMessage (outgoing)
+    - tokenChannelIndex         [4 byte]
     - moveTokenTransactions     (blob?)
     - moveTokenOldToken         [32 bytes]
     - moveTokenRandNonce        [32 bytes]
