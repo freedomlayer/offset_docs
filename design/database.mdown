@@ -209,13 +209,17 @@ FriendLocalRequests entries. TODO: Can this be done in sqlite?
 
 **FriendLocalRequests** table
 
-- friendPublicKey               (link to Friends)
 - requestId                     (primary key)
+- friendPublicKey               (link to Friends)
+- fromFriendTokenChannel        (link to FriendTokenChannels, could be None)
+- toFriendTokenChannel          (link to FriendTokenChannels, could be None)
 - route                         (blob)
 - mediatorPaymentProposal       [8 bytes]
 - invoiceId                     [32 bytes]
 - destinationPayment            [16 bytes]
 
+A row should be automatically deleted if both fromFriendTokenChannel and
+toFriendTokenChannel are None. How to do this?
 
 ## Interface with the Funder
 
@@ -260,9 +264,10 @@ FriendLocalRequests entries. TODO: Can this be done in sqlite?
 - remoteState                   (RequestsEnabled/RequestsDisabled)
 - closedLocalRequests (List)
     - requestId                 [16 bytes]
+- openedRemoteRequests (List of PendingFriendRequest)
 
 
-PendingLocalFriendRequest
+PendingFriendRequest
 
 - requestId                     [16 bytes]
 - route
@@ -285,7 +290,9 @@ PendingLocalFriendRequest
 - balance                       [8 bytes]
 - localState                    (RequestsEnabled/RequestsDisabled)
 - remoteState                   (RequestsEnabled/RequestsDisabled)
-- openedLocalRequests (List of PendingLocalFriendRequest)
+- openedLocalRequests (List of PendingFriendRequest)
+- closedRemoteRequests (List)
+    - requestId                 [16 bytes]
 
 
 **RequestLoadFriendToken** [Funder -> Database]
@@ -310,7 +317,8 @@ PendingLocalFriendRequest
 - balance                       [8 bytes]
 - localState                    (RequestsEnabled/RequestsDisabled)
 - remoteState                   (RequestsEnabled/RequestsDisabled)
-- pendingLocalRequests (List of PendingLocalFriendRequest)
+- pendingLocalRequests          (List of PendingFriendRequest)
+- pendingRemoteRequests         (List of PendingFriendRequest)
 
 
 
