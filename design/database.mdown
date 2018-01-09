@@ -62,7 +62,8 @@ primary key pair of NeighborTokenChannels). Is there a simpler way to do this?
 - requestContentHash = Sha512/256(requestContent)  [32 bytes]
 - maxResponseLength             [4 bytes]
 - processingFeeProposal         [8 bytes]
-- halfCreditsPerByteProposal    [4 bytes]
+- creditsPerByteProposal    [4 bytes]
+
 
 
 
@@ -121,7 +122,7 @@ PendingLocalNeighborRequest
 - requestContentHash = Sha512/256(requestContent)  [32 bytes]
 - maxResponseLength             [4 bytes]
 - processingFeeProposal         [8 bytes]
-- halfCreditsPerByteProposal    [4 bytes]
+- creditsPerByteProposal    [4 bytes]
 
 
 
