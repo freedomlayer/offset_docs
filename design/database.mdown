@@ -207,7 +207,7 @@ Removal of a Friends entry should cause removal of the relevant
 FriendLocalRequests entries. TODO: Can this be done in sqlite?
 
 
-**FriendLocalRequests** table
+**FriendRequests** table
 
 - requestId                     (primary key)
 - friendPublicKey               (link to Friends)
