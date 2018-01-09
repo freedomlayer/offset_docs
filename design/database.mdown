@@ -55,6 +55,8 @@ primary key pair of NeighborTokenChannels). Is there a simpler way to do this?
 
 **NeighborLocalRequests** table
 
+(Requests that were initiated locally)
+
 - neighborTokenChannel  (NeighborTokenChannel primary key)
 - requestId             (primary key)
 - route                 (blob)
