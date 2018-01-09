@@ -1,6 +1,6 @@
 # Networker design
 
-30.12.2017
+09.01.2018
 Required prior reading: 0_credit_clearing.mdown
 
 
@@ -439,7 +439,7 @@ EncContent
 - requestContent: RequestContent
 - maxResponseLength             [4 bytes]
 - processingFeeProposal         [8 bytes]
-- halfCreditsPerByteProposal    [4 bytes]
+- creditsPerByteProposal    [4 bytes]
 
 
 RequestSendMessageTran transaction message opens a communication transaction with a
@@ -500,19 +500,18 @@ node to generate a signed ResponseSendMessage. Usually processingFee is offered
 in cases where issuing a response message takes some effort from the
 destination node (For example: Having to calculate something).
 
-halfCreditsPerByteProposal is half the amount of credits proposed for sending
+creditsPerByteProposal is the amount of credits proposed for sending
 one byte of this request. All the bytes of the request are counted (including
 the requestId field, the route field etc).
 
-In case of a failure on delivering the request, only half the amount of credits
-proposed will be payed to the intermediate nodes. This is why the field name is
-is halfCreditsPerByteProposal, and not "creditsPerByteProposal".
+In case of a failure on delivering the request, only 1 credit will be paid per
+byte to intermediate nodes.  proposed will be payed to the intermediate nodes. 
 
 We define:
 
 ```
 paymentOnSuccess(responseLength) := (length(request) + responseLength) * 
-        halfCreditsPerBytesProposal * 2 *
+        creditsPerBytesProposal *
         (amountOfNodesToDest - 1) + 
     processingFeeProposal + 
     length(request) +
@@ -573,7 +572,7 @@ struct ResponseNodeCommMeans {
     sha512/256(requestContent) ||
     maxResponseLength ||
     processingFeeProposal ||
-    halfCreditsPerBytesProposal || 
+    creditsPerBytesProposal || 
     sha512/256(responseContent))
 
 
@@ -618,7 +617,7 @@ inconsistency occurs.
     sha512/256(requestContent) ||
     maxResponseLength ||
     processingFeeProposal ||
-    halfCreditsPerBytesProposal)
+    creditsPerByteProposal)
 
 
 requestId is the requestId of the original request. reportingNodePublicKey is
@@ -628,7 +627,7 @@ should be one of the nodes on the route.
 We define:
 
 ```
-paymentOnFailure := length(request) * halfCreditsPerBytesProposal *
+paymentOnFailure := length(request) * 1 *
         amountOfNodesToReportingNode
 ```
 
