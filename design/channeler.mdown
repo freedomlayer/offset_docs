@@ -160,10 +160,46 @@ effects of synchronization problems).
 On the other hand, if A is provided a blank socketAddress, it will wait for TCP
 connections from B.
 
-Once a TCP connection is initiated, both sides send the InitChannel message:
+Once a TCP connection is initiated, a diffie hellman exchange is performed
+using the InitChannelActive and InitChannelPassive messages.
 
 ```capnp
-struct InitChannel {
+struct InitChannelActive {
+        neighborPublicKey @0: CustomUInt256;
+        # The identity public key of the sender of this message.
+        channelRandValue @1: CustomUInt128;
+        # An initial random value.
+        # This will be later used for the key exchange as a nonce.
+        # A nonce is required to avoid replay of the signature.
+        channelIndex: @2 UInt32;
+        # The index of this channel. Only messages on token channel number
+        # channelIndex may be sent along this TCP connection.
+}
+```
+
+This message may only be sent by the initiator of the TCP connection (The
+client). The sender node declares his public key, and adds a random value to be
+used with a signature during the diffie-hellman exchange.
+
+When a InitChannelActive message is received by a Channeler, it does the following:
+
+- If this is a TCP connection initiated by the remote host: 
+    - Check if the public key belongs to a neighbor that has the initator role. 
+        If not, close the connection. 
+    - Check if channelIndex smaller than the maximum allowed channels. Also
+        check if the channelIndex is not already in use by another TCP
+        connection. If the channelIndex is invalid, close the connection.
+
+- If this is a TCP connection that was initiated by the Channeler, close the
+    connection (Only the initiator of the TCP connection may send an
+    InitChannelActive message). 
+
+
+Next, the Channeler who received the TCP connection (The TCP Server) sends the
+InitChannelPassive message:
+
+```capnp
+struct InitChannelPassive {
         neighborPublicKey @0: CustomUInt256;
         # The identity public key of the sender of this message.
         channelRandValue @1: CustomUInt128;
@@ -173,19 +209,16 @@ struct InitChannel {
 }
 ```
 
-In this message every node declares his public key, and adds a random value to
-be used with a signature in the next message, Exchange.
+This message may only be sent by the receiver of the TCP connection (The
+server). It contains the sender's public key, and an initial random value to be
+later used with a signature during the diffie-hellman exchange.
 
+Note that this message does not contain a channelIndex, as it was already
+declared by the initiator node at the InitChannelActive message.
 
-When a InitChannel message is received by a Channeler, it does the following:
-
-- If this is a TCP connection that was initiated by the Channeler, check if the
-    declared neighbor public key is the public key expected when connected to
-    the remote host. If not, close the connection.
-
-- If this is a TCP connection initiated by the remote host: Check if the public
-    key belongs to a neighbor that has the initator role. If not, close the
-    connection.
+Upon receipt of InitChannelPassive message, the Channeler checks if the
+declared neighbor public key is the public key expected when connected to the
+remote host. If not, the connection is closed.
 
 
 Next, both sides initiate a
