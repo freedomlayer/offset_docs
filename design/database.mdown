@@ -44,8 +44,8 @@ NeighborTokenChannels entries. TODO: Can this be done in sqlite?
 - localPendingDebt          [8 bytes]
 - balance                   [8 bytes]
 
-- localFundsRandNonce       [32 bytes]  (Can be null)
-- remoteFundsRandNonce      [32 bytes]  (Can be null)
+- localInvoiceId            [32 bytes]  (Can be null)
+- remoteInvoiceId           [32 bytes]  (Can be null)
 
 Removal of a NeighborTokenChannels entry should cause removal of the relevant
 NeighborLocalRequests entries. TODO: Can this be done in sqlite?
@@ -112,8 +112,8 @@ toNeighborTokenChannel are None. How to do this?
 - remotePendingDebt             [8 bytes]
 - localPendingDebt              [8 bytes]
 - balance                       [8 bytes]
-- localFundsRandNonce           [32 bytes]  (Can be null)
-- remoteFundsRandNonce          [32 bytes]  (Can be null)
+- localInvoiceId                [32 bytes]  (Can be null)
+- remoteInvoiceId               [32 bytes]  (Can be null)
 - closedLocalRequests (List)
     - requestId                 [16 bytes]
 - openedRemoteRequests (List of PendingNeighborRequest)
@@ -145,8 +145,8 @@ PendingNeighborRequest
 - remotePendingDebt             [8 bytes]
 - localPendingDebt              [8 bytes]
 - balance                       [8 bytes]
-- localFundsRandNonce           [32 bytes]  (Can be null)
-- remoteFundsRandNonce          [32 bytes]  (Can be null)
+- localInvoiceId                [32 bytes]  (Can be null)
+- remoteInvoiceId               [32 bytes]  (Can be null)
 - openedLocalRequests (List of PendingNeighborRequest)
 - closedRemoteRequests (List)
     - requestId
@@ -173,8 +173,8 @@ PendingNeighborRequest
 - remotePendingDebt             [8 bytes]
 - localPendingDebt              [8 bytes]
 - balance                       [8 bytes]
-- localFundsRandNonce           [32 bytes]  (Can be null)
-- remoteFundsRandNonce          [32 bytes]  (Can be null)
+- localInvoiceId                [32 bytes]  (Can be null)
+- remoteInvoiceId               [32 bytes]  (Can be null)
 - pendingLocalRequests          (List of PendingNeighborRequest)
 - pendingRemoteRequests         (List of PendingNeighborRequest)
 
