@@ -187,7 +187,7 @@ PendingNeighborRequest
 - wantedRemoteMaxDebt       [16 bytes]
 - status                    (Enabled/Disabled)
 
-**FriendTokenChannels**
+**FriendTokenChannels** table
 
 - friendPublicKey           (blob, link to Friends, primary key)
 - moveTokenType             (incoming / outoing)
