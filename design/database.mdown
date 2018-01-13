@@ -182,6 +182,10 @@ PendingNeighborRequest
 
 ## Friends Token Channel Data model
 
+TODO: Possibly merge Friends and FriendsTokenChannels tables, because every
+Friendship has only one token channel. (Unlike the Networker, where every
+relationship with a neighbor is maintained over a few token channels).
+
 **Friends** table
 
 - friendPublicKey           (blob, primary key)
