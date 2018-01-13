@@ -165,6 +165,7 @@ PendingNeighborRequest
     - incoming
     - outgoing
 - moveTokenMessage (incoming/outgoing)
+    - tokenChannelIndex         [4 byte]
     - moveTokenTransactions     (blob?)
     - moveTokenOldToken         [32 bytes]
     - moveTokenRandNonce        [32 bytes]
