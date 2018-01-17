@@ -245,24 +245,44 @@ legitimate indexer nodes belonging to IndP.
 The following messages are used to keep CSwitch nodes up to date with the
 recent state of their indexing providers:
 
+```capnp
+struct ChainLink {
+        previousStateHash @0: CustomUInt256;
+        newOwnersPublicKeys @1: List(CustomUInt256);
+        newIndexersPublicKeys @2: List(CustomUInt256);
+        signaturesByOldOwners @3: List(CustomUInt512);
+}
 
-**RequestUpdateState** (Indexer -> Node)
+# Indexer -> Node
+struct RequestUpdateState {
+        indexingProviderId @0: CustomUInt128;
+        indexingProviderStatesChain @1: List(ChainLink);
+}
+# This message may be accepted from any node.
 
-- indexingProviderID [16 bytes]
-- indexingProviderStatesChain
+# Node -> Indexer
+struct ResponseUpdateState {
+        stateHash @0: CustomUInt256;
+}
 
+# Indexer -> Node
+struct RoutesToIndexers {
+    indexingProviderId @0: CustomUInt128;
+    routes @1: List(IndexerRoute);
+}
+# This message should be accepted only if the sender is an indexer working for
+# indexingProviderId. Otherwise it will be discarded.
 
-**ResponseUpdateState** (Node -> Indexer)
+# Node -> Indexer
+# struct RequestServicePrice { 
+    # Empty
+# }
 
-- knownIndexingProviderStateHash [32 bytes]
-
-
-**RoutesToIndexers** (Indexer -> Node)
-
-- routesToIndexers: List of:
-    - List(PublicKey)
-    - appPort                   [32 bytes]
-- requestPrice                  [8 bytes]
+# Indexer -> Node
+struct ResponseServicePrice {
+    requestPrice @0: UInt64;
+}
+```
 
 
 RequestUpdateState message is sent from an Indexer (belonging to indexing
@@ -288,8 +308,7 @@ looking at his current state of the indexing provider IndP, in the list of
 newIndexersPublicKeys.
 
 The RoutesToIndexers message is sent from an Indexer node to a node,
-specifiying a list of routes to indexer nodes, and the price of a request for
-routes.
+specifiying a list of routes to indexer nodes. 
 
 Every route also contains appPort. This port should be used as
 PluginManagerPort(addPort) by the node when sending messages to the destination
@@ -297,8 +316,14 @@ indexer node. The indexer node logic will always be behind the PluginManager,
 therefore only this type of destination port is supported.
 
 
-TODO: How to deal with changes of requestPrice? Will the Indexer node still
-accept the old price for a while? 
+RequestServicePrice allows to obtain the current price of service from a
+specific indexer node. A query should be sent to the remote indexer node every
+once in a while in order to know the current price of the service. 
+
+If the indexer node just changed the price of the service (Increased the
+price), it should be flexible enough to allow an adaptation period where nodes
+can still use the old price. This is because it is possible some nodes have not
+yet managed to request the new price of service.
 
 
 ## Information collection by indexers
