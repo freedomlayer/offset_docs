@@ -180,6 +180,7 @@ PendingNeighborRequest
 - pendingLocalRequests          (List of PendingNeighborRequest)
 - pendingRemoteRequests         (List of PendingNeighborRequest)
 
+This message may return a "NotFound" response.
 
 ## Friends Token Channel Data model
 
@@ -326,6 +327,7 @@ PendingFriendRequest
 - pendingLocalRequests          (List of PendingFriendRequest)
 - pendingRemoteRequests         (List of PendingFriendRequest)
 
+This message may return a "NotFound" response.
 
 
 ## Indexer client data model
