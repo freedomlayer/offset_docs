@@ -238,7 +238,7 @@ toFriendTokenChannel are None. How to do this?
 
 **RemoveFriend** [Funder -> Database]
 
-- friendPublicKey           [32 bytes]
+- friendPublicKey               [32 bytes]
 
 
 **RequestLoadFriends** [Funder -> Database]
@@ -256,7 +256,7 @@ toFriendTokenChannel are None. How to do this?
 
 **StoreInFriendToken** [Funder -> Database]
 
-- friendPublicKey           [32 bytes]
+- friendPublicKey               [32 bytes]
 - moveTokenMessage
     - moveTokenTransactions     (blob?)
     - moveTokenOldToken         [32 bytes]
@@ -284,7 +284,7 @@ PendingFriendRequest
 
 **StoreOutFriendToken** [Funder -> Database]
 
-- friendPublicKey           [32 bytes]
+- friendPublicKey               [32 bytes]
 - moveTokenMessage
     - moveTokenTransactions     (blob?)
     - moveTokenOldToken         [32 bytes]
