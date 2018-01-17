@@ -20,6 +20,7 @@ This path will probably of a form similar to: ..../db_{public_key}.db
 - neighborPublicKey         (blob, primary key)
 - wantedRemoteMaxDebt       [8 bytes]
 - wantedMaxChannels         [4 bytes]
+- address                   (Blob?)
 - status                    (Enabled/Disabled)
 
 Removal of a Neighbor entry should cause removal of the relevant
