@@ -1,0 +1,173 @@
+# UDP style anti-replay
+23.01.2018
+
+
+## Introduction
+
+Many encryption schemes rely on an underlying communication layer that
+guarantees the order of sent messages. This underlying communication layer is
+usually TCP. Examples for such encryption schemes are SSH and TLS. Such
+encryption schemes fail to work over a communication layer that does not
+guarantee ordered arrival of messages.
+
+Consider SSH for example: In order to avoid replay attacks, SSH uses an
+incrementing counter for each side of the communication. Every messages
+contains an internal counter that increments for every message. The receiving
+side always checks the internal counter of incoming messages. If the counter
+value does not match the expected value, the message is discarded.
+
+Consider a UDP like communication layer between two parties A and B, where there
+is no guarantee for ordered arrival of messages: Messages may be dropped or
+arrive out of order. We want to set up an encrypted channel over such a
+communication layer.
+
+In this case we can not use the countermeasure used by SSH to defend against
+replay attacks. We can not use an incrementing counter because we can not be
+sure that messages arrive at the remote party at the same order they were sent.
+
+This document presents a design for an anti-replay mechanism to be used when
+encrypting UDP style communication layers. Idea is due to Zur, and thus called
+Zur's sliding window.
+
+
+## Problem setup
+
+Consider two parties A and B sending datagrams over a nonreliable UDP style
+communication layer. Assume that A and B have a symmetric key for encryption
+from A to B, and a symmetric key for encryption from B to A. We also assume
+that the encryption scheme used by A and B also provides authenticity. This
+means that when B receives an encrypted message from A, he knows for sure that
+only A could have generated this message.
+
+An attacker E can see all the communication on the wire between A and B, and
+can send messages on the wire. E does not know the symmetric keys for encrypted
+communication between A and B.
+
+```
+A -----+------- B
+       |
+       |
+       |
+       E 
+```
+
+If A naively sends encrypted datagrams to B, E will be able to resend those
+datagrams to B, making B think that A have sent those messages again. We call
+this attack **replay attack**. 
+
+Why is this a security problem? Consider this example: A sends a message to
+open a gate, a person then enters a building, and finally A sends a message to
+close the gate.  If E could replay the "open gate" message, E could enter the
+building. 
+
+A and B need to find a way to send encrypted datagrams so that E will not be
+able to replay those messages.
+
+## Maintaining counters
+
+We define two plaintext messages that could be sent between parties in the
+network:
+
+**RequestCounter**
+
+- nodeId
+
+
+**ResponseCounter**
+
+- nodeId
+- prefix         [64 bits]
+- currentCounter [64 bits]
+
+(Note: RequestCounter message allows any user to "impersonate" to any other user
+by specifing a certain nodeId. We claim that even in this setting our
+encryption scheme is secure.)
+
+Every party P may send a RequestCounter message to B and receive a
+ResponseCounter message containing the corresponding currentCounter for the
+specified nodeId.
+
+The party B keeps a state (with a counter) for every party it comes in contact
+with. This state is erased if no action (related to this state) happens for a
+very long time. 
+
+If B maintains no state for some nodeId K, and a RequestCounter message with
+nodeId=K is received, B generates a new state for K containing a random
+currentCounter, and responds with a ResponseCounter message containing the
+newly generated currentCounter..
+
+If A wants to send a message to B, A needs to know the currentCounter[A] B keeps
+for receiving messages from A. 
+
+1. A sends a RequestCounter(nodeId=A) message to B.
+2. B sends a ResponseCounter(nodeId=A) message to A, containing currentCounter[A].
+
+After this exchange, A can send an encrypted datagram, where the contents of
+the datagram are of the form:
+
+
+**PlainMessage**
+
+- prefix
+- currentCounter
+- data
+
+
+If A wants to send another message, A will increment the counter and send
+another encrypted PlainMessage to B. 
+
+In the case of ordered communication between A and B (Messages arrive at the
+same order they were sent), B may maintain the currentCounter and increase it
+every time a message is received from A, thus keeping A's and B's counters in
+sync. However, in our setting we consider a communication layer where messages
+may not arrive, or arrive out of order. 
+
+
+## Zur's sliding window
+
+We want to avoid replay attacks, but still over a non reliable UDP like
+communication layer. To do this, B has to maintain a bit more state than a
+single counter.
+
+For every nodeId that was ever received in a RequestCounter message, B will
+maintain the following state:
+
+
+**ZurState[nodeId]**
+
+- prefix         [64 bits]
+- currentCounter [64 bits]
+- bitmask        [256 bits]
+
+
+currentCounter is the same currentCounter that was sent in the ResponseCounter
+message. bitmask contains bits representing the arrival of recent messages.
+
+We count bits inside bitmask starting from 0 as the least significat bit.
+Bit number i represents whether the message with counter value `currentCounter
+- i - 1` was ever received. `0` means no, `1` means yes. 
+
+Whenever an encrypted PlainMessage is received from A, B does the following:
+
+1. Decrypts the message (At the same time: 
+    makes sure that it was encrypted by A). If the message is invalid or not
+    encrypted by A, it is discarded.
+2. Checks if the prefix matches A's state prefix. If not, discard the message.
+3. Check the counter:
+    3.1 If counter is bigger than currentCounter:
+        - Update currentCounter = counter.
+        - Shift bitmask counter bits to the left (Inserting the bit `1` from the
+            right on the first bit shift).
+    3.2 If counter is in [currentCounter - bitmask.len(), currentCounter) and
+        the corresponding bitmask bit is 0:
+        - Set the bit to 1.
+    3.3 Else: Discard the message.
+
+
+(TODO: Add an example of shifting a bitmask)
+
+
+## Exhausting currentCounter
+
+TODO: Double state maintanence?
+
