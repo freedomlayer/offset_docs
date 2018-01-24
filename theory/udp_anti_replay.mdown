@@ -171,3 +171,96 @@ Whenever an encrypted PlainMessage is received from A, B does the following:
 
 TODO: Double state maintanence?
 
+
+## Setting up a connection in Channeler
+
+(TODO: Move this section somewhere else later)
+NOTICE: WORK IN PROGRESS
+
+We consider two sides: client (A) and server (B). The client knows the IP address of
+the server, but the server does not know the IP address of the client.
+
+Setting up an encrypted connection:
+
+1. A -> B: Handshake1 (randNonce1, publicKeyA, dhPublicKeyA, keySaltA) 
+2. B -> A: Handshake2 (hashPrev, randNonce2, publicKeyB, dhPublicKeyB, keySaltB, Signature(B))
+3. A -> B: Handshake3 (hashPrev, Signature(A))
+
+
+<!--
+1. A -> B: Handshake1 (randNonce1, publicKeyA) 
+2. B -> A: Handshake2 (hashPrev, randNonce2, publicKeyB, Signature(B))
+3. A -> B: Handshake3 (hashPrev, randNonce3, dhPublicKeyA, keySaltA, signature(A))
+4. B -> A: Handshake4 (hashPrev, randNonce4, dhPublicKeyB, keySaltB, signature(B))
+5. A -> B: Handshake5 (hashPrev, signature(A))
+-->
+
+
+Where:
+
+- hashPrev is sha512/256 over the previous message. This makes sure that the
+    messages are ordered correctly.
+- signature(X) means a signature over all the previous fields in the message by party X.
+
+A considers the connection to be completed once message Handshake3 is sent. B
+considers the connection to be completed once message Handshake3 is received. The
+unique name of the connection is the value hashPrev of message Handshake3.
+
+After the connection was set up, each party has two ends of channels, one
+sending end and one receving end. The channel from A to B is called
+`channelA := hash(dhPublicKeyA || Handshake3.hashPrev)`. The Channel from B to A is called
+`channelB := hash(dhPublicKeyB || Handshake3.hashPrev)`.
+
+Both parties A and B create two symmetric keys for sending and receiving
+messages (keySaltA is used for sending messages from A to B, keySaltB is used
+for sending messages from B to A). We denote the symmetric keys by
+symmetricKeyAB (Sending from A to B) and symmetricKeyBA (Sending from B to A).
+
+Each party may maintain at most 2 receiving ends of channels from a given
+remote party. For example, A may maintain at most 2 receiving ends for channels
+from B. Whenever a new receiving end is created, it replaces the oldest
+receiving end from the list of receiving ends of A from B. 
+
+This makes sure that when a new channel is opened from B to A, if there are
+still some messages from B to A on the previous channel floating in the
+network, A will be able to receive those messages when they arrive. Those
+messages will be received on the previous channel receiver.
+
+A sets up a receiving state for channelB, including a sliding Zur window. It
+also sets up a sending state for channelA, containing a counter. The counter
+begins from 1.
+
+An encrypted message from A to B has the following format:
+
+**EncryptedMessage**
+
+- channelName
+- Enc[symmetricKeyAB]{plain}
+
+Where plain is of the form:
+
+- channelName
+- counter
+- data
+
+
+Each side of transmittion (A -> B or B -> A) has a separate counter that begins
+from 0. 
+
+
+## Channeler Connection teardown
+
+It is possible that one of the sides malfunctions or restarts. In that case the
+state of the channel will be erased. In that case upon a receipt of
+EncryptedMessage message, the party will respond with an UnknownChannel
+message:
+
+
+**UnknownChannel**
+
+- channelName
+- Signature(channelName)
+
+
+This will indicate to the other party that the channel can no longer be used for
+sending messages, and the sending part of the channel will be removed.
