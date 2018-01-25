@@ -139,13 +139,13 @@ each party. If the capacity of the channel carousel was only 2, the
 simultaneous setup of two connections would have erased all of the old
 receiving ends, and messages that were previously sent might be lost.
 
-We still haven't explained what a channel end (receiving end or sending end)
-contains, and how we plan to avoid replay attacks using our mechanism. This is
-explained in the next sections.
-
 Note that while maximum of 3 receiving ends of channels are maintained against
 every remote party, only one sending end of a channel is required against every
 remote party.
+
+We still haven't explained what a channel end (receiving end or sending end)
+contains, and how we plan to avoid replay attacks using our mechanism. This is
+explained in the next sections.
 
 
 ## Memory representation for channel ends
