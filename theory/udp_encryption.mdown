@@ -88,8 +88,8 @@ Where:
 
 - hashPrev is sha512/256 over the previous message [32 bytes]. This makes sure
     that the messages are ordered correctly.
-- signature(X) [64 bytes] means a signature over all the previous fields in the
-    message by party X.
+- signature(X) [64 bytes] means a signature over "{MessageName}" and all the
+    previous fields in the message by party X.
 - publicKeyX and dhPublicKeyX are of size [32 bytes].
 - keySalt is of size [32 bytes].
 
@@ -240,9 +240,9 @@ ChannelAB using an UnknownChannel message:
 
 **UnknownChannel**
 
-- channelId                             [16 bytes]
-- randNonce                             [16 bytes]
-- Signature(channelId || randNonce)     [64 bytes]
+- channelId                                                 [16 bytes]
+- randNonce                                                 [16 bytes]
+- Signature("UnknownChannel" || channelId || randNonce)     [64 bytes]
 
 B will send a new UnknownChannel message to A every time A attempts to send an
 encrypted message to the channel ChannelAB.
