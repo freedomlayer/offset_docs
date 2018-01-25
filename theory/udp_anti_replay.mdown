@@ -1,5 +1,5 @@
 # UDP style anti-replay
-23.01.2018
+25.01.2018
 
 
 ## Introduction
@@ -33,15 +33,11 @@ Zur's sliding window.
 ## Problem setup
 
 Consider two parties A and B sending datagrams over a nonreliable UDP style
-communication layer. Assume that A and B have a symmetric key for encryption
-from A to B, and a symmetric key for encryption from B to A. We also assume
-that the encryption scheme used by A and B also provides authenticity. This
-means that when B receives an encrypted message from A, he knows for sure that
-only A could have generated this message.
+communication layer. A and B both have public keys, each party knows the public
+key of the other party. 
 
 An attacker E can see all the communication on the wire between A and B, and
-can send messages on the wire. E does not know the symmetric keys for encrypted
-communication between A and B.
+can send messages on the wire. E also knows the public keys of A and B.
 
 ```
 A -----+------- B
@@ -51,216 +47,206 @@ A -----+------- B
        E 
 ```
 
+Assume that A and B somehow negotiated a symmetric key for symmetric encryption
+that allows authentication (If A encrypts a message, B can know for sure that
+the encrypted message was created by A).
+
 If A naively sends encrypted datagrams to B, E will be able to resend those
 datagrams to B, making B think that A have sent those messages again. We call
 this attack **replay attack**. 
 
 Why is this a security problem? Consider this example: A sends a message to
 open a gate, a person then enters a building, and finally A sends a message to
-close the gate.  If E could replay the "open gate" message, E could enter the
+close the gate. If E could replay the "open gate" message, E could enter the
 building. 
 
-A and B need to find a way to send encrypted datagrams so that E will not be
+A and B need to find a way to send encrypted messages so that E will not be
 able to replay those messages.
 
-## Maintaining counters
 
-We define two plaintext messages that could be sent between parties in the
-network:
+## Connection setup
 
-**RequestCounter**
+We consider two sides: client (A) and server (B). The client is the side that
+has the ability to initiate a connection.  In the case of IP networks, for
+example, the client knows the IP address of the server, but the server does not
+necessarily know the IP address of the client. 
 
-- nodeId
-
-
-**ResponseCounter**
-
-- nodeId
-- prefix         [64 bits]
-- currentCounter [64 bits]
-
-(Note: RequestCounter message allows any user to "impersonate" to any other user
-by specifing a certain nodeId. We claim that even in this setting our
-encryption scheme is secure.)
-
-Every party P may send a RequestCounter message to B and receive a
-ResponseCounter message containing the corresponding currentCounter for the
-specified nodeId.
-
-The party B keeps a state (with a counter) for every party it comes in contact
-with. This state is erased if no action (related to this state) happens for a
-very long time. 
-
-If B maintains no state for some nodeId K, and a RequestCounter message with
-nodeId=K is received, B generates a new state for K containing a random
-currentCounter, and responds with a ResponseCounter message containing the
-newly generated currentCounter..
-
-If A wants to send a message to B, A needs to know the currentCounter[A] B keeps
-for receiving messages from A. 
-
-1. A sends a RequestCounter(nodeId=A) message to B.
-2. B sends a ResponseCounter(nodeId=A) message to A, containing currentCounter[A].
-
-After this exchange, A can send an encrypted datagram, where the contents of
-the datagram are of the form:
+In other cases it is possible that both sides can play the role of the client
+(If for example both sides have static known addresses).
 
 
-**PlainMessage**
+Setting up an encrypted connection is done through a 4-way handshake, as
+follows:
 
-- prefix
-- currentCounter
-- data
-
-
-If A wants to send another message, A will increment the counter and send
-another encrypted PlainMessage to B. 
-
-In the case of ordered communication between A and B (Messages arrive at the
-same order they were sent), B may maintain the currentCounter and increase it
-every time a message is received from A, thus keeping A's and B's counters in
-sync. However, in our setting we consider a communication layer where messages
-may not arrive, or arrive out of order. 
-
-
-## Zur's sliding window
-
-We want to avoid replay attacks, but still over a non reliable UDP like
-communication layer. To do this, B has to maintain a bit more state than a
-single counter.
-
-For every nodeId that was ever received in a RequestCounter message, B will
-maintain the following state:
-
-
-**ZurState[nodeId]**
-
-- prefix         [64 bits]
-- currentCounter [64 bits]
-- bitmask        [256 bits]
-
-
-currentCounter is the same currentCounter that was sent in the ResponseCounter
-message. bitmask contains bits representing the arrival of recent messages.
-
-We count bits inside bitmask starting from 0 as the least significat bit.
-Bit number i represents whether the message with counter value `currentCounter
-- i - 1` was ever received. `0` means no, `1` means yes. 
-
-Whenever an encrypted PlainMessage is received from A, B does the following:
-
-1. Decrypts the message (At the same time: 
-    makes sure that it was encrypted by A). If the message is invalid or not
-    encrypted by A, it is discarded.
-2. Checks if the prefix matches A's state prefix. If not, discard the message.
-3. Check the counter:
-    3.1 If counter is bigger than currentCounter:
-        - Update currentCounter = counter.
-        - Shift bitmask counter bits to the left (Inserting the bit `1` from the
-            right on the first bit shift).
-    3.2 If counter is in [currentCounter - bitmask.len(), currentCounter) and
-        the corresponding bitmask bit is 0:
-        - Set the bit to 1.
-    3.3 Else: Discard the message.
-
-
-(TODO: Add an example of shifting a bitmask)
-
-
-## Exhausting currentCounter
-
-TODO: Double state maintanence?
-
-
-## Setting up a connection in Channeler
-
-(TODO: Move this section somewhere else later)
-NOTICE: WORK IN PROGRESS
-
-We consider two sides: client (A) and server (B). The client knows the IP address of
-the server, but the server does not know the IP address of the client.
-
-Setting up an encrypted connection:
-
-1. A -> B: Handshake1 (randNonce1, publicKeyA, dhPublicKeyA, keySaltA) 
-2. B -> A: Handshake2 (hashPrev, randNonce2, publicKeyB, dhPublicKeyB, keySaltB, Signature(B))
-3. A -> B: Handshake3 (hashPrev, Signature(A))
-
-
-<!--
 1. A -> B: Handshake1 (randNonce1, publicKeyA) 
-2. B -> A: Handshake2 (hashPrev, randNonce2, publicKeyB, Signature(B))
-3. A -> B: Handshake3 (hashPrev, randNonce3, dhPublicKeyA, keySaltA, signature(A))
-4. B -> A: Handshake4 (hashPrev, randNonce4, dhPublicKeyB, keySaltB, signature(B))
-5. A -> B: Handshake5 (hashPrev, signature(A))
--->
+2. B -> A: Handshake2 (hashPrev, randNonce2, publicKeyB, dhPublicKeyB, keySaltB, Signature(B))
+3. A -> B: Handshake3 (hashPrev, dhPublicKeyA, keySaltA, Signature(A))
+4. B -> A: Handshake4 (hashPrev, Signature(B))
 
 
 Where:
 
-- hashPrev is sha512/256 over the previous message. This makes sure that the
-    messages are ordered correctly.
-- signature(X) means a signature over all the previous fields in the message by party X.
+- hashPrev is sha512/256 over the previous message [32 bytes]. This makes sure
+    that the messages are ordered correctly.
+- signature(X) [64 bytes] means a signature over all the previous fields in the
+    message by party X.
+- publicKeyX and dhPublicKeyX are of size [32 bytes].
+- keySalt is of size [32 bytes].
 
-A considers the connection to be completed once message Handshake3 is sent. B
-considers the connection to be completed once message Handshake3 is received. The
-unique name of the connection is the value hashPrev of message Handshake3.
+B considers the connection to be up once message Handshake4 is sent. A
+considers the connection to be up once message Handshake4 is received.
 
 After the connection was set up, each party has two ends of channels, one
 sending end and one receving end. The channel from A to B is called
-`channelA := hash(dhPublicKeyA || Handshake3.hashPrev)`. The Channel from B to A is called
-`channelB := hash(dhPublicKeyB || Handshake3.hashPrev)`.
+`channelAId := sha512/256("Init" || dhPublicKeyA || Handshake3.hashPrev)[:16]`. 
+The Channel from B to A is called:
+`channelBId := sha512/256("Accp" || dhPublicKeyB || Handshake3.hashPrev)[:16]`.
+
+Note: channelXId is of size [16 bytes].
 
 Both parties A and B create two symmetric keys for sending and receiving
 messages (keySaltA is used for sending messages from A to B, keySaltB is used
 for sending messages from B to A). We denote the symmetric keys by
 symmetricKeyAB (Sending from A to B) and symmetricKeyBA (Sending from B to A).
 
-Each party may maintain at most 2 receiving ends of channels from a given
-remote party. For example, A may maintain at most 2 receiving ends for channels
-from B. Whenever a new receiving end is created, it replaces the oldest
-receiving end from the list of receiving ends of A from B. 
+Pay special attention to the distinction between the concept of a connection
+setup and a channel. A connection setup between A and B creates two new
+distinct channels: A channel for sending messages from A to B, and a channel
+for sending messages from B to A. Each channel makes use of a different
+symmetric encryption key.
 
-This makes sure that when a new channel is opened from B to A, if there are
-still some messages from B to A on the previous channel floating in the
-network, A will be able to receive those messages when they arrive. Those
-messages will be received on the previous channel receiver.
-
-A sets up a receiving state for channelB, including a sliding Zur window. It
-also sets up a sending state for channelA, containing a counter. The counter
-begins from 1.
-
-An encrypted message from A to B has the following format:
-
-**EncryptedMessage**
-
-- channelName
-- Enc[symmetricKeyAB]{plain}
-
-Where plain is of the form:
-
-- channelName
-- counter
-- data
+TODO: Dealing with message drops during connection setup? How to maintain state
+for connection setup?
 
 
-Each side of transmittion (A -> B or B -> A) has a separate counter that begins
-from 0. 
+## Channel receiving ends Carousel
+
+Each party X maintains a maximum of 3 receiving ends of channels from a given
+remote party Y. This is called the channels carousel mechanism. Whenever a new
+receiving end is created from Y (For example, if X or Y initiated a new
+connection using the four-way handshake), X will erase the oldest receiving
+channel it has from Y, and replace it with the new receiving end.
+
+The channels carousel ensures that if there are still some messages from Y sent
+through an old channel, floating in the network, when those messages arrive to
+X, X will be able to receive them. If X maintained only one receiving end of a
+channel from Y to X, those messages would have been lost.
+
+Why does the channel carousel have 3 receiving ends of channels and not just 2?
+It is possible that both parties X and Y attempt to setup a connection at the
+same time. In this case two new receiving ends of channels will be created for
+each party. If the capacity of the channel carousel was only 2, the
+simultaneous setup of two connections would have erased all of the old
+receiving ends, and messages that were previously sent might be lost.
+
+We still haven't explained what a channel end (receiving end or sending end)
+contains, and how we plan to avoid replay attacks using our mechanism. This is
+explained in the next sections.
+
+Note that while maximum of 3 receiving ends of channels are maintained against
+every remote party, only one sending end of a channel is required against every
+remote party.
+
+
+## Memory representation for channel ends
+
+Upon connection setup, every party sets up the following state in memory for
+the sending end of a channel:
+
+**SendingEndState**
+
+- channelId         [16 bytes]
+- sendCounter       [12 bytes]
+- symmetricKey      [32 bytes]
+
+The initial value of sendCounter is 1.
+
+To send a message M to through a channel to the remote party, the party will
+send:
+
+```
+Enc{
+    Key=symmetricKey, 
+    Nonce=sendCounter, 
+    AdditionalAuthenticated=channelId
+}(M) 
+```
+
+to the remote party. The sendCounter is then incremented by 1.
+
+The following state is kept in memory for the receiving end of a channel:
+
+**ReceivingEndState<K>**
+
+- channelId         [16 bytes]
+- recvCounter       [12 bytes]
+- zurWindowBitmask  [K bytes/8*K bits]
+- symmetricKey      [32 bytes]
+
+The initial value for recvCounter is 0.
+
+recvCounter together with zurWindowBitmask allow to represent the set of counters
+that will be accepted for an incoming message: 
+```
+(counter > recvCounter) 
+or
+(
+    (recvCounter - 8*K <= counter < recvCounter) 
+    and 
+    (zurWindowBitmask[recvCounter - counter - 1] = 0)
+)
+```
+
+Note: We consider the lsb of the zurWindowBitmask to be bit number 0.
+
+This zur window bitmask construction allows more freedom for messages to arrive
+out of order or not arrive at all. K is some parameter that we need to choose.
+A reasonable value for K is 32 bytes = 256 bits. The bigger the value of K,
+the more flexibility we allow for messages to be delayed or be dropped, for the
+cost of using more memory for one channel receiving end.
+
+
+Upon the receipt of an encrypted message, the receiving party does the
+following:
+
+1. Read the additional authenticated data to obtain the channelId.
+2. Attempt to decrypt the encrypted message using the appropriate symmetricKey. 
+    If the decryption fails, discard the message.
+3. Check the nonce:
+    a. If nonce is bigger than recvCounter:
+        - Update currentCounter = nonce.
+        - Shift zurWindowBitmask nonce - recvCounter bits to the left (Inserting the bit `1` from the
+            right on the first bit shift).
+    b.  If nonce is in `[recvCounter - K*8, recvCounter)` and
+        the corresponding zurWindowBitmask bit is 0:
+        - Set `zurWindowBitmask[recvCounter - counter - 1] = 1`
+    c.  Else: Discard the message.
 
 
 ## Channeler Connection teardown
 
-It is possible that one of the sides malfunctions or restarts. In that case the
-state of the channel will be erased. In that case upon a receipt of
-EncryptedMessage message, the party will respond with an UnknownChannel
-message:
+Consider two parties A and B with a channel ChannelAB from A to B. A uses the channel to
+send encrypted messages to B. If the machine that runs B shuts down or
+malfunctions, it is possible that B will lose his state for the receiving end
+of the channel ChannelAB. 
 
+A might keep sending encrypted messages to B on the ChannelAB channel, but B
+will not be able to read those messages because he does not have the symmetric
+key required to decrypt the messages, and he does not have a recvCounter in
+place to make sure the messages are not being replayed.
+
+In this case B will indicate to A that he has no information about the channel
+ChannelAB using an UnknownChannel message:
 
 **UnknownChannel**
 
-- channelName
-- Signature(channelName)
+- channelId                             [16 bytes]
+- randNonce                             [16 bytes]
+- Signature(channelName || randNonce)   [64 bytes]
 
 
-This will indicate to the other party that the channel can no longer be used for
-sending messages, and the sending part of the channel will be removed.
+Upon the receipt of this message, the party A will remove its sending end of
+the ChannelAB channel. If A has the ability to initiate a connection, it might
+attempt to setup a new connection with B.
+
+
