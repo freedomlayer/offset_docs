@@ -244,9 +244,12 @@ ChannelAB using an UnknownChannel message:
 - randNonce                             [16 bytes]
 - Signature(channelId || randNonce)     [64 bytes]
 
+B will send a new UnknownChannel message to A every time A attempts to send an
+encrypted message to the channel ChannelAB.
 
 Upon the receipt of this message, the party A will remove its sending end of
 the ChannelAB channel. If A has the ability to initiate a connection, it might
 attempt to setup a new connection with B.
+
 
 
