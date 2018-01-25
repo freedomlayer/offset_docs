@@ -1,4 +1,4 @@
-# UDP style anti-replay
+# UDP style Encryption
 25.01.2018
 
 
