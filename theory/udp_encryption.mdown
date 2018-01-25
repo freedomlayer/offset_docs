@@ -242,7 +242,7 @@ ChannelAB using an UnknownChannel message:
 
 - channelId                             [16 bytes]
 - randNonce                             [16 bytes]
-- Signature(channelName || randNonce)   [64 bytes]
+- Signature(channelId || randNonce)   [64 bytes]
 
 
 Upon the receipt of this message, the party A will remove its sending end of
