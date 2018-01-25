@@ -78,8 +78,8 @@ In other cases it is possible that both sides can play the role of the client
 Setting up an encrypted connection is done through a 4-way handshake, as
 follows:
 
-1. A -> B: Handshake1 (randNonce1, publicKeyA) 
-2. B -> A: Handshake2 (hashPrev, randNonce2, publicKeyB, dhPublicKeyB, keySaltB, Signature(B))
+1. A -> B: Handshake1 (randNonceA, publicKeyA) 
+2. B -> A: Handshake2 (hashPrev, randNonceB, publicKeyB, dhPublicKeyB, keySaltB, Signature(B))
 3. A -> B: Handshake3 (hashPrev, dhPublicKeyA, keySaltA, Signature(A))
 4. B -> A: Handshake4 (hashPrev, Signature(B))
 
@@ -98,9 +98,9 @@ considers the connection to be up once message Handshake4 is received.
 
 After the connection was set up, each party has two ends of channels, one
 sending end and one receving end. The channel from A to B is called
-`channelAId := sha512/256("Init" || dhPublicKeyA || Handshake3.hashPrev)[:16]`. 
+`channelAId := sha512/256("Init" || dhPublicKeyA || dhPublicKeyB || randNonceA || randNonceB)[:16]`. 
 The Channel from B to A is called:
-`channelBId := sha512/256("Accp" || dhPublicKeyB || Handshake3.hashPrev)[:16]`.
+`channelBId := sha512/256("Accp" || dhPublicKeyB || dhPublicKeyA || randNonceB || randNonceA)[:16]`.
 
 Note: channelXId is of size [16 bytes].
 
