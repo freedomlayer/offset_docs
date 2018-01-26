@@ -223,7 +223,7 @@ following:
     c.  Else: Discard the message.
 
 
-## Channeler Connection teardown
+## Connection teardown
 
 Consider two parties A and B with a channel ChannelAB from A to B. A uses the channel to
 send encrypted messages to B. If the machine that runs B shuts down or
