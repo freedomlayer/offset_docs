@@ -78,10 +78,10 @@ In other cases it is possible that both sides can play the role of the client
 Setting up an encrypted connection is done through a 4-way handshake, as
 follows:
 
-1. A -> B: Handshake1 (randNonceA, publicKeyA) 
-2. B -> A: Handshake2 (hashPrev, randNonceB, publicKeyB, dhPublicKeyB, keySaltB, Signature(B))
-3. A -> B: Handshake3 (hashPrev, dhPublicKeyA, keySaltA, Signature(A))
-4. B -> A: Handshake4 (hashPrev, Signature(B))
+1. A -> B: InitChannel      (randNonceA, publicKeyA) 
+2. B -> A: ExchangePassive  (hashPrev, randNonceB, publicKeyB, dhPublicKeyB, keySaltB, Signature(B))
+3. A -> B: ExchangeActive   (hashPrev, dhPublicKeyA, keySaltA, Signature(A))
+4. B -> A: ChannelReady     (hashPrev, Signature(B))
 
 
 Where:
@@ -93,8 +93,8 @@ Where:
 - publicKeyX and dhPublicKeyX are of size [32 bytes].
 - keySalt is of size [32 bytes].
 
-B considers the connection to be up once message Handshake4 is sent. A
-considers the connection to be up once message Handshake4 is received.
+B considers the connection to be up once message ChannelReady is sent. A
+considers the connection to be up once message ChannelReady is received.
 
 After the connection was set up, each party has two ends of channels, one
 sending end and one receving end. The channel from A to B is called
