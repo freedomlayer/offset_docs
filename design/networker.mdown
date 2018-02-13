@@ -553,18 +553,11 @@ Upon receipt of the RequestSendMessageTran message, B's Networker increases
 remotePendingDebt by the same amount.
 
 
-struct ResponseNodeCommMeans {
-        commPublicKey @0: CustomUInt256;
-        # diffie-hellman Public key used for communication.
-        recentTimestamp @1: CustomUInt128;
-        # A recent timestamp to be used for communication.
-}
-
 
 **ResponseSendMessageTran**
 
 - requestId
-- responseContent: EncContent/ResponseNodeCommMeans
+- responseContent
 - Signature{key=recipientKey}(
     "MESSAGE_SUCCESS" ||
     requestId ||
@@ -581,13 +574,8 @@ node of a request.
 
 requestId is the requestId of the original received request.
 
-responseContent is an encrypted message sent back to the originator of the
-request, or a plain message containing communication means
-(ResponseNodeCommMeans).
-
 The total length of ResponseSendMessageTran must not exceed maxResponseLength as
 specified in the request.
-
 
 Whenever A's Networker sends a ResponseSendMessage to B's Networker, A's
 Networker does the following:
