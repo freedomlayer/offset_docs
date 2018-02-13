@@ -125,7 +125,6 @@ PendingNeighborRequest
 
 - requestId                     [16 bytes]
 - route
-- requestType           (CommMeans / Encrypted)
 - requestContentHash = Sha512/256(requestContent)  [32 bytes]
 - maxResponseLength             [4 bytes]
 - processingFeeProposal         [8 bytes]
