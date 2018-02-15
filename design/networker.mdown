@@ -810,9 +810,9 @@ following messages:
 
 
 The Networker's configuration is forwarded to the Channeler, in the form of the
-corresponding messages: AddNeighborRelation, RemoveNeighborRelation,
-SetNeighborMaxChannels.  Note that the Channeler is not given information about
-channelCapacity of the token channels.
+corresponding messages: AddNeighborRelation, RemoveNeighborRelation.
+Note that the Channeler is not given information about channelCapacity of the token channels or 
+about the amount of token channels.
 
 The Networker's configuration does not persist (It is kept on RAM). Therefore
 the Networker has to be configured every time it is started through the
