@@ -1,5 +1,11 @@
 # CSwitch motivation and general idea
 
+The most important question: If a node A can send a large amount of credit to
+some node B that does not trust A (i.e., A and B are not adjacent in the friends
+graph), then why does A need the mediators when it sends a message to C
+in the first place ?
+
+
 04.12.2017
 
 ## Introduction
@@ -33,6 +39,8 @@ service.  On the CSwitch infrastructure, sending many messages to a remote node
 costs credit. In addition, a node that is bombarded with many messages earns
 credit. 
 
+Question: Is this project about replacing the internet infrastructure, or is
+it designed to run on top of the internet ?
 
 ## Ability to send funds implies ability to send messages
 
@@ -43,7 +51,7 @@ In particular, if we have a network where sending funds between nodes could be
 performed efficiently, it is possible to create a mechanism to send messages
 efficiently between nodes. This could be done as follows:
 
-To send a message bit from node `A` to node `B`, `A` could send a `B` 1 credit
+To send a message bit from node `A` to node `B`, `A` could send to `B` 1 credit
 to represent the bit `0`, and 2 credits to represent the bit `1`. This
 mechanism should also allow `B` to send messages to `A`. If `A` and `B` send
 about the same amount of bytes to each other, on average none of them should
@@ -81,7 +89,7 @@ in exchange for some milk.  However, what if at a specific time the milkman
 wants to get some bread from the baker, but the baker doesn't need any milk
 from the milkman? In this case, the method of barter will not allow to perform
 a transaction. Barter only works if the two involved parties are interested in
-the exchange in a specific point in time and location.
+the exchange in a specific point in time.
 
 To solve the problem, the milkman and the baker could use **mutual credit
 clearing**: If the milkman wants to get bread from the baker, but the baker
@@ -209,7 +217,7 @@ We showed above how funds could be transferred between nodes that are not
 friends (They do not have a direct mutual credit clearing setup). We could use
 a similar idea for the transfer of communication between nodes.
 
-Assume of network of nodes, where every node is directly connected to some other
+Assume a network of nodes, where every node is directly connected to some other
 predefined nodes. If A and B are two directly connected nodes, we say that A
 and B are **neighbors**. 
 
@@ -262,6 +270,13 @@ As a summary: large amounts of credit passes using chain of friends, and
 neighbors maintain mutual credit for very small amounts, used mostly for the
 purchase of communication ability.
 
+Question: I normally expect links to very asymmetric. Does it mean that if A
+constantly needs to send messages through B during the morning then it will
+need to pay him many times (because it reaches the maximal debt quickly...).
+
+Question: So does it mean that these "friendships" are self-balancing ?
+Nodes trust each other fr more credit (larger `md`) if they see they will 
+benefit from it ?
 
 ## Backwards credit payment
 
@@ -290,7 +305,7 @@ and secure.
 
 Consider first the following naive idea: A will calculate how much credit he
 needs to give to each of the mediator, for example: 2 credits to B, 2 credits
-to C and 2 credits to D. Next, A will send prepare the message together with
+to C and 2 credits to D. Next, A will send the message together with
 payments of 6 to B, requesting to pass the message all the way to A.
 
 B could keep 2 credits to himself, passing the message with 4 credits to C.
@@ -314,6 +329,8 @@ in his mutual communication credit with C. C sends the message to D,
 together with a promise to pay 2 credits if D signs the message and sends the
 signature back to C.
 
+Question: Does this freezing allow DOS attacks ?
+
 D receives the message, creates a signature of receipt, and sends it back to C.
 C pays 2 credits to D. Next, C sends the signature back to B and receives 4
 credits from B. B Finally B sends the signature back to A and receives 6
@@ -323,8 +340,8 @@ Eventually, A paid 6 credits, and B,C,D each earned two credits. In addition, A
 knows that the message was received by D. 
 
 We distinguish between two stages in this transaction: We call the forward
-stage (Sending the message from A to D) the request, and the backwards stage
-(Sending the signature from D to A) the response.
+stage (Sending the message from A to D) the "request", and the backwards stage
+(Sending the signature from D to A) the "response".
 
 What happens if one of the mediators can not pass the message during the
 request stage? For example, if C wants to pass the message to D, but the cable
@@ -336,6 +353,11 @@ provided error message, A will pay B 2 credits.
 In the case of such error, every node in the path up to the problem location
 will receive only half of the originally promised credit amount.
 
+Question: Is this half has a mathematical meaning ? If I understand correctly
+the rest of this document, it should be less than half (under some symmmetry
+assumptions) because reporting an error without actually sending the request
+is twice as cheap as actually sending the request and forwarding the response.
+
 The example above does not take into account the length of the transferred
 message. The longer the message, the more effort the mediators need to do to
 pass the message, and the more they should be paid.
@@ -344,6 +366,8 @@ In CSwitch the typical payment for passing a message is `2 * len(message)`
 credit. We multiply by `2` to allow for the case of failure, where only half of
 the promised amount of credits will be paid.
 
+Question: Is a linear cost, `2 * len(message)`, has a mathematical reason ? Or
+the optimal function should be some monotonic function of the length ?
 
 ## Analyzing incentives in Backwards credit payment
 
@@ -383,6 +407,8 @@ the channel between D and E. Next time, A will not be able to send a message to
 A through D. The channel between D and E will be opened only when E sends back
 a response message to D.
 
+Question: Is the channel between D and E completely blocked, or only a virtual
+channel that is dedicated for A ?
 
 (4) B receives a response message from C but doesn't pay C.
 
@@ -400,6 +426,11 @@ earn C credit. Therefore, C will prefer to pass the response message to B.
 Analyzing the cases above does not mean that the backwards credit payment is
 proved to be safe, but currently we do not know of any holes in its design.
 
+Question: If B and C cooperate, then B has the private keys of B, and therefore
+B can obtain extra credit from A by reporting an error. A sends a message to E
+through B, then B returns a signed error message (signed with the private key of
+C) to A. This way, B earns 2 credit for receiving a single message, processing
+it and sending a single message.
 
 ## Possible transaction delays
 
@@ -435,6 +466,8 @@ manner), B will keep the request sent by A in memory, and wait indefinately for
 a response message from C. If C ever wakes up and sends B the response, B will
 pay C 4 credits.  Then B will send the response back to A and redeem his
 promised 6 credits.
+
+Question: Does the term "graph of neighbors" is identical to "graph of friends" ?
 
 When used in the graph of neighbors, The method of indefinite waiting for
 responses has the following main disadvantages:
