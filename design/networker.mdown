@@ -383,11 +383,29 @@ may have already begun a payment transaction using the old invoiceId.
 
 **LoadFundsTran**
 
-- paymentReceipt (TODO: Find out real structure)
-    - fundsRandNonce
-    - paymentId     [?]
-    - numCredits    [?]
-    - signature     [?]
+- sendFundsReceipt
+
+Where sendFundsReceipt is of the following form:
+
+```capnp
+# A receipt for payment to the Funder
+struct Receipt {
+        responseHash @0: CustomUInt256;
+        # = sha512/256(requestId || 
+        #       sha512/256(nodeIdPath) || 
+        #       mediatorPaymentProposal)
+        invoiceId @1: CustomUInt256;
+        destinationPayment @2: CustomUInt128;
+        randNonce @3: CustomUInt256;
+        signature @4: CustomUInt512;
+        # Signature{key=recipientKey}(
+        #   "FUND_SUCCESS" ||
+        #   sha512/256(requestId || sha512/256(nodeIdPath) || mediatorPaymentProposal) ||
+        #   invoiceId ||
+        #   destinationPayment ||
+        #   randNonce)
+}
+```
 
 
 This message allows to top up the credit balance by using an external funds
