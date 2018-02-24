@@ -376,9 +376,10 @@ not be used again in the future.
 A new random nonce will be sent the the remote party using the FundsRandNonce
 message in the future.
 
-Note that sending two FundsRandNonce messages, when the first invoiceId
-was never used will cause an inconsistency. This is because the remote party
-may have already begun a payment transaction using the old invoiceId.
+Note that sending two consecutive SetInvoiceIdTran messages, when the first
+invoiceId was never used will cause an inconsistency. This is because the
+remote party may have already begun a payment transaction using the old
+invoiceId.
 
 
 **LoadFundsTran**
