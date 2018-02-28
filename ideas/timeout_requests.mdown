@@ -1,0 +1,120 @@
+
+# Using timeout based requests
+
+The idea of sending requests 
+
+
+## Frozen credits problem with indefinite waiting
+
+CSwitch allows sending requests on the graph of neighbors.
+If credits are frozen indefinitely, the following DoS attack is possible (A and
+D are malicious, the attack is against `B - C`)
+
+```
+A - B - C - D
+```
+
+A and D cooperate. A sends many messages to D until the available credits
+between `B - C` are all frozen. In this case B can not send new requests
+through the link `B - C`, because all the credits are frozen.
+
+One possible idea to mitigate this problem is to add some kind of constant or
+random timeout as the amount of time credits may be frozen. However, having
+this kind of mechanism allows A and D to cooperate and take money from `B - C`
+in the following manner:
+
+A sends a message all the way to D (through `B - C`). D then waits for a long
+period of time until C times out. In this case C will send back to B an Failure
+message, indicating that the request could not be delivered to D. When A
+receives this failure message, it will signal D about this event through some
+side communication channel. D will then send a signed Response message to C,
+having C pay a large fee to D.
+
+In the described scenario A paid about `2`, for a failure Message. B received
+`1`, C received `1` for the error, and lost `processingFee`, which totals to 
+`1 - processingFee`. Together A and D earned credits, `C` has lost credits.
+This should not be possible.
+
+
+## A solution: Using telescopic timeout in Requests
+
+A possible solution to the indefinite freezing of funds is using some kind of a
+timeout on requests. We propose the following idea for sending requests.
+Assume the following network topology:
+
+```
+A - B - C - D
+```
+
+A wants to send a message to D. A passes the message to B, and expects B to
+bring back a signed Response from D. A promises B `6 + processingFee` credits
+in case the message will be back in `6x` units of time.
+
+B passes the message to C. B expects C to bring back a signed Response from D.
+B promises C `4 + processingFee` credits in case the message will be back in
+`4x` units of time.
+
+C passes the message to D. C expects D to bring back a signed Response.
+C promises D `2 + processingFee` credits in case the message will be back in
+`2x` units of time.
+
+D then returns a signed message to C, and earns the promised credit: `2 +
+processingFree`. The signed Response goes on all the way back to A, and every
+participant earns the promised amount of credit, given that the response
+arrived in the allocated window of time.
+
+
+If for example `C` will attempt to return a response to `B` after `4x` units of
+time have passed, an inconsistency will occur. The fault for this inconsistency
+goes to the pair `B, C`. (Though, we can decide for sure which one of them
+caused the problem, if at all possible). 
+
+Examples for causes to such inconsistency could be:
+
+- Loss of power for `B` or `C`.
+- The cable between `B` and `C` got disconnected.
+
+
+It is not known how to divide the losses between B and C in case of
+inconsistency that is caused due to timeout.
+
+
+We calculate win/loss due to the inconsistency between B and C:
+
+- (A, B): A: -1, B: +1
+- (B, C): Inconsistency (?)
+- (C, D): C: -2 - processingFee, D: 2 + processingFee
+
+
+## Dealing with inconsistencies
+
+In this analysis we distinguish between inconsistencies due to timeouts of two
+types:
+
+- Inconsistencies that happen due to malicious activity
+- Inconsistencies that happen due to infrastructure failure (Communication,
+    Power, hardware failure etc)
+
+
+**Example: Inconsistency due to malicious activity**
+Consider the following network topology, with the following scenario:
+
+```
+A - B - C - D
+```
+
+A sends a Request all the way to D, D sends back a Response message to A. 
+One moment before B attempts to pass the signed Response to A, A disconnects
+and therefore B can not pass the message to A. When A reconnects to B, B will
+attempt to send the message to A, which will cause an inconsistency.
+
+In this case a token channel inconsistency is a good solution. A will not be
+able to use the token channel he has with B until the inconsistency is
+resolved.
+
+
+**Inconsistencies that happen due to infrastructure failure** should be solved
+somehow between the parties that live near the problem, possibly using an
+external configuration.
+
+
