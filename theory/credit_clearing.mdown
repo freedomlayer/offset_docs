@@ -1,11 +1,4 @@
 # CSwitch motivation and general idea
-
-The most important question: If a node A can send a large amount of credit to
-some node B that does not trust A (i.e., A and B are not adjacent in the friends
-graph), then why does A need the mediators when it sends a message to C
-in the first place ?
-
-
 04.12.2017
 
 ## Introduction
