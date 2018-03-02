@@ -1,0 +1,100 @@
+
+# Strategies for dealing with timeout inconsistencies
+01.03.2018
+
+
+In order to avoid indefinite waiting to responses, and also to avoid possible
+DoS attacks of freezing credit for long periods of time, we propose to use a
+timeout field inside the Request message. The timeout fields specifies how much
+time the receiving side has to come up with a signed Response.
+
+```
+... - A - B - ...
+```
+
+In the picture: If A passes a Request to B, it also adds a timeout field to the
+Request message. It expects B to return a signed Response to this request in a
+timely manner, before the timeout has expired.
+
+If B can not do this, he is expected to return a Failure message in a timely
+manner. This will usually happen just before the timeout expires.
+
+
+## Timeout inconsistency
+
+For most token channel inconsistencies, it is easy to find out the cause for
+the inconsistency. For example:
+
+- A party sending invalid move token message, with the wrong previous
+    hash.
+
+
+Inconsistency could also happen due to attempt to send a message after the
+allotted time. An example of how this could happen (Relating to the network
+diagram above)
+
+- A passes a request to B. B obtains a signed Response and sends it to A. Some
+    network failure occurs, and A doesn't receive the message. When B later
+    retransmits the Response, A will report inconsistency because the Response was
+    received too late. In this case it is hard to decide who is to blame for the
+    inconsistency.
+
+- B has power outage and shuts down. When B wakes up he receives a timed out
+    Response message. In this case B can not identify if the message sent from
+    A is a legitimate message (Possibly a retransmit of a Response message),
+    or an attempt to cheat.
+
+
+We call this kind of inconsistency a timeout inconsistency.
+
+
+## Dealing with timeout inconsistencies
+
+Timeout inconsistencies are expected to happen from time to time, even on token
+channels that connect two honest parties. Timeout inconsistencies may occur due
+to any infrastructure failure. Some examples:
+
+- (Temporary) Communication failure.
+- Power outage.
+
+
+We want that two honest users will not need to deal with their instances of
+CSwitch with high probability. We also require that if a user attempts to
+cheat, with high probability an inconsistency will occur on a token channel. 
+
+A possible idea is to add external logic (Outside of CSwitch) that will allow
+to decide how to settle inconsistencies, if at all. For example, in case of one
+token channel producing many inconsistencies, it might be a good idea to
+disable communication with the relevant neighbor.
+
+Part of the logic to deal with inconsistencies should allow a honest party to
+take responsibility for inconsistencies.
+
+
+## Dealing with power outages
+
+Consider a token channel between A and B:
+
+```
+... - A - B - ...
+```
+
+Assume that the party B shuts down for a period of time.
+
+```
+        p                      q
+--------|%%%%%%%%%%%%%%%%%%%%%%|-------------------------->
+      B shuts down        B online                      time
+```
+
+When B's CSwitch engine is restarted, all the local pending requests entries
+with expiry time between `p` and `q` should be removed and kept separately in a 
+"local missed requests".
+
+Recall that local pending requests were kept in the database before time `p`.
+Therefore B can retrieve those entries after a shutdown.
+
+If A ever sends to B a Response message corresponding to one of the local
+missed requests, B will accept the message and take the loss for receiving it.
+Note that B might not be able to forward this message to the next party.
+
