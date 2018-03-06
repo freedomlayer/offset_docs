@@ -528,14 +528,25 @@ byte to intermediate nodes.  proposed will be payed to the intermediate nodes.
 
 We define:
 
+Special case:
+
 ```
-paymentOnSuccess(responseLength) := (length(request) + responseLength) * 
-        creditsPerBytesProposal *
-        (amountOfNodesToDest - 1) + 
-    processingFeeProposal + 
-    length(request) +
-    (maxResponseLength - responseLength)
+paymentOnSuccess[dest](responseLen) := 
+    processingFeeProposal 
+    + len(request) * creditsPerBytesProposal 
+    + (maxResponseLength - responseLen)
 ```
+
+
+General case:
+
+```
+paymentOnSuccess[mediator](responseLen) :=
+    (length(request) + responseLength) * creditsPerBytesProposal *
+        (amountOfNodesToDest - 1)
+     + paymentOnSuccess[dest](responseLen)
+```
+
 
 to be the payment received for a successful transaction (This payment happens
 when the transaction is completed: when a ResponseSendMessage is sent).
