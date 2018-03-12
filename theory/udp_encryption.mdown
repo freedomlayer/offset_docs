@@ -83,6 +83,8 @@ follows:
 3. A -> B: ExchangeActive   (hashPrev, dhPublicKeyA, keySaltA, Signature(A))
 4. B -> A: ChannelReady     (hashPrev, Signature(B))
 
+Question: Why doesn't A sign its first message ? It might be replayed.
+
 
 Where:
 
@@ -120,6 +122,8 @@ for connection setup?
 
 
 ## Channel receiving ends Carousel
+
+Question: Is this Carousel of size 3 a standard method ?
 
 Each party X maintains a maximum of 3 receiving ends of channels from a given
 remote party Y. This is called the channels carousel mechanism. Whenever a new
@@ -222,6 +226,8 @@ following:
         - Set `zurWindowBitmask[recvCounter - counter - 1] = 1`
     c.  Else: Discard the message.
 
+
+Note: Keep in mind that specific methods work best in specific environments.
 
 ## Connection teardown
 
