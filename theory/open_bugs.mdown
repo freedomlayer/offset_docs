@@ -1,0 +1,35 @@
+# Current open bugs in CSwitch theory
+12.03.2018
+
+## Introduction
+
+CSwitch defines a mechanism for transferring funds. We did not formalize it yet and did
+not prove its correctness. The mechanism inhibits deficiencies, that need to be addressed.
+
+## Fake failures
+
+Nodes might report on very long failures in order to gain credit.
+Assume the network topology is
+```
+    A -- B -- C -- D -- E
+```
+Now, assume A sends a message to E and assume both B and D are controlled by an adversary.
+
+First, A sends a request message to B.
+Then, B reports that a failure happened in the edge $(D,E)$. It signs
+that failure message using D's private key.
+
+Overall, B gained the credits for failures of three nodes, B, C, D by
+sending only a single message.
+
+
+One simple solution to that problem, is to sign the whole chain of failure.
+That is, a failure message should have the following format:
+    ```Sign_B(Sign_C(Sign_D(Fail, RequestId)))```
+
+Notice that in the Funder, this solution is more reasonable because there is no need for
+speed in the Funder layer.
+
+Still, if an adversary controls a few consecutive nodes along the route then it
+could use them to gain more credit by sending less messages.
+
