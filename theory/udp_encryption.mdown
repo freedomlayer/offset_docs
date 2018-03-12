@@ -83,12 +83,8 @@ follows:
 3. A -> B: ExchangeActive   (hashPrev, dhPublicKeyA, keySaltA, Signature(A))
 4. B -> A: ChannelReady     (hashPrev, Signature(B))
 
-Questions:
-1) Is this a standard protocol ?
-2) Why doesn't A sign its first message ? It might be replayed.
-3) Why don't they just encrypt nonce to each other and combine these
-    nonces into a symmetric key ?
-    Why do we need DH here ?
+Question: Why doesn't A sign its first message ? It might be replayed.
+
 
 Where:
 
