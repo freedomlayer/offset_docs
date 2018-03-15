@@ -143,8 +143,11 @@ Here MA is the last MoveToken message sent or received by A.
             - Report inconsistency
     - Else: (MA is an outgoing message)
         - If MT.oldToken == hash(MA):
-                - process(MT)
-                - set MA = MT (incoming)
+                - process(MT) [In RAM]
+                    [Process will read the message and prepare future tasks,
+                    but not actually execute them immediately]
+                - set MA = MT (incoming) [Also commit credit balance state 
+                                         At the same DB transaction]
                 - Report message received (MT)
         - Else:
             - If MA.oldToken == hash(MT)
