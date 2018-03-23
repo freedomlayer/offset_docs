@@ -1,0 +1,588 @@
+# Introduction to Credit Switching
+23.03.2018
+
+Credit switching is a protocol that allows secure exchange of communication and
+funds, based on trust between people.
+
+## Mutual credit clearing
+
+Assume that two business owners, a milkman and a baker, live next to each
+other. Also assume that they live in a world without money.
+
+One way the milkman and the baker could exchange goods without the use of money
+is using the method of barter. the milkman could ask the baker from some bread,
+in exchange for some milk. However, what if at a specific time the milkman
+wants to get some bread from the baker, but the baker doesn't need any milk
+from the milkman? In this case, the method of barter will not allow to perform
+a transaction. Barter only works if the two involved parties are interested in
+the exchange in a specific point in time.
+
+To solve the problem, the milkman and the baker could use **mutual credit
+clearing**: If the milkman wants to get bread from the baker, but the baker
+doesn't need any milk right now, the baker will give the milkman a loaf of
+bread, and write down on a piece of paper that the milkman owes him some
+credit. The milkman will also write a similar note for reference.
+
+A few days later later, if the baker wants to get milk from the milkman, the
+baker could use his credit at the milkman to get milk. After the milkman gives
+the baker a bottle of milk, the debt of the milkman to the baker is cleared.
+
+This method allows the milkman and the baker to perform exchange of their
+goods, even if they do not want to exchange them at exactly the same time. 
+
+One assumption that mutual credit clearing makes is that the milkman and the
+baker trust each other. Suppose that the milkman takes 5 loafs of bread from
+the baker. The milkman and the baker both write a note that the milkman ows the
+baker credit that equals 5 loafs of bread. What if the milkman is gone one day,
+without ever repaying the debt to the baker? The baker is left with a note that
+the milkman ows him credit, but this note can not be redeemed anywhere for
+goods.
+
+The baker, by allowing the milkman to have debt to him, trusts that the milkman
+will stick around to be able to pay back the debt in the future, in some way.
+
+Some measures to be taken when using mutual credit clearing:
+
+- Mutual credit clearing should only be set up between people that trust each
+    other. It is advantage if those people know each other from the real world,
+    and they have met in person.
+
+- The maximum debt possible in the mutual credit clearing between two sides
+    should be limited to some maximum amount. For example: If the baker allows the milkman to owe
+    him credit of value at most 3 loafs of bread, the baker will not be able to lose
+    more than 3 loafs of bread if A can't repay the debt.
+
+
+Given these assumptions, the state of mutual credit between two nodes A and B
+consists of the following parameters:
+
+- A allows B maximum debt of md{AB}
+- B allows A maximum debt of md{BA}
+
+md{BA} and md{AB} are not necessarily equal. Drawn on a one dimensional scale,
+we get a picture as follows (from the point of view of A):
+
+```
+                     d{AB}
+     [-----------|-----^-------]
+  -md{BA}        0           md{AB}
+```
+
+In the picture, B owes A some amount of money. The `^` marks shows the current
+credit relationship between A and B. The value d{AB} is the mutual credit state
+between A and B. It denotes the purchasing power of A with respect to B. It is
+always true that `-md{BA} <= d{AB} <= md{AB}`. Note the symmetric property:
+`d{AB} = -d{BA}`.
+
+From the point of view of B, the picture looks as follows:
+
+```
+            d{BA)
+     [-------^-----|-----------]
+  -md{AB}          0         md{BA}
+```
+
+In the context of credit switching, we call such a pair of identities A and B
+**friends**.  A pair of friends represents a trust relationship in the real
+world between two people.
+
+The economy of mutual credit clearing between two people is simple, and it
+requires that each side generates goods that the other side wants. In the
+example above, the milkman wants to get bread, and the baker wants to get milk.
+This does not always happen in the real world. 
+
+If, for example, the baker decided to stop drinking milk (Maybe he got
+allergic?), the simple mutual credit clearing between the milkman and the baker
+will not keep working. After a few loafs of bread that the milkman takes from
+the baker for credit, the baker will not allow the milkman to take any more,
+because the debt is too large.
+
+This problem could be solved if the baker possibly wanted to buy service from
+the carpenter, assuming that the carpenter buys milk from the milkman. This
+will usually happen in an economy of multiple players.
+
+
+## Chains of mutual credit clearing
+
+To extend the idea of credit clearing to the economy of multiple players we use
+chains of mutual credit clearing. In this setting, every person has a few other
+people he trusts, and maintains mutual credit clearing with.
+
+Assume that a person A wants to send funds to another person B. If A and B
+are friends (They directly manage mutual credit clearing), the transaction is
+simple: A will decrease d{AB} and B will increase d{BA}. 
+
+If A and B are not friends, they need the help of a mediator, or a chain of
+mediators, to perform the transaction. A and B will look for a chain of the
+following form:
+
+```
+A -- M1 -- M2 -- M3 -- B
+```
+
+Where A, M1 are friends, M1, M2 are friends, M2, M3 are friends and M3, B are
+friends. Of course, the length of the chain could be arbitrary.
+
+To transfer funds from A to B, A will first transfer funds to M1, M1 and will
+transfer the funds to M2, M2 will transfer the funds to M3 and M3 will transfer
+the funds to B. Each mediator (M1, M2, M3) can take a little amount of funds
+for himself during the transaction, in exchange for helping A and B perform the
+transaction.
+
+We assume that friendship between people in the real world should allow any two
+strangers A,B to find a chain of friends that connects them, to allow transfer
+of funds between A and B. If no such chain is found, transfer of funds will not
+be possible.
+
+
+## Introduction to backwards credit payment
+
+In the previous sections we showed that transfer of funds between
+two nodes could be accomplished by "pushing" credit along a chain of friends.
+
+To examine the security of this setup, we need to consider the incentives of
+the nodes participating in the transaction. In this section we introduce a
+method to perform a transaction between friends.
+
+Consider the following graph of friends:
+
+```
+A -- B -- C -- D
+```
+
+A,B are friends, B,C are friends, C,D are friends. Suppose that A wants to send
+funds to D. We described earlier the general idea for sending funds
+from A to B together with payments to the mediators, but we haven't yet gave
+the specifics of how to do this, to make this transaction somewhat atomic and
+secure.
+
+Consider first the following naive scenario: A wants to send 10 credits to D. 
+A will calculate how much credit he needs to give to each of the mediators as a
+payment for passing the funds all the way to D. For example: 2 credits to B, 2
+credits to C and 10 credits to D.  Next, A will send 14 = 2 + 2 + 10 credits to B.
+A trusts B to take 2 credits to himself, sending the rest of the credits to C.
+In the same way, A could trust C to take 2 credits to himself, and pass the
+remaining 10 credits to D.
+
+B could keep 2 credits to himself, passing 12 credits to C. However, it is of
+greater benefit to B to keep the full 14 credits to himself and not pass any
+credits to C.
+
+We solve this problem using the idea of **backwards payment of credits**. This idea
+is crucial to the operation of the credit switching protocol.
+
+When A wants to send funds to D, instead of directly passing all the 14 credits
+to B, A will send B a promise for credit, in the future, given a proof that D
+received the correct amount of credits. In addition, A freezes 14 credits in
+his mutual credit with B. Those 14 credits will not be unfrozen until A gets a
+proof from B that the funds were delivered to D, or until A gets a message from
+B notifying that an error happened while processing the request.
+
+Next, B passes a promise to C to pay 12 credits if C
+brings a proof that the funds were delivered to D. B freezes 12 credits
+in his mutual communication credit with C. C then sends a promise to D to pay
+10 credits if D issues a signed message which proves D received the funds.
+
+    Question: Does this freezing allow DOS attacks ?
+
+D receives the promise message, creates a signature of receipt, and sends it back to C.
+C pays 10 credits to D. Next, C sends the signature back to B and receives 12
+credits from B. B Finally B sends the signature back to A and receives 14
+credits.
+
+Eventually, A paid 14 credits, and B,C each earned 2 credits. D received 10
+credits. In addition, A knows that the funds was received by D. 
+
+We distinguish between two stages in this transaction: We call the forward
+stage (Sending the message from A to D) the "RequestSendFund", and the backwards stage
+(Sending the signature from D to A) the "ResponseSendFund".
+
+What happens if one of the mediators can not pass the message during the
+request stage? For example, if C wants to pass the message to D, but C knows
+that D is currently not online? 
+In this case, C will send back a FailedSendFund message to B, claiming that the
+funds could not be delivered, together with C's signature. B will pay C 1
+credit. B will then add his own signature to the failure message, and forward
+the failure message to A. Seeing the provided failure message, A will pay B 2
+credits. 
+
+In other words, in the case of a failure, every mediator node (Up to the failure
+reporting node) receives only 1 credit.
+
+
+## Messages definition
+
+We include here a more detailed description of each of the three messages used for
+the transfer of funds between friends: RequestSendFun, ResponseSendFun and FailedSendFund.
+The fields of each message begin with a dash (`-`). Comments for fields are
+written right below the field and begin with a hash sign (`#`).
+
+```
+RequestSendFund
+    - requestId
+        # A unique id of the request
+    - route
+        # A route of friends used to pass the credits. This route begins from the
+        # party that initiates the payment, and goes all the way until the
+        # destination, which receives the credits.
+    - mediatorPaymentProposal
+        # Proposal for the amount of credits paid to every mediator.
+    - invoiceId
+        # An invoice id number. This is used by the higher level application to
+        # link the payment request to specific goods delivered.
+    - destinationPayment
+        # Amount of credits that will be paid to the destination node.
+```
+
+```
+ResponseSendFund
+    - requestId
+        # The unique id of the original request.
+    - randNonce
+        # A random nonce.
+    - signature
+        # Signature{key=recipientKey}(
+        #   "FUND_SUCCESS" ||
+        #   sha512/256(requestId || 
+        #       sha512/256(nodeIdPath) || 
+        #       mediatorPaymentProposal) ||
+        #   invoiceId ||
+        #   destinationPayment ||
+        #   randNonce)
+```
+
+```
+FailedSendFund
+    - requestId
+        # The unique id of the original request.
+    - reportingPublicKeyIndex
+        # Index of the reporting node in the route of the corresponding request.
+        # The reporting node cannot be the destination node.
+    - randNonceSignatures
+        # Contains an array of tuples:  (nonce, signature), beginning from the reporting node, until the current node.
+        # A signature is of the following form:
+        # Signature{key=recipientKey}(
+        #   "FUND_FAILURE" ||
+        #   sha512/256(requestId || sha512/256(nodeIdPath) || mediatorPaymentProposal) ||
+        #   invoiceId ||
+        #   destinationPayment ||
+        #   prev randNonceSignatures ||
+        #   randNonce)
+```
+
+
+## Invoice and Receipt
+
+We now consider higher level applications that use the credit clearing
+mechanism for sending funds in exchange for some goods. There are two parties
+in the transaction: The buyer and the seller.
+
+```
+Buyer App                       Seller App
+           <---[InvoiceId]----
+           ----[Receipt]----->
+                
+```
+
+Detailed process:
+
+1. The buyer wants to buy something from the seller.
+2. The seller generates a random invoice id and sends it to the buyer.
+3. The buyer sends a RequestSendFund along a route to the seller, containing
+   the invoiceId provided by the seller.
+4. The buyer receives a ResponseSendFund, signed by the buyer. He uses it to
+   construct a signed receipt that contains the invoiceId.
+5. The buyer sends the receipt to the seller.
+6. The seller verifies the receipt and provies the goods.
+
+The structure of the receipt is as follows:
+
+
+```
+Receipt {
+    - responseHash 
+        # = sha512/256(requestId || 
+        #       sha512/256(nodeIdPath) || 
+        #       mediatorPaymentProposal)
+    - invoiceId 
+    - destinationPayment
+    - randNonce 
+    - signature 
+        # Signature{key=recipientKey}(
+        #   "FUND_SUCCESS" ||
+        #   sha512/256(requestId || 
+        #       sha512/256(nodeIdPath) || 
+        #       mediatorPaymentProposal) ||
+        #   invoiceId ||
+        #   destinationPayment ||
+        #   randNonce)
+```
+
+Note that once a valid ResponseSendFund message is received, it is possible to
+construct a Receipt. The signature in the receipt is exactly the same signature
+at the ResponseSendFund message.
+
+
+## Analyzing incentives in Backwards credit payment
+
+We now analyze various cases of action during a backwards credit payment
+transaction, to make sure that all the participants of the transaction are
+properly incentivized. Our goal is that it will be the most profitable for
+every participant to pass the funds to their destination (When possible).
+
+Consider the following network formation between neighbors:
+
+```
+A -- B -- C -- D -- E -- F
+```
+
+And consider the following cases:
+
+(1) B receives a RequestSendFund message that he should forward to C, but he
+doesn't forward the message to C.
+
+This is not a reasonable for B, because B could potentially earn credits
+from this transaction.
+
+
+(2) A sends a message to a nonexistent remote node T, along the route:
+
+`A -- B -- C -- D -- T`
+
+As a result, the node D will send back a FailedSendFund
+message, signed by D, back to C. The error response message will eventually
+arrive A, and all the mediator nodes will be paid 1 credit. This means that
+sending a message to a nonexistent remote node costs money to A, and the
+mediator nodes are still compensated.
+
+
+(3) A and F cooperate. When F receives a RequestSendFund message, F doesn't
+return a signed response message to E. A and F might be using this as a
+technique for free communication.
+
+In this case E will keep the request open, waiting for a response from F. This
+freezes credits between E and F. If F does this many times, all credits between
+E and F will be frozen and it will not be possible to open new requests from E
+to F. This means that F will not be able to receive funds through E.
+
+
+(4) B receives a ResponseSendFund message from C but doesn't pay C.
+
+An inconsistency will be created in the neighbor relationship between B and C,
+and communication will not continue between them until this inconsistency is
+wsolved manually.
+
+
+(5) C receives a ResponseSendFund message from D but does not pass it to B.
+
+This means that C gives up on credit, passing the ResponseSendFund message to B
+will earn C credit. Therefore, C will prefer to pass the ResponseSendFund
+message to B.
+
+(6) "Hollow failure route attack": Consider the following friends graph:
+
+`A -- B -- C1 -- C2 -- C3 -- E -- F`
+
+In addition, assume that B and E belong to the same person (But B and E might
+be distant geographically, without any method of direct communication). In
+other words, B knows the private key of E. We call this attack "hollow" because
+of the gap of C1, C2, C3 between the attacker's nodes: B and E.
+
+Assume that A sends a RequestSendFund message with route `A -- ... -- F` to B.
+If B could create a FailedSendFund message that looks like it
+originated from E, he could have send it to A directly, earning 5 credits
+(These are the credits that A thinks he is paying for B, C1, C2, C3, E). This
+is more than B and E would have earned together (2 + 2 = 4 credits) if they had
+sent the RequestSendFund message all the way to F. 
+
+But it is not possible for B to create a FailedSendFund message that looks like
+it originated from E, because the signatures of all the nodes between B and E
+are required (C1, C2, C3).
+
+
+(7) An attacker node claims to be many nodes
+For example, consider the following friends graph:
+
+```
+A -- B -- C -- D -- E
+     \---------/
+       Attacker
+```
+
+Where B, C, D all belong to the same attacker. Those nodes possibly run on the
+same machine, simulating multiple machines on the friends graph. It could be
+very difficult for other nodes to notice that B, C, D run on the same machine.
+
+Hence, whenever A sends funds to E through the route `A -- B -- C -- D -- E`,
+the attacker obtains more credit compared to the honest friends graph:
+`A - M - E`.
+
+The equivalent of this is letting the attacker ask for for credit for
+forwarding funds, and this is possible in the credit switching protocol. 
+An attacker will prefer to ask for more credit per transaction instead of
+simulating multiple nodes to make the route look longer.
+
+Also note that if a route to a destination node is long or expensive, it is
+likely that a different route will be chosen to send the funds. It is only
+reasonable for a node to increase the amount of credits he bills for mediating
+a transaction as long as there are no cheaper routes.
+
+
+Analyzing the cases above does not mean that the backwards credit payment is
+proved to be safe, but currently we do not know of any holes in its design.
+
+
+(8) "Side communication attack": Consider the following friends graph:
+
+`A -- B -- C1 -- C2 -- C3 -- E -- F`
+
+where B and E belong to one attacker, and they have a communication channel
+between them (Or even: They are on the same machine).
+
+Assume that A sends to B a RequestSendFund message. B forwards this message
+through the communication channel to E. E then sends the RequestSendFund
+message to F. F signs the message and produces a ResponseSendFund message. E
+receives this message, pays F and forwards the ResponseSendFund message to B
+through the communication channel. B then forwards the ResponseSendFund message
+to A pays B. Therefore B and E have earned more credit that they would have
+earned if they forwarded the message through C1, C2, C3.
+
+This case is equivalent to the previous dicussed case (7).
+
+
+## Frozen credits
+
+Assume the mutual credit relationship between two friends `A -- B`. 
+Consider the credit balance from the point of view of A.
+
+We denote: 
+- balance is `d{AB}`, the balance between A and B from the point of view of A.
+- remoteMaxDebt is `md{AB}`, the maximum debt A allows to B.
+- localMaxDebt is `md{BA}`, the maximum debt B allows to A.
+- remotePendingDebt is the current amount of credits frozen from B to A.
+- localPendingDebt is the amount of credits frozen from A to B.
+
+A picture of the credit balance from the point of view of A:
+
+```
+      balance - localPendingD  balance       balance + remotePendingD
+                      |          |                |
+    ----------[-------(----------*----------------)------------]--------->
+              |                                                |
+    -localMaxDebt                                   remoteMaxDebt
+```
+
+We generally require the following inequalities:
+
+```
+-localMaxDebt
+    <= balance - localPendingDebt 
+    <= balance
+    <= balance + remotePendingDebt
+    <= remoteMaxDebt
+```
+
+TODO: Check the inequalities. Some of them are relaxed in the implementation
+for ease of changing remoteMaxDebt. Maybe not relevant here?
+
+
+## Credit Freezing DoS problem
+
+Assume a mutual credit between two parties: `A -- B`.
+Consider an attacker that has routes to A and routes to B:
+
+```
+M -- .. -- A -- B -- .. -- N
+```
+
+In the picture above: M and N are nodes that are controlled by an attacker
+(It is even possible that M and N are running on the same machine).
+
+M sends a RequestSendFund message to N through the route in the picture. N
+receives the RequestSendFund message and never sends a ResponseSendFund
+message. 
+
+If M keeps sending RequestSendFund to which N never responds, all available
+credits from A to B will be frozen. This will block any new RequestSendFund
+messages to be sent from A to B. (Note that this is not true for the other
+direction! sending RequestSendFund messages from B to A will still be
+possible).
+
+The attacker can perform this attack without losing significant credit. (If N
+never sends a ResponseSendFund, the attacker doesn't lose any credit). The
+attacker does lose credit capacity around M and N, because M has to freeze at
+least the same amount of credits A has to freeze.
+
+However, if the attacker can obtain enough credit capacity (This should be
+possible in most cases), the attacker might be able to block a specific
+friendship channel between two parties.
+
+
+## Proportional credit freezing allocation
+
+To solve the credit freezing DoS problem, we limit the amount of credit that
+can be frozen. This is done as follows:
+
+Consider a node A, having friendship relationships with B, C, D, E.
+
+```
+ B <---  /---\
+ C <---  | A |  <--- E
+ D <---  \---/
+```
+
+When a RequestSendFund is sent from E through A to one of B, C, D, credits are
+frozen from E to A. 
+
+We distinguish between different frozen credits from E to A:
+- `F{EA}_B`: Frozen credits that represent a RequestSendFund that continues to B.
+- `F{EA}_C`: Frozen credits that represent a RequestSendFund that continues to C.
+- `F{EA}_D`: Frozen credits that represent a RequestSendFund that continues to D.
+
+Recall that `md{AI}` is the maximum debt A allows the node I. This is an
+amount controlled by A. We denote by `md{A}`: the sum of maximum debt A allows
+all the nodes A has friendship with. In our case: `md{A} = md{AB} + md{AC} +
+md{AD} + md{AE}`.
+
+We then require:
+
+`F{EA}_I / md{AE} <= md{AI} / md{A}`
+
+In words: This means that the amount of frozen credits from the channel `E-->I`
+allocated to the channel `A-->I` is proportional to the trust A puts in I.
+
+For all nodes I that have friendship with node A.
+More generally (Instead of only looking at `A <-- E`), we require that:
+
+`F{JA}_I / md{AJ} <= md{AI} / md{A}`
+
+For all nodes I, J that have friendship with A. (Checking for the special case
+of I = J, we get `F{IA}_I = 0`. Putting this into the inequality yields no new
+information).
+
+In words: The amount of frozen credits from the channel `J-->I`
+allocated to the channel `A-->I` is proportional to the trust A puts in I.
+
+This requirement can also be formulated as: 
+
+`F{JA}_I <= md{AI} * md{AJ} / md{A}`
+
+Note that the right hand of this inequality is fully determined by A's
+configuration.
+
+
+As a result of the proportional credit freezing allocation mechanism, we obtain
+this property: The farer a node from a channel in the friendship graph, the
+less credits he can freeze. The amount of credits that can be frozen decrease
+exponentially with the distance. 
+
+This means that each single RequestSendFund message will allow to freeze (and
+therefore send) less credits. However, large amounts of credits can still be
+sent to a remote destination by issuing multiple RequestSendFund messages.
+
+With the proportional credit freezing mechanism, an attacker can only freeze
+credits according to the amount of trust put on him, possibly indirectly. The
+farer an attacker in the friendship graph from a friends channel, the less
+credits the attacker can freeze.
+
+TODO: Possibly add examples here?
