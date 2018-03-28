@@ -352,7 +352,7 @@ from this transaction.
 As a result, the node D will send back a FailedSendFund
 message, signed by D, back to C. The error response message will eventually
 arrive A, and all the mediator nodes will be paid 1 credit. This means that
-sending a message to a nonexistent remote node costs money to A, and the
+sending a message to a nonexistent remote node costs credit to A, and the
 mediator nodes are still compensated.
 
 
