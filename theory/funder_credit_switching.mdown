@@ -661,3 +661,53 @@ and C.
 Because of the possibility of conflicts that can not be resolved easily, **we
 decided to abandon the idea of time limiting requests.**
 
+
+## Fund transactions are not atomic
+
+When transferring large amount of credits in the graph of friends, the method
+of indefinite waiting for response messages imposes risks for the sender of the
+credits .
+
+Fund transactions are not fully atomic. Consider the following graph of
+friends:
+
+```
+A -- B -- C -- D
+```
+
+Consider the following cases:
+
+(1) A wants to send funds to D. A sends a request message to
+B. B sends a request message to C. Suddenly C crashes. As in the previous
+example (in the graph of neighbors) is not known to B if C has received the
+message, therefore B will wait indefinately, until a response message is
+received from C. 
+
+Meanwhile, A doesn't know if the trasfer of funds to D has completed. If A has
+sent a large amount of credit to D, this could be a problem. A could try to open
+a new request to send funds to D, but then it is possible that the two
+transactions will succeed, and eventually A sent D twice as much credit.
+
+(2) A wants to send funds to D. A sends a request message to B, B forwards the
+request message to C, C forwards the request message to D. D then sends back a
+signed response message to C. This implies that C paid D the promised amount of credit.
+C then suddenly crashes.
+
+From D's point of view, the funds from A were received. A doesn't know if the
+funds transfer transaction was completed.
+
+As a summary:
+
+- If A knows that the funds transfer was completed, then D has already received the funds. 
+- It is possible that D received the funds, but A doesn't know about this yet.
+
+
+A possible solution to the lack of atomicity of funds transfer would be to
+split large payments into smaller chunks. For example, if A wants to send D
+1000 credits, A could send D 50 credits at a time. Most of the fund transfers
+should complete successfuly. If a transaction of 50 credits is somehow delayed,
+A could attempt to send another 50 credits to D. At some point enough credits
+have arrived to D.
+
+Sending the total credits in smaller amounts might decrease the risk taken by
+the sender.
