@@ -586,3 +586,78 @@ farer an attacker in the friendship graph from a friends channel, the less
 credits the attacker can freeze.
 
 TODO: Possibly add examples here?
+
+
+## The idea of time limiting requests (Abandoned)
+
+In the past we considered the idea of adding a time limit for a request (In the
+layer of communication or funds transfer), but we abandoned it due to problems
+of inconsistencies that could arise in the mutual credit management (between
+neighbors or friends).
+
+We show an example of implementing the time limit feature for a request.
+Consider the following graph of friends:
+
+```
+A -- B -- C -- D
+```
+
+A wants to transfer funds to D with a time limit for the request.
+A is willing to wait at most 6 seconds before the request is fulfilled.  A
+sends B a request message that contains:
+
+- A promise for 6 credits upon presenting a signed response message from D.
+- Time remaining fulfill the request: 6 seconds.
+
+B sends C a request message that contains:
+
+- A promise for 4 credits upon presenting a signed response message from D.
+- Time remaining to fulfill the request: 4 seconds.
+
+C sends D a request message that contains:
+
+- A promise for 2 credits upon presenting a signed response message.
+- Time remaining to fulfill the request: 2 seconds.
+
+D then sends a signed response message back to C. If the signed response
+message was sent on time (Before 2 seconds passed), C will accept the message
+and pay D 2 credits. C then sends back the signed response message to B. If
+sent on time, B will accept the message and pay C 4 credits. Finally B sends
+back the signed response message to A. If the response message arrived on time,
+A will pay B the promised 6 credits.
+
+
+The idea time limiting requests was abandoned because of the way it performs
+when network failures happen. Consider the previous example of A attempting to
+send funds to D, when A is willing to wait at most 6 seconds.
+
+Assume that A sends a request message to B, B sends a request message to C, C
+sends a request message to D. Next, D sends C a signed response message. C pays
+D the promised 2 credits, and then C attempts to send back to B the signed
+response message, but suddenly the connection between B and C is disturbed.
+
+```
+A -- B -X- C -- D
+```
+
+If the connection is disturbed for a few seconds, B will send back to A an
+error message indicating that the request could not be fulfilled. B will be
+paid 1 credit by A.
+
+C is at a loss of 2 credits. C thinks that he managed to send the signed
+response message to B on time. However, B has never received the signed
+response message. D has received the funds, but A is not sure that the
+transaction is completed.
+
+There is conflict in the mutual credit state between B and C. C thinks that B
+should pay him 4 credits, while B thinks that C didn't send the signed response
+message on time.
+
+Those kind of conflicts are difficult to solve, because it is not known who is
+at blame in this situation. It is possible that the communication between B and
+C was disturbed due to some problem that is outside of the control of both B
+and C.
+
+Because of the possibility of conflicts that can not be resolved easily, **we
+decided to abandon the idea of time limiting requests.**
+
