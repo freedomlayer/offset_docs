@@ -213,7 +213,7 @@ reporting node) receives only 1 credit.
 ## Messages definition
 
 We include here a more detailed description of each of the three messages used for
-the transfer of funds between friends: RequestSendFun, ResponseSendFun and FailedSendFund.
+the transfer of funds between friends: RequestSendFund, ResponseSendFund and FailedSendFund.
 The fields of each message begin with a dash (`-`). Comments for fields are
 written right below the field and begin with a hash sign (`#`).
 
