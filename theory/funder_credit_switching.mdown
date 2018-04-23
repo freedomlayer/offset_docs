@@ -183,8 +183,6 @@ brings a proof that the funds were delivered to D. B freezes 12 credits
 in his mutual communication credit with C. C then sends a promise to D to pay
 10 credits if D issues a signed message which proves D received the funds.
 
-    Question: Does this freezing allow DOS attacks ?
-
 D receives the promise message, creates a signature of receipt, and sends it back to C.
 C pays 10 credits to D. Next, C sends the signature back to B and receives 12
 credits from B. B Finally B sends the signature back to A and receives 14
