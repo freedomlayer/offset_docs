@@ -1,0 +1,99 @@
+# Linear pricing
+29.04.2018
+
+## Introduction
+
+Credit switching allows a node to send a message together with funds to a
+remote node. A naive approach will promise each of the mediators a constant
+amount of credits as compensation. However, the costs for sending messages for
+every mediator might vary. In other words, for some mediator passing messages
+might be more expensive than to others. We present here a method of pricing
+messages passing called linear pricing.
+
+This method of linear pricing should apply both to the Neighbors (Networker)
+and Friends (Funder) layers.
+
+
+## Basic linear pricing
+
+Consider the following topology between two neighbors:
+
+```
+B -- C
+```
+
+Assume that the node B sends a request message (RequestSendMessage or
+RequestSendFund) to the node C, expecting a response message.
+
+We make the assumption that sending data incurs costs only to the sender.
+Following this assumption we have two directions for pricing considerations:
+
+- Sending data from B to C, which incurs costs to B.
+- Sending data from C to B, which incurs costs to C.
+
+We choose the following model for costs: 
+
+- Sending x bytes from B to C will cost B {BC}_b + x * {BC}_r credits.
+- Sending x bytes from C to B will cost C {CB}_b + x * {CB}_r credits.
+
+We call the `b` value **base**, and the `r` value **multiplier**. Note that we
+have one base and one multiplier for every direction.
+
+The values {BC}_b and {BC}_r are determined by the node B, as B should know how
+much it costs him to send a message to C. In the same manner, the values
+{CB}_b, and {CB}_r are determined by C.
+
+
+We choose this model for simplicity. It could be true that the costs for
+sending a message from B to C is not linear with respect to the amount of bytes
+sent, but we assume that this formula could be used as a reasonable
+approximation in most cases.
+
+
+We present here two simpler alternative models, and explanations for why we
+chose not to use them:
+
+1. Constant cost for sending any message, regardless of its size. 
+
+This is a simple model, however, we do believe that in most cases sending
+larger messages will be more expensive.
+
+2. Having only the multiplier value for every direction. This means that
+   sending a message of size x bytes will cost `r * x` for some constant r. 
+
+This solution does not consider that in some cases sending empty messages also
+costs something to the sender. This is mostly true in cases where the
+communication is built upon another communication layer. For example: the
+Funder communication which is implemented over the Networker communication.
+
+
+## Payment proposal in request message
+
+TODO: Explain how payment proposal should be inserted into a request message.
+(Along the path of nodes).
+
+
+## Costs of sending a message
+
+TODO: Explain how to calculate the amount of credits required for sending a
+message along a path, given the values of bidirectional bases and multipliers
+along the path.
+
+## Funder over Networker
+
+TODO: Explain how bases and multipliers could be calculated for Friends chains,
+given the bases and multipliers used in the neighbors layer.
+
+## The case of too expensive error
+
+TODO: Explain the case of possibly DoS when the price for sending an error
+message is too large for a node. Explain how we mitigate this case by notifying
+neighbors/friends directly of price changes.
+
+
+## Notifying about pricing changes
+
+TODO: Explain how the Indexer and neighbors/friends should be notified when
+pricing changes.
+
+
