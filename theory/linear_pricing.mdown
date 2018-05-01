@@ -311,6 +311,7 @@ The total amount of credits paid by the source (B) is the sum:
     + request_len * ({CD}_r + {DE}_r + {EF}_r)
     + (max_response_len + max_failure_len) * ({CB}_r + {DC}_r + {ED}_r)
     + {FE}_b + max_response_len * {FE}_r
+    + processing_fee
 ```
 
 Note that this amount does not depend on `response_len`. Said differently, the
