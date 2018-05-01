@@ -421,3 +421,16 @@ the friends graph will be able to use those values as payment proposals, in
 order to send request messages.
 
 
+
+## Correct incentives
+
+TODO:
+
+- It is always more profitable to forward a message than to return a failure.
+    - Hollow route attack ?
+
+- It is best for the destination to return the shortest possible response.
+
+- Sending a message succesfuly always costs more than a message that has failed
+    to deliver.
+
