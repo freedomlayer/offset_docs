@@ -351,11 +351,32 @@ failed to deliver (For example, reporting node is E):
 Note that this value is lower than `Total{BF}`.
 
 
-## The case of too expensive error
 
-TODO: Explain the case of possibly DoS when the price for sending an error
-message is too large for a node. Explain how we mitigate this case by notifying
-neighbors/friends directly of price changes.
+
+## The case of a too expensive Failure message 
+
+Consider the following topology:
+
+```
+B -- C -- D -- E
+```
+
+Assume that the node B wants to send a message to node E along the route
+(B,C,D,E). If an error occurs when C attempts to pass the message to D, C will
+have to return an error message to B.
+
+B sent a certain payment proposal for to D. If the proposed payment is too
+low, it might not pay off to D to send back an error message. In turn, this
+might lead to frozen credits that will never be fulfilled.
+
+As a solution, D should inform C through the token channel about the required
+costs for sending bytes from D to C. If the proposal given by B is too low, C
+will return a failure message to B immediately. C will not attempt to pass the
+message to D.
+
+If C does forward a message to D with a too low proposal (For the cost of
+sending bytes from D to C), a token channel inconsistency between C and D will
+occur.
 
 
 ## Funder over Networker pricing
