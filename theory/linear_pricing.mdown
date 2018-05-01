@@ -67,10 +67,145 @@ communication is built upon another communication layer. For example: the
 Funder communication which is implemented over the Networker communication.
 
 
+## Notifying about pricing changes
+
+For a node B with a neighbor/friend node C, the amounts {BC}_b, {BC}_r can be
+configured by B. Whenever B changes any of the values {BC}_b or {BC}_r, B
+should notify the node C and also notify an Indexer. 
+
+Note that notifying an Indexer is not done actively. On the next time an
+Indexer communicates with B, B will notify of the changes to the values {BC}_b
+and {BC}_r.
+
+Notifications about changes to {BC}_b and {BC}_r sent from B to C are sent as a
+token channel message. After receiving this message, C must not pass messages
+through C that do not comply with the new {BC}_b, {BC}_r values. Attempt to do
+so will result in a token channel inconsistency.
+
+Note that as B advertises the values {BC}_b and {BC}_r both to his
+neighbors/friends and to Indexers, it is possible that those values will be out
+of sync for a while. 
+
+```
+T -- B -- C -- R
+```
+
+If for example the node T attempts to send a message to node R through the
+edge `B -- C` with proposal that is too low, B will return an error message
+back to T. If, on the other hand, the proposal is too high, the message will be
+passed.
+
+Therefore the node T can always send messages with a payment proposal that is a
+bit higher than the one obtained by the Indexer. This will increase the odds of
+having the message pass along the full path to its destination, despite
+possible out of sync base and multiplier values.
+
+
 ## Payment proposal in request message
 
 TODO: Explain how payment proposal should be inserted into a request message.
 (Along the path of nodes).
+
+During the sending of a request message, the source node should specify
+proposals for the request and response base and multiplier values for every
+node along the chain. The following diagram demonstrates the required proposal
+values for sending a message from the node A to the node E:
+
+```
+         req    req,res  req,res    res
+  A  --   B   --   C   --   D   --   E   
+
+```
+
+In the diagram, req means the pair (requestBaseProposal,
+reqMultiplierProposal). res means the pair (responseBaseProposal,
+responseMultiplierProposal). The node A does not need to specify proposals for
+B's response{Base|Multiplier} values, because he already knows them. B has sent
+those values on the token channel between A and B.
+
+Also, the node A does not need to specify proposal values for
+request{Base|Multiplier} for the node E, because E does not issue any request
+message to a next node. He only sends a response message back to the node D.
+
+We construct the messages containing the proposals as follows (Example for
+Networker Layer):
+
+```
+struct NeighborRouteLink {
+        nodePublicKey: CustomUInt256;
+        requestBaseProposal @1: UInt32;
+        requestMultiplierProposal @2: UInt32;
+        responseBaseProposal @3: UInt32;
+        responseMultiplierProposal @3: UInt32;
+}
+```
+
+```
+struct NeighborsRoute {
+        sourcePublicKey: CustomUInt256;
+        routeLinks @0: List(NeighborRouteLink);
+        destinationPublicKey: CustomUInt256;
+}
+```
+
+Note that NeighborRoute contains the source and destination public keys
+separately. This is a "trick" we use to make sure the amount of proposal
+payment values are always correct. For a route of length `n` (Including the
+source and destination) we expect to have exactly `n-2` pairs of request
+payment proposals and `n-2` pairs of response payment proposals. 
+
+We store those values as follows:
+
+```
+|source|====== routeLinks =======|destination|
+|      |                         |           |
+          req      req      req
+          res      res      res
+   A  --   B   --   C   --   D   --   E   
+```
+
+Where in fact, those values should be distributed as follows:
+
+```
+          req      req      req
+                   res      res      res
+   A  --   B   --   C   --   D   --   E   
+```
+
+In other words, `routeLinks[i].responseBaseProposal` is actually the
+responseBaseProposal for the node of index `i+1` in the routeLinks array.
+
+We could use a few lists instead, but then we would have to verify that the
+lists are always of equal length.
+
+
+```
+struct RequestSendMessageTran {
+        requestId @0: CustomUInt128;
+        route @1: NeighborsRoute;
+        requestContent @2: Data;
+        maxResponseLength @3: UInt32;
+        processingFeeProposal @4: UInt64;
+        creditsPerByteProposal @5: UInt64;
+}
+```
+
+The values for request/response Base/Multiplier proposal are obtained during a
+request for route from the Indexer. The Indexer should return the route
+together with those values. 
+
+It is reasonable to use slightly higher values than the ones that were supplied
+by the Indexer, because changes might have happened since the last time those
+values were obtained.
+
+When a node receives a RequestSendMessage, before he passes it to the next node
+he should first verify: 
+
+- The request{Base|Multiplier} values for the current node are high enough.
+- The response{Base|Multiplier} values for the next node are high enough. 
+
+If any check fails, an error message should be returned to the previous node on
+the route.
 
 
 ## Costs of sending a message
@@ -91,9 +226,5 @@ message is too large for a node. Explain how we mitigate this case by notifying
 neighbors/friends directly of price changes.
 
 
-## Notifying about pricing changes
-
-TODO: Explain how the Indexer and neighbors/friends should be notified when
-pricing changes.
 
 
