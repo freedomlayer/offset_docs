@@ -291,6 +291,8 @@ B -- C -- D -- E -- F
 The total amount of credits paid by the source (B) is the sum:
 
 ```
+Total{BF} := 
+
 {CD}_b + request_len * {CD}_r
     + {CB}_b + (response_len + max_failure_len) * {CB}_r 
 
@@ -318,6 +320,7 @@ Note that this amount does not depend on `response_len`. Said differently, the
 destination node is fully responsible for the costs incurred by sending a large
 response message.
 
+
 ## The case of too expensive error
 
 TODO: Explain the case of possibly DoS when the price for sending an error
@@ -325,11 +328,45 @@ message is too large for a node. Explain how we mitigate this case by notifying
 neighbors/friends directly of price changes.
 
 
-## Funder over Networker
+## Funder over Networker pricing
 
-TODO: Explain how bases and multipliers could be calculated for Friends chains,
-given the bases and multipliers used in the neighbors layer.
+Recall the formula Total{BF} in previous sections for sending a message from B
+to F. This formula gives us higher level values for costs of sending a message
+from the node B to the node F. 
 
+For example, it is possible that the nodes B and F are friends. We can use the
+formula for Total{BF} to calculate linear pricing for sending a message from B
+to F. Because our pricing scheme is linear, adding the costs of sending a
+message through neighbors amounts to linear pricing of sending messages between
+friends.
 
+To obtain the base value for sending a message from B
+to F, we assign `request_len = 0` to Total{BF}, and add {BC}_b:
+
+```
+[BF]_b := {BC}_b 
+        + {CD}_b + {DE}_b + {EF}_b
+        + {CB}_b + {DC}_b + {ED}_b 
+        + (max_response_len + max_failure_len) * ({CB}_r + {DC}_r + {ED}_r)
+        + {FE}_b + max_response_len * {FE}_r
+        + processing_fee
+```
+
+To obtain the multiplier value for sending a message from B to F, we derivate
+Total{BF} by the variable request_len and add {BC}_r. We obtain:
+
+```
+[BF]_r := {BC}_r + {CD}_r + {DE}_r + {EF}_r
+```
+
+Why add {BC}_b and {BC}_r?  When the message originates from B, this is not
+relevant, because there is no point in B paying B for the work done. However,
+if the message does not originate from B, then B should get compensation for
+his work in passing the message.
+
+The values [BF]_b and [BF]_r will then be calculated by B, and advertised to an
+Indexer and to the friend F (Through the friend token channel). Other nodes in
+the friends graph will be able to use those values as payment proposals, in
+order to send request messages.
 
 
