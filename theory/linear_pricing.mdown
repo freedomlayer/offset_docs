@@ -208,22 +208,126 @@ If any check fails, an error message should be returned to the previous node on
 the route.
 
 
+## Compensation for intermediate nodes
+
+Assume that a node B wants to send a message to a node F.
+B first requets a route to the node F from an Indexer. B then receives the
+following route from the Indexer:
+
+```
+B -- C -- D -- E -- F
+```
+
+Together with linear pricing for sending bytes on all the relevant edges of the
+route:
+
+```
+          req      req      req
+                   res      res      res
+   B  --   C   --   D   --   E   --   F   
+```
+
+B should already know the pricing for response from C because B is a direct
+neighbor of C, and C should have sent this information on the token channel
+with B.
+
+Consider sending a message from B to F along the route specified above.
+
+For a successful delivery, the node C should receive:
+
+```
+{CD}_b + request_len * {CD}_r
+    + {CB}_b + (response_len + max_failure_len) * {CB}_r 
+```
+
+credits. Here `request_len` is the length of the
+request message, including all the fields. `response_len` is the length of
+the response message, including all the fields. `max_failure_len` is the
+maximum possible length of a failure message. Recall that the failure message
+contains signatures of all nodes until the reporting node, therefore
+`max_failure_len` depends on the length of the route.
+
+
+For a failed delivery, the node C should receive:
+
+```
+{CB}_b + failure_len * {CB}_r
+```
+
+credits, where `failure_len` is the length of the failure message
+including all fields.
+
+The same compensation formula can be calculated for the nodes D and E which
+fulfil a similar job in passing the message. The node destination node F has a
+different compensation formula.
+
+Note that the expression `response_len + max_failure_len` has the job of being
+larger than each of the summands. We could have been chosen `max(response_len,
+max_failure_len) + 1` instead. However, we chose to use a summation formula
+because it makes analysis easier. For example, see the calculations in the next
+section.
+
+
+For a successful delivery, F should receive:
+
+```
+processing_fee 
+    + {FE}_b + max_response_len * {FE}_r +
+    + (max_response_len - response_len) * ({CB}_r + {DC}_r + {ED}_r) 
+```
+
+credits. `max_response_len` is the maximum possible response length set by the
+source of this message (B). Recall that F can not issue a failure message.
+
+
 ## Costs of sending a message
 
-TODO: Explain how to calculate the amount of credits required for sending a
-message along a path, given the values of bidirectional bases and multipliers
-along the path.
+Consider again the following topology:
 
-## Funder over Networker
+```
+B -- C -- D -- E -- F
+```
 
-TODO: Explain how bases and multipliers could be calculated for Friends chains,
-given the bases and multipliers used in the neighbors layer.
+The total amount of credits paid by the source (B) is the sum:
+
+```
+{CD}_b + request_len * {CD}_r
+    + {CB}_b + (response_len + max_failure_len) * {CB}_r 
+
++ {DE}_b + request_len * {DE}_r
+    + {DC}_b + (response_len + max_failure_len) * {DC}_r 
+
++ {EF}_b + request_len * {EF}_r
+    + {ED}_b + (response_len + max_failure_len) * {ED}_r 
+
++ processing_fee 
+    + {FE}_b + max_response_len * {FE}_r + 
+    + (max_response_len - response_len) * ({CB}_r + {DC}_r + {ED}_r) 
+
+= 
+
+{CD}_b + {DE}_b + {EF}_b
+    + {CB}_b + {DC}_b + {ED}_b 
+    + request_len * ({CD}_r + {DE}_r + {EF}_r)
+    + (max_response_len + max_failure_len) * ({CB}_r + {DC}_r + {ED}_r)
+    + {FE}_b + max_response_len * {FE}_r
+```
+
+Note that this amount does not depend on `response_len`. Said differently, the
+destination node is fully responsible for the costs incurred by sending a large
+response message.
 
 ## The case of too expensive error
 
 TODO: Explain the case of possibly DoS when the price for sending an error
 message is too large for a node. Explain how we mitigate this case by notifying
 neighbors/friends directly of price changes.
+
+
+## Funder over Networker
+
+TODO: Explain how bases and multipliers could be calculated for Friends chains,
+given the bases and multipliers used in the neighbors layer.
 
 
 
