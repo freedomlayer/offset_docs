@@ -248,7 +248,7 @@ contains signatures of all nodes until the reporting node, therefore
 `max_failure_len` depends on the length of the route.
 
 
-For a failed delivery, the node C should receive:
+For a failed delivery reported by C, the node C should receive:
 
 ```
 {CB}_b + failure_len * {CB}_r
@@ -256,6 +256,14 @@ For a failed delivery, the node C should receive:
 
 credits, where `failure_len` is the length of the failure message
 including all fields.
+
+For a failed delivery reported by D or E, the node C should receive:
+
+```
+{CD}_b + request_len * {CD}_r 
+    + {CB}_b + failure_len * {CB}_r 
+```
+
 
 The same compensation formula can be calculated for the nodes D and E which
 fulfil a similar job in passing the message. The node destination node F has a
@@ -319,6 +327,28 @@ Total{BF} :=
 Note that this amount does not depend on `response_len`. Said differently, the
 destination node is fully responsible for the costs incurred by sending a large
 response message.
+
+The total amount of credits paid by the source (B) for a message that was
+failed to deliver (For example, reporting node is E):
+
+```
+{CD}_b + request_len * {CD}_r 
+    + {CB}_b + failure_len * {CB}_r 
+
++ {DE}_b + request_len * {DE}_r 
+    + {DC}_b + failure_len * {DC}_r 
+
++ {ED}_b + failure_len * {ED}_r 
+
+= 
+
+{CD}_b + {DE}_b 
+    + {ED}_b + {DC}_b + {CB}_b
+    + request_len * ({CD}_r + {DE}_r)
+    + failure_len * ({CB}_r + {DC}_r + {ED}_r)
+```
+
+Note that this value is lower than `Total{BF}`.
 
 
 ## The case of too expensive error
