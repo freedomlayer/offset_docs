@@ -546,10 +546,10 @@ We then require:
 
 `F{EA}_I / md{AE} <= md{AI} / md{A}`
 
-In words: This means that the amount of frozen credits from the channel `E-->I`
-allocated to the channel `A-->I` is proportional to the trust A puts in I.
+In words: The amount of frozen credits from the channel `E-->A`
+allocated to the channel `A-->I` is proportional to the trust A puts in I
+(For all nodes I that have friendship with node A).
 
-For all nodes I that have friendship with node A.
 More generally (Instead of only looking at `A <-- E`), we require that:
 
 `F{JA}_I / md{AJ} <= md{AI} / md{A}`
@@ -567,6 +567,72 @@ This requirement can also be formulated as:
 
 Note that the right hand of this inequality is fully determined by A's
 configuration.
+
+
+## Exponential decay of credit freezing
+
+Proportional credit freezing allocation makes sure that all the immediate
+friends of A can freeze credits only according to the amount of trust A puts in
+them. This is a "first level" protection against freezing DoS. 
+
+However, note that this countermeasure is not enough to protect against
+excessive freezing of credits by remote adversarial nodes. Consider for example
+the following friends topology:
+
+```
+         F                  -- J
+         |                     |
+         |                     |
+    C -- A -- B
+         |
+         |
+         E
+
+```
+
+
+Assume that the node J is an adversarial node. J can start a Request messages
+with the following paths:
+
+- (J, ..., E, A, B, ... J)
+- (J, ..., E, A, C, ... J)
+- (J, ..., E, A, F, ... J)
+
+This will allow J to consume almost all of the available credits from E to A.
+
+If we could somehow extend the proportional credit freezing allocation to
+the whole friends graph we could have gained better protection against
+freezing DoS for the node A, as every node will be able to freeze credits
+exactly according to the derived trust the node A puts in him. (By derived
+trust we mean multiplying the relative trust a node puts in another along the
+chain from one node to another)
+
+This is probably not possible though, as the node A can not have a reliable
+view of the network of friends. In addition, the network of friends changes
+with time, while frozen credits can not be changed after freezing takes place.
+
+
+To limit the amount of frozen credits a remote node can create, we use
+**exponential decay** of allowed credit freezing.
+Consider a node A, and a path going through A as follows:
+
+```         
+                 |
+K -- ... -- B -- A -- C -- ... -- J
+                 |
+```
+
+The maximum amount of credits that can be frozen in this path are:
+
+`F{BA}_C <= (md{AC} * md{AB} / md{A}) * 2^-len(C,...,J)`
+
+
+TODO: Continue here.
+
+- Explain why 2.
+
+
+
 
 
 As a result of the proportional credit freezing allocation mechanism, we obtain
