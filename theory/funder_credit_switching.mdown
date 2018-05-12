@@ -544,7 +544,7 @@ md{AD} + md{AE}`.
 
 We then require:
 
-`F{EA}_I / md{AE} <= md{AI} / md{A}`
+`F{EA}_I / md{AE} <= md{AI} / (md{A} - md{AE})`
 
 In words: The amount of frozen credits from the channel `E-->A`
 allocated to the channel `A-->I` is proportional to the trust A puts in I
@@ -552,7 +552,7 @@ allocated to the channel `A-->I` is proportional to the trust A puts in I
 
 More generally (Instead of only looking at `A <-- E`), we require that:
 
-`F{JA}_I / md{AJ} <= md{AI} / md{A}`
+`F{JA}_I / md{AJ} <= md{AI} / (md{A} - md{AJ})`
 
 For all nodes I, J that have friendship with A. (Checking for the special case
 of I = J, we get `F{IA}_I = 0`. Putting this into the inequality yields no new
@@ -563,7 +563,7 @@ allocated to the channel `A-->I` is proportional to the trust A puts in I.
 
 This requirement can also be formulated as: 
 
-`F{JA}_I <= md{AI} * md{AJ} / md{A}`
+`F{JA}_I <= md{AI} * md{AJ} / (md{A} - md{AJ})`
 
 Note that the right hand of this inequality is fully determined by A's
 configuration.
@@ -592,13 +592,15 @@ the following friends topology:
 
 
 Assume that the node J is an adversarial node. J can start a Request messages
-with the following paths:
+with the following paths (All start with J and end with J):
 
 - (J, ..., E, A, B, ... J)
 - (J, ..., E, A, C, ... J)
 - (J, ..., E, A, F, ... J)
 
-This will allow J to consume almost all of the available credits from E to A.
+Assume that J does not send Response messages for the initiated Request
+messages. This will allow J to consume almost all of the available credits from
+E to A as frozen credits.
 
 If we could somehow extend the proportional credit freezing allocation to
 the whole friends graph we could have gained better protection against
@@ -611,34 +613,60 @@ This is probably not possible though, as the node A can not have a reliable
 view of the network of friends. In addition, the network of friends changes
 with time, while frozen credits can not be changed after freezing takes place.
 
-
 To limit the amount of frozen credits a remote node can create, we use
 **exponential decay** of allowed credit freezing.
 Consider a node A, and a path going through A as follows:
 
 ```         
-                 |
-K -- ... -- B -- A -- C -- ... -- J
-                 |
+A1 -- A2 -- ... -- A(k)
 ```
 
-The maximum amount of credits that can be frozen in this path are:
+The maximum amount of credits that can be frozen (from the point of view of the
+node A(i)) in this path are:
 
-`F{BA}_C <= (md{AC} * md{AB} / md{A}) * 2^-len(C,...,J)`
+```
+frozenCredits <= md{A(i)-A(i-1)} * (md{A(i)-A(i+1)} / (md{A(i)} - md{A(i)-A(i-1)}))
+    * (md{A(i+1)-A(i+2)} / (md{A(i+1)} - md{A(i+1)-A(i)}))
+    ...
+    * (md{A(k-1)-A(k)} / (md{A(k)} - md{(A(k)-A(k-1)}))
+```
 
+Every node A(i) in the chain must check this inequality, and return error if
+the inequality is not satisfied. Therefore, every node A(s) that forwards a
+request message will add the following information to the forwarded Request
+message:
 
-TODO: Continue here.
+- sharedCredits(s):    md{A(s)-A(s-1)} if A is not first, 
+                       md{A(s)} otherwise.
 
-- Explain why 2.
+- forwardTrust(s):     md{A(s)-A(s+1)}
 
+- totalTrust(s):       md{A(s)} - md{A(s)-A(s-1)} if A is not first,
+                       md{A(s)} otherwise
 
+Upon receipt of a Request message, a node A(m) will verify the following
+frozen credits inequalities:
 
+```
+frozenCredits <= sharedCredits1 * (forwardTrust1 / totalTrust1) * ... 
+                    * (forwardTrust(m) / totalTrust(m))
 
+frozenCredits <= sharedCredits2 * (forwardTrust2 / totalTrust2) * ... 
+                    * (forwardTrust(m) / totalTrust(m))
+
+...
+
+frozenCredits <= sharedCredits(m) * (forwardTrust(m) / totalTrust(m))
+```
+
+If any of the above inequalities is not satisfied, the node A(m) will return a
+failure message. Note that we can only trust non adversarial nodes to verify
+the above inequalities.
 
 As a result of the proportional credit freezing allocation mechanism, we obtain
-this property: The farer a node from a channel in the friendship graph, the
-less credits he can freeze. The amount of credits that can be frozen decrease
-exponentially with the distance. 
+this property: The farer a node from a channel in the friendship graph (with
+respect to trust), the less credits he can freeze. The amount of credits that
+can be frozen decrease exponentially with the distance. 
 
 This means that each single RequestSendFund message will allow to freeze (and
 therefore send) less credits. However, large amounts of credits can still be
