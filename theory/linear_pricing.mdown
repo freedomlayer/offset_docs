@@ -112,18 +112,20 @@ node along the chain. The following diagram demonstrates the required proposal
 values for sending a message from the node A to the node E:
 
 ```
-         req    req,res  req,res    res
+       req,res  req,res  req,res    res
   A  --   B   --   C   --   D   --   E   
 
 ```
 
 In the diagram, req means the pair (requestBaseProposal,
 reqMultiplierProposal). res means the pair (responseBaseProposal,
-responseMultiplierProposal). The node A does not need to specify proposals for
-B's response{Base|Multiplier} values, because he already knows them. B has sent
-those values on the token channel between A and B.
+responseMultiplierProposal). 
 
-Also, the node A does not need to specify proposal values for
+Although A and B already agree on B's response{Base|Multiplier} values through
+the token channel, the node A still puts those values inside the Request
+message, to allow the rest of the nodes on the route make credit calculations.
+
+The node A does not need to specify proposal values for
 request{Base|Multiplier} for the node E, because E does not issue any request
 message to a next node. He only sends a response message back to the node D.
 
@@ -132,19 +134,24 @@ Networker Layer):
 
 ```
 struct NeighborRouteLink {
-        nodePublicKey: CustomUInt256;
-        requestBaseProposal @1: UInt32;
-        requestMultiplierProposal @2: UInt32;
-        responseBaseProposal @3: UInt32;
-        responseMultiplierProposal @3: UInt32;
+        nodePublicKey @0: CustomUInt256;
+        # Public key of current node
+        requestProposal @1: NetworkerSendPrice;
+        # Payment proposal for sending data to the next node.
+        responseProposal @2: NetworkerSendPrice;
+        # Payment proposal for sendingdata to the previous node.
 }
-```
 
-```
+
 struct NeighborsRoute {
-        sourcePublicKey: CustomUInt256;
-        routeLinks @0: List(NeighborRouteLink);
-        destinationPublicKey: CustomUInt256;
+        sourcePublicKey @0: CustomUInt256;
+        # Public key for the message originator.
+        routeLinks @1: List(NeighborRouteLink);
+        # A chain of all intermediate nodes.
+        destinationPublicKey @2: CustomUInt256;
+        # Public key for the message destination.
+        destResponseProposal @3: NetworkerSendPrice;
+        # Payment proposal for sending data from dest backwards
 }
 ```
 
@@ -152,7 +159,7 @@ Note that NeighborRoute contains the source and destination public keys
 separately. This is a "trick" we use to make sure the amount of proposal
 payment values are always correct. For a route of length `n` (Including the
 source and destination) we expect to have exactly `n-2` pairs of request
-payment proposals and `n-2` pairs of response payment proposals. 
+payment proposals and `n-1` pairs of response payment proposals. 
 
 We store those values as follows:
 
@@ -160,33 +167,26 @@ We store those values as follows:
 |source|====== routeLinks =======|destination|
 |      |                         |           |
           req      req      req
-          res      res      res
+          res      res      res      res
    A  --   B   --   C   --   D   --   E   
 ```
-
-Where in fact, those values should be distributed as follows:
-
-```
-          req      req      req
-                   res      res      res
-   A  --   B   --   C   --   D   --   E   
-```
-
-In other words, `routeLinks[i].responseBaseProposal` is actually the
-responseBaseProposal for the node of index `i+1` in the routeLinks array.
 
 We could use a few lists instead, but then we would have to verify that the
 lists are always of equal length.
 
 
 ```
-struct RequestSendMessageTran {
+struct RequestSendMessageOp {
         requestId @0: CustomUInt128;
-        route @1: NeighborsRoute;
-        requestContent @2: Data;
-        maxResponseLength @3: UInt32;
-        processingFeeProposal @4: UInt64;
-        creditsPerByteProposal @5: UInt64;
+        maxResponseLength @1: UInt32;
+        processingFeeProposal @2: UInt64;
+        route @3: NeighborsRoute;
+        requestContent @4: Data;
+        freezeLinks @5: List(NeighborFreezeLink);
+        # Variable amount of freezing links. This is used for protection
+        # against DoS of credit freezing by have exponential decay of available
+        # credits freezing according to derived trust.
+        # This part should not be signed in the Response message.
 }
 ```
 
@@ -223,7 +223,7 @@ route:
 
 ```
           req      req      req
-                   res      res      res
+          res      res      res      res
    B  --   C   --   D   --   E   --   F   
 ```
 
@@ -349,7 +349,6 @@ failed to deliver (For example, reporting node is E):
 ```
 
 Note that this value is lower than `Total{BF}`.
-
 
 
 
