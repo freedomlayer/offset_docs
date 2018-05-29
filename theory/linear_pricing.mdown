@@ -1,5 +1,5 @@
 # Linear pricing
-01.05.2018
+29.05.2018
 
 ## Introduction
 
@@ -236,16 +236,22 @@ Consider sending a message from B to F along the route specified above.
 For a successful delivery, the node C should receive:
 
 ```
-{CD}_b + request_len * {CD}_r
+{CD}_b + request_len(C) * {CD}_r
     + {CB}_b + (response_len + max_failure_len) * {CB}_r 
 ```
 
 credits. Here `request_len` is the length of the
-request message, including all the fields. `response_len` is the length of
-the response message, including all the fields. `max_failure_len` is the
-maximum possible length of a failure message. Recall that the failure message
-contains signatures of all nodes until the reporting node, therefore
-`max_failure_len` depends on the length of the route.
+request message, including all the fields. Note that `request_len` increases
+when we go along the route, because of the freezeLinks array inside
+RequestSendMessageOp. Therefore we mark it as `request_len(X)` for node `X`.
+
+`response_len` is the length of
+the response message, including all the fields. This value does not depend on
+which node we are looking at.
+
+`max_failure_len` is the maximum possible length of a failure message. Recall
+that the failure message contains signatures of all nodes until the reporting
+node, therefore `max_failure_len` depends on the length of the route.
 
 
 For a failed delivery reported by C, the node C should receive:
@@ -260,7 +266,7 @@ including all fields.
 For a failed delivery reported by D or E, the node C should receive:
 
 ```
-{CD}_b + request_len * {CD}_r 
+{CD}_b + request_len(C) * {CD}_r 
     + {CB}_b + failure_len * {CB}_r 
 ```
 
@@ -301,13 +307,13 @@ The total amount of credits paid by the source (B) is the sum:
 ```
 Total{BF} := 
 
-{CD}_b + request_len * {CD}_r
+{CD}_b + request_len(C) * {CD}_r
     + {CB}_b + (response_len + max_failure_len) * {CB}_r 
 
-+ {DE}_b + request_len * {DE}_r
++ {DE}_b + request_len(D) * {DE}_r
     + {DC}_b + (response_len + max_failure_len) * {DC}_r 
 
-+ {EF}_b + request_len * {EF}_r
++ {EF}_b + request_len(E) * {EF}_r
     + {ED}_b + (response_len + max_failure_len) * {ED}_r 
 
 + processing_fee 
@@ -318,7 +324,7 @@ Total{BF} :=
 
 {CD}_b + {DE}_b + {EF}_b
     + {CB}_b + {DC}_b + {ED}_b 
-    + request_len * ({CD}_r + {DE}_r + {EF}_r)
+    + request_len(C) * {CD}_r + request_len(D) * {DE}_r + request_len(E) * {EF}_r
     + (max_response_len + max_failure_len) * ({CB}_r + {DC}_r + {ED}_r)
     + {FE}_b + max_response_len * {FE}_r
     + processing_fee
@@ -332,10 +338,10 @@ The total amount of credits paid by the source (B) for a message that was
 failed to deliver (For example, reporting node is E):
 
 ```
-{CD}_b + request_len * {CD}_r 
+{CD}_b + request_len(C) * {CD}_r 
     + {CB}_b + failure_len * {CB}_r 
 
-+ {DE}_b + request_len * {DE}_r 
++ {DE}_b + request_len(D) * {DE}_r 
     + {DC}_b + failure_len * {DC}_r 
 
 + {ED}_b + failure_len * {ED}_r 
@@ -344,7 +350,7 @@ failed to deliver (For example, reporting node is E):
 
 {CD}_b + {DE}_b 
     + {ED}_b + {DC}_b + {CB}_b
-    + request_len * ({CD}_r + {DE}_r)
+    + request_len(C) * {CD}_r + request_len(D) * {DE}_r
     + failure_len * ({CB}_r + {DC}_r + {ED}_r)
 ```
 
@@ -397,10 +403,14 @@ to F, we assign `request_len = 0` to Total{BF}, and add {BC}_b:
 [BF]_b := {BC}_b 
         + {CD}_b + {DE}_b + {EF}_b
         + {CB}_b + {DC}_b + {ED}_b 
+        + empty_request_len(C) * {CD}_r + empty_request_len(D) * {DE}_r + empty_request_len(E) * {EF}_r
         + (max_response_len + max_failure_len) * ({CB}_r + {DC}_r + {ED}_r)
         + {FE}_b + max_response_len * {FE}_r
         + processing_fee
 ```
+
+`empty_request_len(X)` is the length of a request message that contains 0
+request bytes at the node X. (This message only contains the metadata).
 
 To obtain the multiplier value for sending a message from B to F, we derivate
 Total{BF} by the variable request_len and add {BC}_r. We obtain:
