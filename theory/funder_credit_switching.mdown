@@ -558,7 +558,7 @@ For all nodes I, J that have friendship with A. (Checking for the special case
 of I = J, we get `F{IA}_I = 0`. Putting this into the inequality yields no new
 information).
 
-In words: The amount of frozen credits from the channel `J-->I`
+In words: The amount of frozen credits from the channel `J-->A`
 allocated to the channel `A-->I` is proportional to the trust A puts in I.
 
 This requirement can also be formulated as: 
