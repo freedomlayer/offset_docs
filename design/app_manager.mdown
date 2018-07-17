@@ -220,20 +220,25 @@ payment proposal structures.
 
 Messages:
 
+```
 RequestSendMessage            Application -> AppManager
 ResponseSendMessage           AppManager -> Application
 MessageReceived               AppManager -> Application
 RespondIncomingMessage        Application -> AppManager
+```
 
 Funds transfer:
 
+```
 RequestSendFunds              Application -> AppManager
 ResponseSendFunds             AppManager -> Application
 ReceiptAck                    Application -> AppManager
+```
 
 
 Neighbor management:
 
+```
 OpenNeighbor                  Application -> AppManager
 CloseNeighbor                 Application -> AppManager
 AddNeighbor                   Application -> AppManager
@@ -246,10 +251,12 @@ SetNeighborMaxTokenChannels   Application -> AppManager
 
 NeighborStateUpdate           AppManager -> Application
 ResetNeighborChannel          Application -> AppManager
+```
 
 
 Friend management:
 
+```
 OpenFriend                    Application -> AppManager
 CloseFriend                   Application -> AppManager
 AddFriend                     Application -> AppManager
@@ -261,18 +268,22 @@ SetFriendRemoteMaxDebt        Application -> AppManager
 
 FriendStateUpdate             AppManager -> Application
 ResetFriendChannel            Application -> AppManager
+```
 
 
 Routes:
 
+```
 RequestNeighborsRoute         Application -> AppManager
 ResponseNeighborsRoute        AppManager -> Application
 RequestFriendsRoute           Application -> AppManager
 ResponseFriendsRoute          AppManager -> Application
+```
 
 
 ## Interface with Networker
 
+```
 RequestSendMessage            AppManager -> Networker
 ResponseSendMessage           Networker -> AppManager
 MessageReceived               Networker -> AppManager
@@ -296,10 +307,12 @@ DisableNeighbor               AppManager -> Networker
 
 NeighborStateUpdate           Networker -> AppManager
 ResetNeighborChannel          AppManager -> Networker
+```
 
 
 ## Interface with Funder
 
+```
 RequestSendFunds              AppManager -> Funder
 ResponseSendFunds             Funder -> Application
 ReceiptAck                    AppManager -> Funder
@@ -318,6 +331,7 @@ SetFriendRemoteMaxDebt        AppManager -> Funder
 
 FriendStateUpdate             Funder -> AppManager
 ResetFriendChannel            AppManager -> Funder
+```
 
 
 
