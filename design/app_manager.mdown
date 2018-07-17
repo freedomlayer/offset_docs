@@ -220,108 +220,108 @@ payment proposal structures.
 
 Messages:
 
-[RequestSendMessage]            Application -> AppManager
-[ResponseSendMessage]           AppManager -> Application
-[MessageReceived]               AppManager -> Application
-[RespondIncomingMessage]        Application -> AppManager
+RequestSendMessage            Application -> AppManager
+ResponseSendMessage           AppManager -> Application
+MessageReceived               AppManager -> Application
+RespondIncomingMessage        Application -> AppManager
 
 Funds transfer:
 
-[RequestSendFunds]              Application -> AppManager
-[ResponseSendFunds]             AppManager -> Application
-[ReceiptAck]                    Application -> AppManager
+RequestSendFunds              Application -> AppManager
+ResponseSendFunds             AppManager -> Application
+ReceiptAck                    Application -> AppManager
 
 
 Neighbor management:
 
-[OpenNeighbor]                  Application -> AppManager
-[CloseNeighbor]                 Application -> AppManager
-[AddNeighbor]                   Application -> AppManager
-[RemoveNeighbor]                Application -> AppManager
-[EnableNeighbor]                Application -> AppManager
-[DisableNeighbor]               Application -> AppManager
+OpenNeighbor                  Application -> AppManager
+CloseNeighbor                 Application -> AppManager
+AddNeighbor                   Application -> AppManager
+RemoveNeighbor                Application -> AppManager
+EnableNeighbor                Application -> AppManager
+DisableNeighbor               Application -> AppManager
 
-[SetNeighborRemoteMaxDebt]      Application -> AppManager
-[SetNeighborMaxTokenChannels]   Application -> AppManager
+SetNeighborRemoteMaxDebt      Application -> AppManager
+SetNeighborMaxTokenChannels   Application -> AppManager
 
-[NeighborStateUpdate]           AppManager -> Application
-[ResetNeighborChannel]          Application -> AppManager
+NeighborStateUpdate           AppManager -> Application
+ResetNeighborChannel          Application -> AppManager
 
 
 Friend management:
 
-[OpenFriend]                    Application -> AppManager
-[CloseFriend]                   Application -> AppManager
-[AddFriend]                     Application -> AppManager
-[RemoveFriend]                  Application -> AppManager
-[EnableFriend]                  Application -> AppManager
-[DisableFriend]                 Application -> AppManager
+OpenFriend                    Application -> AppManager
+CloseFriend                   Application -> AppManager
+AddFriend                     Application -> AppManager
+RemoveFriend                  Application -> AppManager
+EnableFriend                  Application -> AppManager
+DisableFriend                 Application -> AppManager
 
-[SetFriendRemoteMaxDebt]        Application -> AppManager
+SetFriendRemoteMaxDebt        Application -> AppManager
 
-[FriendStateUpdate]             AppManager -> Application
-[ResetFriendChannel]            Application -> AppManager
+FriendStateUpdate             AppManager -> Application
+ResetFriendChannel            Application -> AppManager
 
 
 Routes:
 
-[RequestNeighborsRoute]         Application -> AppManager
-[ResponseNeighborsRoute]        AppManager -> Application
-[RequestFriendsRoute]           Application -> AppManager
-[ResponseFriendsRoute]          AppManager -> Application
+RequestNeighborsRoute         Application -> AppManager
+ResponseNeighborsRoute        AppManager -> Application
+RequestFriendsRoute           Application -> AppManager
+ResponseFriendsRoute          AppManager -> Application
 
 
 ## Interface with Networker
 
-[RequestSendMessage]            AppManager -> Networker
-[ResponseSendMessage]           Networker -> AppManager
-[MessageReceived]               Networker -> AppManager
-[RespondIncomingMessage]        AppManager -> Networker
+RequestSendMessage            AppManager -> Networker
+ResponseSendMessage           Networker -> AppManager
+MessageReceived               Networker -> AppManager
+RespondIncomingMessage        AppManager -> Networker
 
-[OpenNeighbor]                  AppManager -> Networker
-[CloseNeighbor]                 AppManager -> Networker
+OpenNeighbor                  AppManager -> Networker
+CloseNeighbor                 AppManager -> Networker
 
-[RequestNeighborsRoute]         Networker -> AppManager
-[ResponseNeighborsRoute]        AppManager -> Networker
+RequestNeighborsRoute         Networker -> AppManager
+ResponseNeighborsRoute        AppManager -> Networker
 
-[SetNeighborRemoteMaxDebt]      AppManager -> Networker
-[SetNeighborMaxTokenChannels]   AppManager -> Networker
+SetNeighborRemoteMaxDebt      AppManager -> Networker
+SetNeighborMaxTokenChannels   AppManager -> Networker
 
-[OpenNeighbor]                  AppManager -> Networker
-[CloseNeighbor]                 AppManager -> Networker
-[AddNeighbor]                   AppManager -> Networker
-[RemoveNeighbor]                AppManager -> Networker
-[EnableNeighbor]                AppManager -> Networker
-[DisableNeighbor]               AppManager -> Networker
+OpenNeighbor                  AppManager -> Networker
+CloseNeighbor                 AppManager -> Networker
+AddNeighbor                   AppManager -> Networker
+RemoveNeighbor                AppManager -> Networker
+EnableNeighbor                AppManager -> Networker
+DisableNeighbor               AppManager -> Networker
 
-[NeighborStateUpdate]           Networker -> AppManager
-[ResetNeighborChannel]          AppManager -> Networker
+NeighborStateUpdate           Networker -> AppManager
+ResetNeighborChannel          AppManager -> Networker
 
 
 ## Interface with Funder
 
-[RequestSendFunds]              AppManager -> Funder
-[ResponseSendFunds]             Funder -> Application
-[ReceiptAck]                    AppManager -> Funder
+RequestSendFunds              AppManager -> Funder
+ResponseSendFunds             Funder -> Application
+ReceiptAck                    AppManager -> Funder
 
-[RequestFriendsRoute]           Funder -> AppManager
-[ResponseFriendsRoute]          AppManager -> Funder
+RequestFriendsRoute           Funder -> AppManager
+ResponseFriendsRoute          AppManager -> Funder
 
-[OpenFriend]                    AppManager -> Funder
-[CloseFriend]                   AppManager -> Funder
-[AddFriend]                     AppManager -> Funder
-[RemoveFriend]                  AppManager -> Funder
-[EnableFriend]                  AppManager -> Funder
-[DisableFriend]                 AppManager -> Funder
+OpenFriend                    AppManager -> Funder
+CloseFriend                   AppManager -> Funder
+AddFriend                     AppManager -> Funder
+RemoveFriend                  AppManager -> Funder
+EnableFriend                  AppManager -> Funder
+DisableFriend                 AppManager -> Funder
 
-[SetFriendRemoteMaxDebt]        AppManager -> Funder
+SetFriendRemoteMaxDebt        AppManager -> Funder
 
-[FriendStateUpdate]             Funder -> AppManager
-[ResetFriendChannel]            AppManager -> Funder
+FriendStateUpdate             Funder -> AppManager
+ResetFriendChannel            AppManager -> Funder
 
 
 
-TODO:
+# TODO:
 
 - Add a basic implementation for structs: 
     - In capnp schema (For communication with Apps and IndexerClient)
