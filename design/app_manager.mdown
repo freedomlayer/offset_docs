@@ -1,0 +1,229 @@
+# The design of the AppManager component
+17.07.2018
+
+## Intro
+
+The AppManager component is the communication interface between CSwitch and the
+user's applications. Most users will not interface with the AppManager
+directly. They will instead use an application that wraps CSwitch
+functionality.
+
+
+```
+
+   +----[CSwitch]----+
+   |                 |      +--------------+
+   |     Networker --+------|              |========== IndexerClient
+   |                 |      |  AppManager  |
+   |     Funder -----+------|              |---------\
+   |                 |      +--------------+         +---- App
+   |                 |                               +---- App
+   +-----------------+                               +---- App
+
+```
+
+User's applications are native programs running on the user's machine. They
+could be implemented by anyone, in any language. The communication between
+user's apps and the AppManager is done over secure TCP connection.
+
+AppManager exposes low level API for the main CSwitch abilities:
+Sending and receiving messages and funds and the management of trust for
+neighbors and friends. 
+
+The AppManager is also the connection point between CSwitch and an
+IndexerClient. IndexerClient is a "special" app that provides CSwitch with
+routes between neighbors and friends. An operational IndexerClient is crucial
+for the operation of the CSwitch engine.
+
+We say that IndexerClient is a "special" app because it has a different
+interface to AppManager than the rest of the apps have. IndexerClient is the
+only app that has the ability to receive requests (for routes) from the CSwitch
+engine.
+
+Examples for possible apps to be connected to AppManager:
+
+- A driver that provides the user with an IPv6 interface (Like done on [CJDNS](https://github.com/cjdelisle/cjdns)).
+- A graphical web interface for managing trust between neighbors and friends.
+- An app for automatic payment.
+
+
+## Configuration
+
+On startup, the AppManager should load a configuration file. The configuration
+file should contain: 
+
+- IndexerClient configuration:
+    - The public key of IndexerClient app.
+
+- Apps configuration:
+    - App name (TODO: What if there are multiple instances of the same application?)
+    - App public key
+    - App permissions
+
+
+The configuration should be some textual format, possibly [TOML](https://github.com/toml-lang/toml).
+
+Other information (Like neighbors list, friends list and their state) will be
+obtained as messages from the Networker and Funder.
+
+
+## Security
+
+The AppManager is the gatekeeper to the CSwitch engine. CSwitch serves as a
+user's wallet, and therefore it must be secured. Restricting access to CSwitch
+through the AppManager component is done using the following mechanisms:
+
+- Application public keys whitelist
+- Application permissions
+
+
+## Secure communication
+
+The communication between AppManager and an app begins as follows:
+
+(0) Application opens a TCP connection to AppManager.
+
+(1) Application -> AppManager:
+
+[AppRandNonce]
+- appRandNonce
+- appPublicKey
+
+(if appPublicKey is not on the AppManager's whitelist, he will close the
+connection).
+
+(2) AppManager -> Application:
+
+[AppManagerRandNonce]
+- appManagerRandNonce
+- appManagerPublicKey
+
+(if appManagerPublicKey is not as expected for the app, the app will close the
+connection).
+
+(3) Application -> AppManager:
+
+[AppDh]
+- appDhPublicKey
+- appManagerRandNonce
+- appKeySalt
+- signature{appPublicKey}(previous fields)
+
+(if the signature is invalid, the connection will be closed).
+
+(4) AppManager -> Application:
+
+[AppManagerDh]
+- appManagerDhPublicKey
+- appManagerRandNonce
+- appManagerKeySalt
+- signature{appManagerPublicKey}(previous fields)
+
+(if the signature is invalid, the connection will be closed).
+
+
+TODO: Handle possible man in the middle attack with curve25519 (Weak points in
+the group).
+
+After the exchange, both the Application and the AppManager combine the dh keys
+into one shared secret. This shared secret is then expanded into two symmetric
+keys for communication, a key for each direction. (A key for AppManager -> App,
+and another key for App -> AppManager). 
+
+The derivation of two symmetric keys is done using the
+[hkdf](https://en.wikipedia.org/wiki/HKDF) algorithm. See the function
+`derive_symmetric_key()` at `src/ccrypto/dh.rs` for more details.
+
+Symmetric encryption will be done using ChaCha20 with Poly1305 for
+authentication. Nonces will be generated randomly. See for example
+Encryptor::encrypt() method at `src/crypto/sym_encrypt.rs` for more details.
+
+
+## Interface with IndexerClient
+
+[RequestSendMessage]            IndexerClient -> AppManager
+- requestId
+- neighborsRoute
+- requestContent
+- maxResponseLen
+- processingFeeProposal
+
+[ResponseSendMessage]           AppManager -> IndexerClient
+- requestId
+- processingFeeCollected
+- responseContent
+
+[MessageReceived]               IndexerClient -> AppManager
+- requestId
+- neighborsRoute
+- requestContent
+- maxResponseLen
+- processingFeeProposal
+
+[RespondIncomingMessage]        AppManager -> IndexerClient
+- requestId
+- processingFeeCollected
+- responseContent
+
+[RequestNeighborsRoute]         AppManager -> IndexerClient
+- sourceNodePublicKey
+- destNodePublicKey
+
+[ResponseNeighborsRoute]        IndexerClient -> AppManager
+- List(NeighborsRoute)
+
+[RequestFriendsRoute]           AppManager -> IndexerClient
+- one of:
+    - Direct
+        - sourceNodePublicKey
+        - destinationNodePublicKey
+    - LoopFromFriend 
+        - friendPublicKey
+    - LoopToFriend
+        - friendPublicKey
+
+
+[ResponseFriendsRoute]          IndexerClient -> AppManager
+- routes:
+    - capacity
+    - FriendsRoute
+
+
+Where NeighborsRoute is defined as follows: (See `src/networker/messenger/types.rs`):
+
+```rust
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct NeighborRouteLink {
+    pub node_public_key: PublicKey,
+    pub payment_proposal_pair: PaymentProposalPair,
+}
+
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct NeighborsRoute {
+    pub (super) source_public_key: PublicKey,
+    pub (super) source_request_proposal: NetworkerSendPrice,
+    pub (super) route_links: Vec<NeighborRouteLink>,
+    pub (super) dest_public_key: PublicKey,
+    pub (super) dest_response_proposal: NetworkerSendPrice,
+}
+```
+
+TODO: FriendsRoute will be defined similarly, with larger (u128) sizes for the
+payment proposal structures.
+
+
+## Interface with Application
+
+
+[RequestSendMessage]            Application -> AppManager
+- (As defined earlier)
+
+[ResponseSendMessage]           AppManager -> Application
+- (As defined earlier)
+
+[MessageReceived]               Application -> AppManager
+- (As defined earlier)
+
+[ResponseSendMessage]           AppManager -> AppManager
+- (As defined earlier)
+
