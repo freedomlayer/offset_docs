@@ -22,7 +22,8 @@ functionality.
 
 ```
 
-User's applications are native programs running on the user's machine. They
+User's applications are native programs running on the user's machine (Or
+possibly outside of it, communicating securely with the AppManager). They
 could be implemented by anyone, in any language. The communication between
 user's apps and the AppManager is done over secure TCP connection.
 
