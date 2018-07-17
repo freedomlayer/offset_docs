@@ -141,6 +141,8 @@ Encryptor::encrypt() method at `src/crypto/sym_encrypt.rs` for more details.
 
 ## Interface with IndexerClient
 
+(Will be serialized using capnp)
+
 [RequestSendMessage]            IndexerClient -> AppManager
 - requestId
 - neighborsRoute
@@ -212,18 +214,126 @@ TODO: FriendsRoute will be defined similarly, with larger (u128) sizes for the
 payment proposal structures.
 
 
-## Interface with Application
+## Interface with an Application
 
+(Will be serialized using capnp)
+
+Messages:
 
 [RequestSendMessage]            Application -> AppManager
-- (As defined earlier)
-
 [ResponseSendMessage]           AppManager -> Application
-- (As defined earlier)
+[MessageReceived]               AppManager -> Application
+[RespondIncomingMessage]        Application -> AppManager
 
-[MessageReceived]               Application -> AppManager
-- (As defined earlier)
+Funds transfer:
 
-[ResponseSendMessage]           AppManager -> AppManager
-- (As defined earlier)
+[RequestSendFunds]              Application -> AppManager
+[ResponseSendFunds]             AppManager -> Application
+[ReceiptAck]                    Application -> AppManager
+
+
+Neighbor management:
+
+[OpenNeighbor]                  Application -> AppManager
+[CloseNeighbor]                 Application -> AppManager
+[AddNeighbor]                   Application -> AppManager
+[RemoveNeighbor]                Application -> AppManager
+[EnableNeighbor]                Application -> AppManager
+[DisableNeighbor]               Application -> AppManager
+
+[SetNeighborRemoteMaxDebt]      Application -> AppManager
+[SetNeighborMaxTokenChannels]   Application -> AppManager
+
+[NeighborStateUpdate]           AppManager -> Application
+[ResetNeighborChannel]          Application -> AppManager
+
+
+Friend management:
+
+[OpenFriend]                    Application -> AppManager
+[CloseFriend]                   Application -> AppManager
+[AddFriend]                     Application -> AppManager
+[RemoveFriend]                  Application -> AppManager
+[EnableFriend]                  Application -> AppManager
+[DisableFriend]                 Application -> AppManager
+
+[SetFriendRemoteMaxDebt]        Application -> AppManager
+
+[FriendStateUpdate]             AppManager -> Application
+[ResetFriendChannel]            Application -> AppManager
+
+
+Routes:
+
+[RequestNeighborsRoute]         Application -> AppManager
+[ResponseNeighborsRoute]        AppManager -> Application
+[RequestFriendsRoute]           Application -> AppManager
+[ResponseFriendsRoute]          AppManager -> Application
+
+
+## Interface with Networker
+
+[RequestSendMessage]            AppManager -> Networker
+[ResponseSendMessage]           Networker -> AppManager
+[MessageReceived]               Networker -> AppManager
+[RespondIncomingMessage]        AppManager -> Networker
+
+[OpenNeighbor]                  AppManager -> Networker
+[CloseNeighbor]                 AppManager -> Networker
+
+[RequestNeighborsRoute]         Networker -> AppManager
+[ResponseNeighborsRoute]        AppManager -> Networker
+
+[SetNeighborRemoteMaxDebt]      AppManager -> Networker
+[SetNeighborMaxTokenChannels]   AppManager -> Networker
+
+[OpenNeighbor]                  AppManager -> Networker
+[CloseNeighbor]                 AppManager -> Networker
+[AddNeighbor]                   AppManager -> Networker
+[RemoveNeighbor]                AppManager -> Networker
+[EnableNeighbor]                AppManager -> Networker
+[DisableNeighbor]               AppManager -> Networker
+
+[NeighborStateUpdate]           Networker -> AppManager
+[ResetNeighborChannel]          AppManager -> Networker
+
+
+## Interface with Funder
+
+[RequestSendFunds]              AppManager -> Funder
+[ResponseSendFunds]             Funder -> Application
+[ReceiptAck]                    AppManager -> Funder
+
+[RequestFriendsRoute]           Funder -> AppManager
+[ResponseFriendsRoute]          AppManager -> Funder
+
+[OpenFriend]                    AppManager -> Funder
+[CloseFriend]                   AppManager -> Funder
+[AddFriend]                     AppManager -> Funder
+[RemoveFriend]                  AppManager -> Funder
+[EnableFriend]                  AppManager -> Funder
+[DisableFriend]                 AppManager -> Funder
+
+[SetFriendRemoteMaxDebt]        AppManager -> Funder
+
+[FriendStateUpdate]             Funder -> AppManager
+[ResetFriendChannel]            AppManager -> Funder
+
+
+
+TODO:
+
+- Add a basic implementation for structs: 
+    - In capnp schema (For communication with Apps and IndexerClient)
+    - As Rust structs for communication with Networker and Funder.
+ 
+- Explain logic behind messages: What should the AppManager do when a message
+    is received? How to redirect etc.
+
+- What should AppManager do when any of the following happens:
+    - An App disconnects.
+    - The IndexerClient disconnects.
+
+- How to keep funder receipts.
+
 
