@@ -57,9 +57,15 @@ file should contain:
     - The public key of IndexerClient app.
 
 - Apps configuration:
+    - port number (u32). 
     - App name (TODO: What if there are multiple instances of the same application?)
     - App public key
     - App permissions
+
+
+The port number allow AppManager to forward messages to applications. Remote
+nodes can choose a port to decide to send a message to a remote application.
+Therefore no two applications can have thee same port.
 
 
 The configuration should be some textual format, possibly [TOML](https://github.com/toml-lang/toml).
