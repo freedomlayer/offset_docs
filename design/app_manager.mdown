@@ -144,75 +144,19 @@ Encryptor::encrypt() method at `src/crypto/sym_encrypt.rs` for more details.
 
 (Will be serialized using capnp)
 
-[RequestSendMessage]            IndexerClient -> AppManager
-- requestId
-- neighborsRoute
-- requestContent
-- maxResponseLen
-- processingFeeProposal
-
-[ResponseSendMessage]           AppManager -> IndexerClient
-- requestId
-- processingFeeCollected
-- responseContent
-
-[MessageReceived]               IndexerClient -> AppManager
-- requestId
-- neighborsRoute
-- requestContent
-- maxResponseLen
-- processingFeeProposal
-
-[RespondIncomingMessage]        AppManager -> IndexerClient
-- requestId
-- processingFeeCollected
-- responseContent
-
-[RequestNeighborsRoute]         AppManager -> IndexerClient
-- sourceNodePublicKey
-- destNodePublicKey
-
-[ResponseNeighborsRoute]        IndexerClient -> AppManager
-- List(NeighborsRoute)
-
-[RequestFriendsRoute]           AppManager -> IndexerClient
-- one of:
-    - Direct
-        - sourceNodePublicKey
-        - destinationNodePublicKey
-    - LoopFromFriend 
-        - friendPublicKey
-    - LoopToFriend
-        - friendPublicKey
-
-
-[ResponseFriendsRoute]          IndexerClient -> AppManager
-- routes:
-    - capacity
-    - FriendsRoute
-
-
-Where NeighborsRoute is defined as follows: (See `src/networker/messenger/types.rs`):
-
-```rust
-#[derive(Clone, Debug, Eq, PartialEq)]
-pub struct NeighborRouteLink {
-    pub node_public_key: PublicKey,
-    pub payment_proposal_pair: PaymentProposalPair,
-}
-
-#[derive(Clone, Debug, Eq, PartialEq)]
-pub struct NeighborsRoute {
-    pub (super) source_public_key: PublicKey,
-    pub (super) source_request_proposal: NetworkerSendPrice,
-    pub (super) route_links: Vec<NeighborRouteLink>,
-    pub (super) dest_public_key: PublicKey,
-    pub (super) dest_response_proposal: NetworkerSendPrice,
-}
 ```
+RequestSendMessage            IndexerClient -> AppManager
+ResponseSendMessage           AppManager -> IndexerClient
 
-TODO: FriendsRoute will be defined similarly, with larger (u128) sizes for the
-payment proposal structures.
+MessageReceived               IndexerClient -> AppManager
+RespondIncomingMessage        AppManager -> IndexerClient
+
+RequestNeighborsRoute         AppManager -> IndexerClient
+ResponseNeighborsRoute        IndexerClient -> AppManager
+
+RequestFriendsRoute           AppManager -> IndexerClient
+ResponseFriendsRoute          IndexerClient -> AppManager
+```
 
 
 ## Interface with an Application
