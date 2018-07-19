@@ -203,6 +203,8 @@ neighbors routes.
 Messages:
 
 ```
+RequestPath                   Application -> AppManager
+ResponsePath                  AppManager -> Application
 RequestSendMessage            Application -> AppManager
 ResponseSendMessage           AppManager -> Application
 MessageReceived               AppManager -> Application
@@ -231,8 +233,9 @@ DisableNeighbor               Application -> AppManager
 SetNeighborRemoteMaxDebt      Application -> AppManager
 SetNeighborMaxTokenChannels   Application -> AppManager
 
-NeighborStateUpdate           AppManager -> Application
 ResetNeighborChannel          Application -> AppManager
+
+NeighborStateUpdate           AppManager -> Application
 ```
 
 
@@ -248,8 +251,9 @@ DisableFriend                 Application -> AppManager
 
 SetFriendRemoteMaxDebt        Application -> AppManager
 
-FriendStateUpdate             AppManager -> Application
 ResetFriendChannel            Application -> AppManager
+
+FriendStateUpdate             AppManager -> Application
 ```
 
 
@@ -263,9 +267,75 @@ ResponseFriendsRoute          AppManager -> Application
 ```
 
 
+Messages related to communication messages are forwarded from the Applicaction
+to the Networker, and the other way around.
+Messages related to Funds transfer are forwarded from the Application to the
+Funder, and the other way around.
+
+A ResponseSendFunds message sent from AppManager to the Application should be
+kept at the AppManager until a valid receiptAck message is received. 
+If a receiptAck have not yet been received, and the Application restarted
+(Communication was lost, and then regained), the AppManager should retransmit
+the ResponseSendFunds message to the Application.
+
+This is important because ResponseSendFunds contains a receipt for the
+payment. If an Application performed a payment and suddenly crashed before
+obtaining the receipt, credits could be lost. Using the receiptAck mechanism we
+avoid this possibility. Also note that the Funder will also keep the 
+ResponseSendFunds message sent to AppManager until a ReceiptAck message is
+received from AppManager. The Funder keeps this information inside a persistent
+database.
+
+Illustration:
+
+
+```
+    <--[RequestSendFunds]--           <--[RequestSendFunds]--
+Funder                     AppManager                    Application
+
+
+    --[ResponseSendFunds]-->          --[ResponseSendFunds]-->
+Funder                     AppManager                    Application
+
+
+        <--[ReceiptAck]--               <--[ReceiptAck]--
+Funder                     AppManager                    Application
+
+```
+
+On the last step in the illustration, AppManager first receives ReceiptAck,
+checks that it is valid, and only then removes the record of the corresponding
+ResponseSendFunds message. Funder does the same.
+
+Note that AppManager does not keep any persistent data.
+
+
+Neighbor management messages are forwarded from the Application to the
+Networker. Friends management messages are forwarded from the Application to
+the Funder.
+
+NetworkerStateUpdate and FriendsStateUpdate are of special importance.
+Whenever a significant change happens for the state of the Networker, the
+Networker sends a NetworkerStateUpdate message to AppManager. The same is true
+for the Funder.
+
+AppManager should maintain the current state of the Networker and the Funder.
+Whenever a new Application connects, AppManager will send it the full state of
+the Networker and the Funder using NetworkerStateUpdate and FunderStateUpdate
+messages.
+
+In addition, whenever a new {Networker, Funder}StateUpdate messages is
+received by the AppManager, the AppManager will forward this message to all
+active Applications. This should allow all the Applications to stay up to date
+with the current state of the Networker and the Funder.
+
+
+
 ## Interface with Networker
 
 ```
+RequestPath                   AppManager -> Networker
+ResponsePath                  Networker -> AppManager
 RequestSendMessage            AppManager -> Networker
 ResponseSendMessage           Networker -> AppManager
 MessageReceived               Networker -> AppManager
@@ -274,8 +344,8 @@ RespondIncomingMessage        AppManager -> Networker
 OpenNeighbor                  AppManager -> Networker
 CloseNeighbor                 AppManager -> Networker
 
-RequestNeighborsRoute         Networker -> AppManager
-ResponseNeighborsRoute        AppManager -> Networker
+RequestFriendsRoute           Networker -> AppManager
+ResponseFriendsRoute          AppManager -> Networker
 
 SetNeighborRemoteMaxDebt      AppManager -> Networker
 SetNeighborMaxTokenChannels   AppManager -> Networker
@@ -299,8 +369,8 @@ RequestSendFunds              AppManager -> Funder
 ResponseSendFunds             Funder -> Application
 ReceiptAck                    AppManager -> Funder
 
-RequestFriendsRoute           Funder -> AppManager
-ResponseFriendsRoute          AppManager -> Funder
+RequestNeighborsRoute         Funder -> AppManager
+ResponseNeighborsRoute        AppManager -> Funder
 
 OpenFriend                    AppManager -> Funder
 CloseFriend                   AppManager -> Funder
@@ -311,21 +381,20 @@ DisableFriend                 AppManager -> Funder
 
 SetFriendRemoteMaxDebt        AppManager -> Funder
 
-FriendStateUpdate             Funder -> AppManager
 ResetFriendChannel            AppManager -> Funder
+FriendStateUpdate             Funder -> AppManager
 ```
 
 
+## Behaviour on special cases
 
-# TODO:
- 
-- Explain logic behind messages: What should the AppManager do when a message
-    is received? How to redirect etc.
+**An Application disconnects**
 
-- What should AppManager do when any of the following happens:
-    - An App disconnects.
-    - The IndexerClient disconnects.
+All unacknowledged ResponseSendFunds messages will be kept, in case the
+Application reconnects later.
 
-- How to keep funder receipts.
+TODO: What should be done in the following cases:
 
+- IndexerClient disconnects.
+- Timeout when asking for a route from IndexerClient.
 
