@@ -148,7 +148,7 @@ Encryptor::encrypt() method at `src/crypto/sym_encrypt.rs` for more details.
 
 ## Interface with IndexerClient
 
-(Will be serialized using capnp)
+(Will be serialized using capnp, See app_manager.capnp for more details)
 
 ```
 RequestSendMessage            IndexerClient -> AppManager
@@ -164,10 +164,31 @@ RequestFriendsRoute           AppManager -> IndexerClient
 ResponseFriendsRoute          IndexerClient -> AppManager
 ```
 
+AppManager allows IndexerClient to send and receive messages. This is done by
+forwarding those messages to/from the Networker. Examples:
+
+```
+           RequestSendMessage             RequestSendMessage
+Networker     <----------     AppManager   <--------------   IndexerClient
+
+
+
+           ResponseSendMessage            ResponseSendMessage 
+Networker     ---------->     AppManager   -------------->   IndexerClient
+```
+
+AppManager also forwards requests for routes of both the Networker and the
+Funder to IndexerClient. Example:
+
+```
+           RequestFriendsRoute            RequestFriendsRoute
+Networker     ---------->     AppManager   -------------->   IndexerClient
+```
+
 
 ## Interface with an Application
 
-(Will be serialized using capnp)
+(Will be serialized using capnp, See app_manager.capnp for more details)
 
 Messages:
 
@@ -287,10 +308,6 @@ ResetFriendChannel            AppManager -> Funder
 
 
 # TODO:
-
-- Add a basic implementation for structs: 
-    - In capnp schema (For communication with Apps and IndexerClient)
-    - As Rust structs for communication with Networker and Funder.
  
 - Explain logic behind messages: What should the AppManager do when a message
     is received? How to redirect etc.
