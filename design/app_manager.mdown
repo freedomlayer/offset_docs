@@ -191,6 +191,10 @@ Funder to IndexerClient. Example:
 Networker     ---------->     AppManager   -------------->   IndexerClient
 ```
 
+Note that the above is not a mistake. Networker is the one that should be
+asking for friends routes, and Funder is the one that should be asking for
+neighbors routes.
+
 
 ## Interface with an Application
 
