@@ -481,13 +481,15 @@ the following steps in order to send a message:
 
 To send `1000` credits to a remote user, MyIm will do the following:
 
+- Send a message to the remote user, requesting an invoiceId.
+
 - Send a `RequestFriendsRoute` to AppManager.
 
 - Wait for a `ResponseFriendsRoute`. 
     - Review the obtained routes, and check their capacity. 
     - If no route has enough capacity to send `1000` credits, abort.
 
-- Create a `RequestSendFunds` message.
+- Create a `RequestSendFunds` message with the obtained invoiceId.
     - Generate a random `paymentId`. 
     - Create a `RequestSendFunds` message with this paymentId and the route previously obtained.
     - Save `RequestSendFunds` message to a persistent location, so that it will not
@@ -501,6 +503,10 @@ To send `1000` credits to a remote user, MyIm will do the following:
 
 - Send a `ReceiptAck` back to AppManager, indicating that the receipt was
     received successfuly, and AppManager (And the Funder) may forget about the payment.
+
+- Send a message containing the `receipt` to the remote user, completing the
+    payment. (The receipt contains the original invoiceId, signed by the remote
+    users's Funder).
 
 
 
