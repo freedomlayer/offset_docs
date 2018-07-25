@@ -62,14 +62,32 @@ file should contain:
     - App public key
     - App permissions
 
-(NOTE: At the initial implementation permissions are not required. We can add
-this feature in the future.)
-
 
 The port number allow AppManager to forward messages to applications. Remote
 nodes can choose a port to decide to send a message to a remote application.
 Therefore no two applications can have thee same port.
 
+Possible permissions (From lower to higher):
+(TODO: Review the model of permissions. Is this the wanted level of
+granularity?)
+
+- VIEW
+    - View changes to the state of CSwitch.
+
+- COMMUNICATION
+    - View changes to the state of CSwitch.
+    - Allows to send and receive communication.
+
+- COMMUNICATION_AND_FUNDS
+    - View changes to the state of CSwitch.
+    - Allows to send and receive communication.
+    - Allows to send funds.
+
+- ALL
+    - View changes to the state of CSwitch.
+    - Allows to send and receive communication.
+    - Allows to send funds.
+    - Allows to manage neighbors and friends.
 
 The configuration should be some textual format, possibly [TOML](https://github.com/toml-lang/toml).
 
