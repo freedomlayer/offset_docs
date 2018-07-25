@@ -157,9 +157,10 @@ Encryptor::encrypt() method at `src/crypto/sym_encrypt.rs` for more details.
 (Will be serialized using capnp, See app_manager.capnp for more details)
 
 ```
+RequestPath                   IndexerClient -> AppManager
+ResponsePath                  AppManager -> IndexerClient
 RequestSendMessage            IndexerClient -> AppManager
 ResponseSendMessage           AppManager -> IndexerClient
-
 MessageReceived               IndexerClient -> AppManager
 RespondIncomingMessage        AppManager -> IndexerClient
 
@@ -397,4 +398,10 @@ TODO: What should be done in the following cases:
 
 - IndexerClient disconnects.
 - Timeout when asking for a route from IndexerClient.
+
+
+TODO:
+
+- Explain about random generation of paymentId and messageId used for
+    communication with the AppManager.
 
