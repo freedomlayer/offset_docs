@@ -62,14 +62,32 @@ file should contain:
     - App public key
     - App permissions
 
-(NOTE: At the initial implementation permissions are not required. We can add
-this feature in the future.)
-
 
 The port number allow AppManager to forward messages to applications. Remote
 nodes can choose a port to decide to send a message to a remote application.
 Therefore no two applications can have thee same port.
 
+Possible permissions (From lower to higher):
+(TODO: Review the model of permissions. Is this the wanted level of
+granularity?)
+
+- VIEW
+    - View changes to the state of CSwitch.
+
+- COMMUNICATION
+    - View changes to the state of CSwitch.
+    - Allows to send and receive communication.
+
+- COMMUNICATION_AND_FUNDS
+    - View changes to the state of CSwitch.
+    - Allows to send and receive communication.
+    - Allows to send funds.
+
+- ALL
+    - View changes to the state of CSwitch.
+    - Allows to send and receive communication.
+    - Allows to send funds.
+    - Allows to manage neighbors and friends.
 
 The configuration should be some textual format, possibly [TOML](https://github.com/toml-lang/toml).
 
@@ -157,9 +175,10 @@ Encryptor::encrypt() method at `src/crypto/sym_encrypt.rs` for more details.
 (Will be serialized using capnp, See app_manager.capnp for more details)
 
 ```
+RequestPath                   IndexerClient -> AppManager
+ResponsePath                  AppManager -> IndexerClient
 RequestSendMessage            IndexerClient -> AppManager
 ResponseSendMessage           AppManager -> IndexerClient
-
 MessageReceived               IndexerClient -> AppManager
 RespondIncomingMessage        AppManager -> IndexerClient
 
@@ -385,6 +404,111 @@ ResetFriendChannel            AppManager -> Funder
 FriendStateUpdate             Funder -> AppManager
 ```
 
+## Example for using AppManager
+
+We will describe here the way an example Application can use the services of
+the AppManager. Generally, this is how an Application communicates with
+CSwitch.
+
+Consider an instant messaging application called **MyIm** with the ability to send
+messages and funds between users. The application allows users to maintain a
+contact list, and send messages or funds to users in their contact list. The
+application shows a web interface, listening for example on
+`https://localhost/`.
+
+The first step is for the user to create a key pair for the Application: A
+public key and a private key. The private key is kept with the application, and
+the public key will be added to the configuration file of CSwitch. In addition,
+the application will be given CSwitch's AppManager's public key.
+
+
+```
+          +------------------+            +------------------+       +------------+
+          |    AppManager    |            |       MyIm       |       |            |    
+  mpsc    |                  |    TCP     |                  | HTTPS |  Browser   |    
+<---------|                  |<---------->|                  |<----->|            |    
+          |                  |            |                  |       |            |    
+          |                  |            |                  |       |            |
+          +------------------+            +------------------+       +------------+
+
+     - AppManager private key              - App private key
+     - Application                         - AppManager public key
+        - port number: 99
+        - App name: "MyIm"
+        - Application public key
+        - Permissions: COMMUNICATION_AND_FUNDS
+```
+
+Assume for example that it is well known MyIm works on port 99 on the CSwitch
+network, so the user configures his MyIm application to take port 99. From now
+on any message delivered to the AppManager to port 99 will be directed to the
+MyIm application. 
+
+The MyIm application is given the permission set of COMMUNICATION_AND_FUNDS.
+This will allow MyIm to send and receive messages, and also to send funds to
+remote nodes. However, MyIm will not be able to change the configured set of
+neighbors or friends.
+
+Next, consider that the user wants to send a message to a remote user. The
+remote user's address in the CSwitch network is a public key. MyIm will take
+the following steps in order to send a message:
+
+- Send a `RequestNeighborsRoute` to AppManager.
+- Wait until a `ResponseNeighborRoute` message is received from AppManager with
+    a neighbors route to the remote node. If no neighbors route is found, it
+    will not be possible to send a message to the remote node.
+
+- Open an encrypted path to the remote node, by sending the `RequestPath`
+    message to AppManager with the obtained neighbors route, and an amount of
+    credits we are willing to pay for opening this path.
+
+- Wait for a receipt of `ResponsePath` from AppManager. 
+    - If the received message indicates failure due to a too low proposal, we
+        might give up on trying to open a path. 
+    - If the received message indicated a route failure, go back to obtain a new route. 
+    - If the received message indicates success, keep the obtained pathId.
+
+- Generate a random messageId, and send a `RequestSendMessage` to AppManager
+    with the given pathId, messageId and a message. Keep the messageId for
+    later reference.
+
+- If a `ResponseSendMessage` is received with the kept messageId, we can obtain
+    information about the receipt status of the sent message: Success or
+    failure. Failure indicates that the path is closed, and a new one needs to
+    be created.
+
+
+
+To send `1000` credits to a remote user, MyIm will do the following:
+
+- Send a message to the remote user, requesting an invoiceId.
+
+- Send a `RequestFriendsRoute` to AppManager.
+
+- Wait for a `ResponseFriendsRoute`. 
+    - Review the obtained routes, and check their capacity. 
+    - If no route has enough capacity to send `1000` credits, abort.
+
+- Create a `RequestSendFunds` message with the obtained invoiceId.
+    - Generate a random `paymentId`. 
+    - Create a `RequestSendFunds` message with this paymentId and the route previously obtained.
+    - Save `RequestSendFunds` message to a persistent location, so that it will not
+        be lost in case of a crash or a power failure.
+
+- Send `RequestSendFunds` to AppManager.
+
+- Wait for a receipt of `ResponseSendFunds`. 
+    - On failure, abort.
+    - On success: Obtain a receipt and keep it at a persistent location.
+
+- Send a `ReceiptAck` back to AppManager, indicating that the receipt was
+    received successfuly, and AppManager (And the Funder) may forget about the payment.
+
+- Send a message containing the `receipt` to the remote user, completing the
+    payment. (The receipt contains the original invoiceId, signed by the remote
+    users's Funder).
+
+
 
 ## Behaviour on special cases
 
@@ -397,4 +521,10 @@ TODO: What should be done in the following cases:
 
 - IndexerClient disconnects.
 - Timeout when asking for a route from IndexerClient.
+
+
+TODO:
+
+- Explain about random generation of paymentId and messageId used for
+    communication with the AppManager.
 
