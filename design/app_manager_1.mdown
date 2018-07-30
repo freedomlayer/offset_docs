@@ -1,0 +1,58 @@
+# AppManager outer interface
+
+# 1 Introduction
+
+AppManager is the gate to Cswitch. That is, external components will only interact with AppManager. Therefore AppManger will contain all features that Cswitch is capable of.
+This document will mostly discuss the outer interface of AppManager, that is the interface to communicate with IndexerClient and Applications.
+
+# 2 Terminology
+- Indexer: IndexerClient
+- Client: Application
+- Server: AppManager
+# 3 Connection definition
+- Internet protocol: TCP
+- Listening port: undecided
+- Encryption:
+  - Key exchange: Diffie-Hellman
+  - Cipher + authenticator: ChaCha20 + Poly1305
+- Data serialize: capnp
+
+Once connected, this TCP connection will be used for all request-reponse beween server and client. No additional connection need to be opened, unless this connection got interupted. If interupted, client can open a new connection. No client shall open two connections at the same time, this is not allowed.
+
+# 4 Communication model
+
+If client want something, he will ask the server by sending request, server will then return a response to client. If client do nothing, server will do nothing.
+Client also has to send an ACK when he successfully recieve the message.
+
+## 4.1 Request’s id
+
+Because of this request-response model, each request must have an ID, and its response must attach that id.
+This id concept is transparent to Cswitch engine. Only server and client know about it, other components of Cswitch do not.
+Without request’s id, client must wait until he receives the response before sending another request, which will slow down the engine.
+Request’s id is calculated by client, he must make sure that no two active requests have the same id. Server will forget request’s id when he receive an ACK for that request.
+Request’s id is non-negative number. Negative id number is used for requests that don’t need ACKing.
+
+## 4.2 Handling connection lost
+
+Server will keep reponses until they are ACKed. Therefore, if somethings happened, client can open a new connection and ask server to resend the response. Requests for asking resend must have negative id number.
+To prevent flooding the server by not ACKing, each client have a limited number of waiting requests.
+
+## 4.3 Transmit format
+
+AppManager use tagged union (sum type) as the data type for request and response. Each request is self-contained in a tag, the same goes for responses. Note that request’s id is not in tag, tag only contains action that needs to be done.
+Data is serialized/deserialized by capnp protocol.
+
+## 4.4 Summary
+
+Communication process:
+
+- Client sends request
+- Server respond
+- Client sends ACK if need to.
+- Server forgets the request after recieving ACK
+
+Each message is a struct containing:
+
+- Request id
+- A tagged enum describing message’s data.
+
