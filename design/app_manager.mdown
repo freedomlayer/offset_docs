@@ -177,6 +177,7 @@ Encryptor::encrypt() method at `src/crypto/sym_encrypt.rs` for more details.
 ```
 RequestPath                   IndexerClient -> AppManager
 ResponsePath                  AppManager -> IndexerClient
+ClosePath                     IndexerClient -> AppManager
 RequestSendMessage            IndexerClient -> AppManager
 ResponseSendMessage           AppManager -> IndexerClient
 MessageReceived               IndexerClient -> AppManager
@@ -224,6 +225,7 @@ Messages:
 ```
 RequestPath                   Application -> AppManager
 ResponsePath                  AppManager -> Application
+ClosePath                     Application -> AppManager
 RequestSendMessage            Application -> AppManager
 ResponseSendMessage           AppManager -> Application
 MessageReceived               AppManager -> Application
@@ -253,8 +255,6 @@ SetNeighborRemoteMaxDebt      Application -> AppManager
 SetNeighborMaxTokenChannels   Application -> AppManager
 
 ResetNeighborChannel          Application -> AppManager
-
-NeighborStateUpdate           AppManager -> Application
 ```
 
 
@@ -271,8 +271,12 @@ DisableFriend                 Application -> AppManager
 SetFriendRemoteMaxDebt        Application -> AppManager
 
 ResetFriendChannel            Application -> AppManager
+```
 
-FriendStateUpdate             AppManager -> Application
+Updates:
+
+```
+StateUpdate                   AppManager -> Application
 ```
 
 
