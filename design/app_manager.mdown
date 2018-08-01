@@ -514,6 +514,95 @@ To send `1000` credits to a remote user, MyIm will do the following:
 
 
 
+## State saved in AppManager
+
+AppManager saves it's full state in memory. In case of a crash, this state is lost. This is
+not a problem, as persistent state is saved in the Networker and Funder.
+
+AppManager maintains state for each Application. It saves the ids of opened messages
+requests: RequestPath, RequestSendMessage, RequestSendFunds,
+RequestNeighborsRoute, RequestFriendsRoute. This allows AppManager to send the
+response to the correct Application when it arrives.
+
+Besides this state, AppManager does not need to save anything. The Networker
+and Funder have mechanisms in place for persisting important information, and
+for making sure no duplicate requests are issued.
+
+When an Application disconnects, AppManager removes all the state for this
+Application from memory.
+
+## Randomly generated outgoing unique ids
+
+In order for an Application to be able to send multiple requests to AppManager
+(Without having to wait for a reply), we are attaching a randomly generated unique
+id to sent requests. The corresponding response will include the same unique
+id, allowing the Application to match the response to the original request.
+
+The following are the request messages that require the Application to generate
+a random unique id:
+
+- RequestPath
+- RequestSendMessage
+- RequestSendFunds
+- RequestNeighborsRoute
+- RequestFriendsRoute
+
+The unique id is of size 128 bits, therefore it is highly unlikely to have a
+collision.
+
+A special care should be taken with the unique ids inside RequestSendMessage
+and RequestSendFunds. The unique id in those messages is passed to Networker or
+Funder (correspondingly), and eventually sent over the wire, unencrypted, as part of the
+CSwitch protocol. 
+
+AppManager should pass to the Networker and Funder exactly the same unique id
+it have received from the Application when dealing with RequestSendMessage and
+RequestSendFunds. This is crucial, as the Networker and Funder have mechanisms
+for avoiding duplicate requests. 
+
+Example:
+
+An Application wants to send funds. It does the following steps:
+- Randomly generate a unique id. Store the unique id in a persistent memory.
+- Create a RequestSendFunds message with the generated unique id.
+- Send RequestSendFunds message to AppManager.
+
+AppManager should then forward the request to the Funder, which should pass the
+message on, eventually completing the payment and returning a receipt.
+
+Consider the case that right after the Application have sent RequestSendFunds
+to AppManager, it crashed, and then restarted.
+The Application has the randmoly generated unique id in persistent memory, but
+it does not know for sure if it was sent succesfuly or not (Maybe Funder
+crashed too?)
+
+Therefore the Application will use the same unique id, generate a new
+RequestSendFunds message and send it to AppManager.
+AppManager will forward the message to Funder. Funder will look at the
+unique requestId, and according to this unique id it will know if the message
+was already sent. There are a few possible options:
+
+- The message was never sent. In this case Funder will start the payment
+    process.
+- The message was sent, but a response was not yet received. In this case the
+    Funder will do nothing.
+- The message was sent, and a response was received (But not yet acked by the
+    Application). In this case the Funder will send the response to the
+    Application.
+
+
+Note that if the AppManager did not use exactly the same randomly generated
+unique id that was used by the Application, the Funder would not have been able
+to know that this is the same payment, and he could transmit the same payment
+twice!
+
+
+## Incoming unique ids
+
+AppManager can may receive a MessageReceived message from the Networker.
+
+
+
 ## Behaviour on special cases
 
 **An Application disconnects**
