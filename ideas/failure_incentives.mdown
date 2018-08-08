@@ -1,6 +1,7 @@
 # Incentives when designing Failure response
 
 08.08.2018, by real
+Flaw reported by BronzeAge.
 
 
 ## Intro
@@ -48,7 +49,7 @@ flaw found in the design of failure fees, and discusses various possiblities of
 solving this issue.
 
 
-## Flaw in Failure fees
+## Fake Routes attack
 
 Consider the case of a node B that wants to send a message to a node F.
 B will first request a route of neighbors from B to F from an Indexer. The
@@ -75,26 +76,194 @@ adversary manages to obtain neighborhood contact with C1 and C5 using the nodes
 E1 and E3. The adversary can then report to Indexers The connections: `E1 -- E2
 -- E3`, with very cheap pricing for those links, while those links do not
 really exist. 
-
 As a result, when B asks for a route to the node F, the Indexer will prefer to
 give B the route `B -- E1 -- E2 -- E3 -- C5 -- F` over the more expensive route
 `B -- C1 -- C2 -- C3 -- C4 -- C5 -- F`.
 
 Finally, B will attempt to send a message to F, the messages will arrive at E2
-and it will report back a failure. As a result, the adversary will earn
+and E2 will report back a failure. As a result, the adversary will earn
 credits, and B will lose credits.
+
+Also note that the adversary can create infinitely more nodes
+like E2, connected both to E1 and E3 with very cheap links. This might make
+blacklisting E2 difficult.
 
 Many other nodes (like B) can obtain a route that involves the links `E1 -- E2
 -- E3` from the Indexer, because those links are cheap. This will allow the
 adversary to earn many credits by reporting failures for all (or most) requests
 routed through `E1 -- E2 -- E3`.
 
-
-Allowing this kind of attack could cause users to lose trust in routes obtained
-from Indexers, as many scammers might create fake routes in order to obtain
-credits from failure responses.
+We call this attack the **Fake Routes** attack.
 
 
-## Summary of possible solutions
+Allowing the Fake Routes attack will cause users to lose trust in routes
+obtained from Indexers, as many scammers might create fake routes in order to
+obtain credits from failure responses.
+
+
+## Summary of solution ideas
+
+A short summary of the main ideas for mitigating the Fake Routes attack is
+included here. The ideas are explained in detail later.
+
+- Return many different routes from an Indexer
+- Report failures to Indexers.
+- Using relations between Friends for trust
+- Monitor link quality locally
+- Removing failure responses from the protocol
+- Turn failures to be expensive for mediators
+
+
+### Return many different routes from an Indexer
+
+
+An adversary running the Fake Routes attack causes an Indexer to return his
+fake routes to many nodes that request routes. This happens because the
+adversary's fake routes are cheap and short, therefore they look like better
+routes for the Indexer.
+
+We might be able to change the algorithm used by the Indexer so that it is less
+likely that a fake route is chosen.
+
+Possible algorithms to use at an Indexer when finding a route from B to F:
+
+- Generate a random node T, then find a route from B to T, and from T to F.
+    Finally combine the two routes and return the resulting route.
+
+- Find a few disjoint routes from B to T, and return all of them.
+
+- Pick a few different neighbors of B, and find a route from each of those
+    neighbors to F. Return all the routes found.
+
+
+It turns out that using the above methods do not mitigate the Fake Routes
+attack. Cheap routes between two B and a random node T are likely to encounter
+a fake route. 
+
+
+### Report failures to Indexers
+
+Consider a node B that obtained a route from B to F from an Indexer.
+If B sends a message to F and receives back a failure from some node in the
+middle, B can take the signed failure message and send it back to the Indexer.
+The Indexer might send B credits for this information, or give a different
+route from B to F instead.
+
+Implementing this requires that an Indexer will have a random based time
+stamp (A random value that changes every constant interval of time).
+Whenver a route is returned from the Indexer, it will also contain a time
+stamp. The time stamp will be somehow included inside the message sent to the
+destination. The signature over the failure message will also sign over this
+time stamp, and so the failure message could be used as a proof for the node B
+that a recently obtained route from B to F does not work as intended.
+
+An issue when implementing this mechanism is that a failure might happen
+due to other reasons. For example, it is possible that forwarding a message is
+not possible because of freezing DoS protection (Discussed in
+`funder_credit_switching.mdown` document), or because of an attempt to send a
+very large message.
+
+Those cases can not be tracked and authenticated by the Indexer, and so reports
+of failures to the Indexer may not always be accurate or justified.
+
+Another issue with this solution is how will the Indexer use the information
+obtained by the failures. The Indexer knows about the failures, but he can not
+know for sure who in the route is responsible for the failure. (This happens
+because the adversary might own more than one node along the route).
+
+One possibility is to have some kind of reputation maintained by the Indexer
+for every link. Whenever a failure happens and reported to the Indexer, the
+reputation of all links along the route decreases. Currently we do not know of
+a good way to do this. Another problem is that the Indexer can not account for
+all the successful requests along this route.
+
+
+### Using relations between Friends for trust
+
+The Indexer has all the trust relationship between nodes in the network as the
+amount of credits trusted by friends. It might be possible to use this
+information to go over routes that are "more trusted" than others. We currently
+do not know of a method of doing that.
+
+
+### Monitor link quality locally
+
+
+Nodes can monitor their neighbors and evaluate statistics for success/failure.
+Consider for example the following network layout:
+
+
+```
+.. -- B -- C -- ..
+```
+
+B will try to evaluate the quality of the link `B -- C` by observing requests
+sent through `B -- C`. (Possibly from behind B to a destination after C). Every
+request should result in a success or failure. The requests should probably be
+weighted according to the amount of bytes inside of them.
+
+B could keep a window of the last 0x100 requests and responses. If the
+statistics show that there is a high rate of failures, B could do one of the
+following:
+
+- Disable the link with C, or remove neighbor relationship with C.
+- Report to an Indexer (How can the Indexer verify this report?)
+- Increase the fee required to send a message from B to C. This information is
+    updated with the Indexer.
+
+It is still unknown if this solution performs well against other types of
+malicious behaviour. For example, a remote node might send (on purpose) many
+requests along a route that goes through `B -- C` and fail. This will effect
+B's statistics for the route `B -- C`. 
+
+If B's statistics are sent to an Indexer, how can the Indexer verify that the
+statistics are valid? Does B has an incentive to report high or low statistics
+to the Indexer? What happens if two adjacent nodes report contradicting
+statistics about a route? How can the Indexer know who is correct?
+
+
+## Removing failure message from the protocol
+
+It seems like failure messages might be the root of the problem with the Fake
+Routes attack. One possible solution is to eliminate failure messages from the
+protocol. This means that when a request is sent along a route, only a success
+response is acceptable. This turns the Fake Routes attack to be unprofitable
+for the attacker.
+
+However, if a request can not be delivered, credits will be frozen forever.  If
+many requests that can not be delivered are sent through a certain link, the
+link will be clogged with frozen credits and it will be impossible to send new
+requests through this link.
+
+Example:
+
+```
+B -- C -- D -- E -x- F
+```
+
+In the figure above: If B sends a request to F, but E can not deliver the
+message to F, the frozen credits along the route can not be unfrozen.
+After a while the links on the route between B and F can be clogged.
+
+We might need some way to periodically clean up the clogged links, possibly by
+reset, but this requires human intervention. It is not known at this time how
+to resolve the unfreeze problems.
+
+
+## Turn failures to be expensive for mediators
+
+In the current design of CSwitch mediators earn credits both in the cases of
+a success response or failure response. It makes sense that mediators earn
+credits in the case of success, and the sender of the source of the request
+pays those credits. However, it is less obvious that mediators should earn
+credits (Less than the case of success) in the case of a failure.
+
+The original reason for having mediators earn money in the case of failure was
+to avoid the possibility of sending messages for free between two ends that
+belong to the same entity.
+
+We now consider a few schemes for compensation in the case of failure, and try
+to understand their consequences.
+
 
 
