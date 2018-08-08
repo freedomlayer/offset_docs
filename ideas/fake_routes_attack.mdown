@@ -1,7 +1,6 @@
-# Incentives when designing Failure response
-
+# Fake Routes attack and failure response incentives
 08.08.2018, by real
-Flaw reported by BronzeAge.
+Attack reported by BronzeAge.
 
 
 ## Intro
