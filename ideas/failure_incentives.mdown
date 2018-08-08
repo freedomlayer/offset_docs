@@ -1,0 +1,100 @@
+# Incentives when designing Failure response
+
+08.08.2018, by real
+
+
+## Intro
+
+
+CSwitch basic exchange technology works by sending a request along a path of
+nodes, from source to destination, followed by the transmission of a signed
+response along the reversed path: from the destination to the source.
+
+```
+B -- C -- D -- E -- F
+```
+
+In the figure above: B sends a request all the way to F. 
+When the request is sent from B to F, nodes freeze credits. The frozen credits
+are a promise for future payment. (B promises to pay to C, C promises to pay to
+D, D promises to pay to E, E promises to pay to F).
+
+After F receives the request, he creates a signed response and sends it along
+the reversed route, all the way to B. When E receives the signed response, he
+pays the credits he promised to F. Similarly, D pays to E, C pays to D and B
+pays to C. This works well when the request arrives F successfuly.
+
+A question arises regarding what is the correct thing to do in case it is not
+possible to deliver the request to its destination. For example, if B attempts
+to send a message to F, it is possible that a failure occured at E, and
+therefore D can not pass the message on. Instead, it will return a failure
+message to C, which will return the failure message to B.
+
+```
+ ---Request-->
+ <--Failure---
+B  --  C  --  D  -x-  E  --  F
+```
+
+In the figure above: B sends a request to F, but D can not pass the message to
+E. Therefore D reports failure back to C, and C forwards the failure message
+back to B. In that case C pays a small fee to D, and B pays a small fee to C.
+The fee is smaller than the fee that B would have paid on success, therefore
+the mediator nodes should want to pass the message successfuly instead of
+returning a failure.
+
+Recently a design flaw was found in this design. This document explains the
+flaw found in the design of failure fees, and discusses various possiblities of
+solving this issue.
+
+
+## Flaw in Failure fees
+
+Consider the case of a node B that wants to send a message to a node F.
+B will first request a route of neighbors from B to F from an Indexer. The
+indexer will then return a route from B to F. B will then use the provided
+route to send a message to F.
+
+The Indexer chooses a route for B by picking a cheap or possibly short route
+from B to F. As a result, an Adversary can advertise a cheap route from B to F,
+and the Indexer will return this route to B with high probability. B will then
+attempt to send a message to F along this route, and the adversary will be able
+to return a Failure response to B, and earn credits as a result.
+
+
+```
+
+B -- C1 -- C2 -- C3 -- C4 -- C5 -- F
+      \                     /
+       E1   --    E2  ==   E3
+```
+
+In the above figure: The route `B -- C1 -- C2 -- C3 -- C4 -- C5 -- F` is a long
+route between B and F. The nodes E1, E2, E3 belong to the adversary. The
+adversary manages to obtain neighborhood contact with C1 and C5 using the nodes
+E1 and E3. The adversary can then report to Indexers The connections: `E1 -- E2
+-- E3`, with very cheap pricing for those links, while those links do not
+really exist. 
+
+As a result, when B asks for a route to the node F, the Indexer will prefer to
+give B the route `B -- E1 -- E2 -- E3 -- C5 -- F` over the more expensive route
+`B -- C1 -- C2 -- C3 -- C4 -- C5 -- F`.
+
+Finally, B will attempt to send a message to F, the messages will arrive at E2
+and it will report back a failure. As a result, the adversary will earn
+credits, and B will lose credits.
+
+Many other nodes (like B) can obtain a route that involves the links `E1 -- E2
+-- E3` from the Indexer, because those links are cheap. This will allow the
+adversary to earn many credits by reporting failures for all (or most) requests
+routed through `E1 -- E2 -- E3`.
+
+
+Allowing this kind of attack could cause users to lose trust in routes obtained
+from Indexers, as many scammers might create fake routes in order to obtain
+credits from failure responses.
+
+
+## Summary of possible solutions
+
+
