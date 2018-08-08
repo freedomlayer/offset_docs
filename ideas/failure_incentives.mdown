@@ -265,5 +265,200 @@ belong to the same entity.
 We now consider a few schemes for compensation in the case of failure, and try
 to understand their consequences.
 
+(1) **Mediators earn credits**: During failure the Source loses credits, the mediators and the
+reporter of failure earn credits. This is the design we currently use.
 
+```
+B -- C -- D -- E -x- F
+-    +    +    +
+```
+
+In the figure above, B attempts to send a message to F along the route `B -- C
+-- D -- E -- F`, but a failure is reported by E and sent back all the way to B
+along the reversed route. We mark by `-` the state of losing credits, and by
+`+` the state of earning credits.
+
+This scheme allows the Fake Routes attack, because mediators earn credits
+during failure.
+
+
+(2) **Sender earns credits**: During failure the sender earns credits, and the
+   mediators lose credits.
+
+
+```
+B -- C -- D -- E -x- F
++    -    -    -
+```
+
+In this case the Fake Routes attack is not profitable for the attacker.
+However, a different problem arises. The source of a request (B) can send
+deliberately requests to nonexistent nodes. For example, B could send a request
+along the fake route `B -- C -- D -- G`. The node G does not exist, therefore D
+will have to report failure, and as a result C and D will lose credits, and B
+will earn credits. It is still not known how to mitigate this problem.
+
+
+(3) **No credits earned**: During failure no credits are lost or earned
+
+
+```
+B -- C -- D -- E -x- F
+0    0    0    0
+```
+
+In the figure above, we denote by `0` the fact that no credits were lost or
+earned. 
+
+In this case it is also not profitable to perform the Fake Routes attack,
+because mediators don't earn credits. However, it is still possible for B to
+invent fake routes and send requests along those routes, same as in the
+previous "Sender earns credits" case. 
+
+B can send a request to C along a fake route `B -- C -- D -- G`, where G does
+not exist. This way B causes C and D to perform networking work by sending only
+one message. B could use an even longer fake route to cause many nodes to
+perform networking work.
+
+It is a strange thing for B to do, because it costs networking work for B,
+however B might do this for some reason.
+
+A major issue with this solution is that it allows sending messages from B to E
+for free. If B and E cooperate, B could pretend to send messages to F. E then
+receives the messages and reports failure. Using this method B and E can
+transfer information without paying for the mediators: C and D.
+
+(4) **Failure reporter loses credits**: During failure the failure reporter
+loses credits. All other nodes earn credits.
+
+
+```
+B -- C -- D -- E -x- F
++    +    +    -
+```
+
+In this case B can send requests along fake routes and earn credits.
+
+(5) **Failure reporter earns credits**: During failure the failure reporter
+earns credits. All other nodes lose credits.
+
+
+```
+B -- C -- D -- E -x- F
+-    -    -    +
+```
+
+In this case the Fake Routes attack is still profitable for an attacker.
+
+
+## Invalid schemes for failure incentives
+
+Note that some schemes are not possible to implement securely on a decentralized setting.
+For example, a hollow scheme:
+
+```
+B -- C -- D -- E -x- F
++    0    0    -
+```
+
+Is not possible to implement securely. An adversary could split E into two
+nodes E1 and E2, changing the layout into:
+
+```
+B -- C -- D -- E1 -- E2 -x- F
++    0    0    0     -
+```
+
+This will allow the adversary to not lose credits.
+A dual argument goes for the following hollow layout:
+
+```
+B -- C -- D -- E -x- F
+-    0    0    +
+```
+
+An adversary would split B into two nodes B1 and B2, changing the layout into:
+
+```
+B1 -- B2 -- C -- D -- E -x- F
+-     0     0    0    +
+```
+
+This will allow the adversary to not lose credits.
+
+
+Also note that all schemes proposed here sum up to 0, because the CSwitch
+economy is a zero sum economy. The sum of all credits of a subset of nodes in a
+closed system can not change.
+
+
+## All participants lose in case of failure
+
+A scheme we have not yet discussed for the case of failure is a scheme where
+all of the participants lose in the case of failure: Both the source of the
+message and the mediators.
+
+
+```
+B -- C -- D -- E -x- F
+-    -    -    -
+```
+
+In the figure above: B attempts to send a message to F along the route `B -- C
+-- D -- E -- F`. A failure is reported by E, and a failure response is passed
+back to B all the way along the reversed route.
+
+If we could somehow make all participants lose credits in the case of failure,
+we manage to overcome all the problems previously mentioned:
+
+- Fake Routes attack becomes not profitable for an attacker, because in this
+    scheme mediators lose credits in case of failure.
+
+- The source (B) will not attempt to send requests along fake routes, because the
+    source loses credits in case of failure.
+
+- It is not possible to send messages for free from B to E, because B and E
+    have to pay credits for sending a message.
+
+
+
+However, the subset of nodes {B,C,D,E} is a closed system, and therefore it
+is not possible that all of them will lose credit at the same time.
+
+One possiblity to implement this state could be using **proof of work**: In case of
+failure, all nodes {B,C,D,E} will have to solve a proof of work puzzle,
+otherwise credits from the request will stay frozen. Solving the proof of work
+puzzle will unfreeze the credits.
+
+Another possiblity is to use a neutral party. Every pair of nodes with a link
+between them can define a neutral party. In case of a failure, both parties
+will send some amount of credits to the neutral party. Note that different
+pairs of nodes will usually have different neutral parties.
+
+Given a link `B -- C`, a neutral party should be a node that is not related to
+B or C. If for example the neutral party belogs to the owner of B, whenever B
+sends credits to the neutral party the owner of B doesn't lose credits!
+
+The neutral party should be chosen during configuration of a new neighbor, and
+should be agreed upon by both sides.
+
+A proof of payment to the neutral party could be provided in the form of a
+receipt. 
+
+
+Note that the proof (Both proof of work, or proof of payment to a neutral
+party) does not have to be provided immediately when returning a failure
+response. It could be provided later at a later time, unfreezing the frozen
+credits between a pair of nodes. If no proofs are provided for a long period of
+time, the link between the pair of nodes will be clogged with frozen credits.
+
+
+The idea of neutral party has some disadvantages:
+
+- How can two nodes decide on a neutral party? (Maybe people should provide a
+    service of trusted third parties?)
+
+- What happens if the neutral third party is offline at a certain time? Maybe
+    we should declare more than one neutral third party? Maybe use proof of
+    work as a fallback?
 
