@@ -459,3 +459,7 @@ The idea of neutral party has some disadvantages:
     we should declare more than one neutral third party? Maybe use proof of
     work as a fallback?
 
+
+
+TODO: Possibly freeze credits for a certain period of time as a penalty,
+instead of using proof of work or payment to a neutral party?
