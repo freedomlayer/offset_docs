@@ -177,6 +177,7 @@ Encryptor::encrypt() method at `src/crypto/sym_encrypt.rs` for more details.
 ```
 RequestPath                   IndexerClient -> AppManager
 ResponsePath                  AppManager -> IndexerClient
+ClosePath                     IndexerClient -> AppManager
 RequestSendMessage            IndexerClient -> AppManager
 ResponseSendMessage           AppManager -> IndexerClient
 MessageReceived               IndexerClient -> AppManager
@@ -224,6 +225,7 @@ Messages:
 ```
 RequestPath                   Application -> AppManager
 ResponsePath                  AppManager -> Application
+ClosePath                     Application -> AppManager
 RequestSendMessage            Application -> AppManager
 ResponseSendMessage           AppManager -> Application
 MessageReceived               AppManager -> Application
@@ -253,8 +255,6 @@ SetNeighborRemoteMaxDebt      Application -> AppManager
 SetNeighborMaxTokenChannels   Application -> AppManager
 
 ResetNeighborChannel          Application -> AppManager
-
-NeighborStateUpdate           AppManager -> Application
 ```
 
 
@@ -271,8 +271,12 @@ DisableFriend                 Application -> AppManager
 SetFriendRemoteMaxDebt        Application -> AppManager
 
 ResetFriendChannel            Application -> AppManager
+```
 
-FriendStateUpdate             AppManager -> Application
+Updates:
+
+```
+StateUpdate                   AppManager -> Application
 ```
 
 
@@ -510,21 +514,197 @@ To send `1000` credits to a remote user, MyIm will do the following:
 
 
 
+## State saved in AppManager
+
+AppManager saves it's full state in memory. In case of a crash, this state is lost. This is
+not a problem, as persistent state is saved in the Networker and Funder.
+
+AppManager maintains state for each Application. It saves the ids of opened messages
+requests: RequestPath, RequestSendMessage, RequestSendFunds,
+RequestNeighborsRoute, RequestFriendsRoute. This allows AppManager to send the
+response to the correct Application when it arrives.
+
+Besides this state, AppManager does not need to save anything. The Networker
+and Funder have mechanisms in place for persisting important information, and
+for making sure no duplicate requests are issued.
+
+When an Application disconnects, AppManager removes all the state for this
+Application from memory.
+
+## Randomly generated outgoing unique ids
+
+In order for an Application to be able to send multiple requests to AppManager
+(Without having to wait for a reply), we are attaching a randomly generated unique
+id to sent requests. The corresponding response will include the same unique
+id, allowing the Application to match the response to the original request.
+
+The following are the request messages that require the Application to generate
+a random unique id:
+
+- RequestPath
+- RequestSendMessage
+- RequestSendFunds
+- RequestNeighborsRoute
+- RequestFriendsRoute
+
+The unique id is of size 128 bits, therefore it is highly unlikely to have a
+collision.
+
+A special care should be taken with the unique ids inside RequestSendMessage
+and RequestSendFunds. The unique id in those messages is passed to Networker or
+Funder (correspondingly), and eventually sent over the wire, unencrypted, as part of the
+CSwitch protocol. 
+
+AppManager should pass to the Networker and Funder exactly the same unique id
+it have received from the Application when dealing with RequestSendMessage and
+RequestSendFunds. This is crucial, as the Networker and Funder have mechanisms
+for avoiding duplicate requests. 
+
+Example:
+
+An Application wants to send funds. It does the following steps:
+- Randomly generate a unique id. Store the unique id in a persistent memory.
+- Create a RequestSendFunds message with the generated unique id.
+- Send RequestSendFunds message to AppManager.
+
+AppManager should then forward the request to the Funder, which should pass the
+message on, eventually completing the payment and returning a receipt.
+
+Consider the case that right after the Application have sent RequestSendFunds
+to AppManager, it crashed, and then restarted.
+The Application has the randmoly generated unique id in persistent memory, but
+it does not know for sure if it was sent succesfuly or not (Maybe Funder
+crashed too?)
+
+Therefore the Application will use the same unique id, generate a new
+RequestSendFunds message and send it to AppManager.
+AppManager will forward the message to Funder. Funder will look at the
+unique requestId, and according to this unique id it will know if the message
+was already sent. There are a few possible options:
+
+- The message was never sent. In this case Funder will start the payment
+    process.
+- The message was sent, but a response was not yet received. In this case the
+    Funder will do nothing.
+- The message was sent, and a response was received (But not yet acked by the
+    Application). In this case the Funder will send the response to the
+    Application.
+
+
+Note that if the AppManager did not use exactly the same randomly generated
+unique id that was used by the Application, the Funder would not have been able
+to know that this is the same payment, and he could transmit the same payment
+twice!
+
+
+## Incoming unique ids
+
+AppManager may receive a MessageReceived message from the Networker.
+MessageReceived does not contain a requestId. Therefore AppManager will
+randomly generate a messageId for this message, and then forward it to the
+Application.
+
+When ready, the Application will create a RespondIncomingMessage with the same
+messageId and send it back to the AppManager. The AppManager will forward the
+RespondIncomingMessage to the Networker.
+
+Note that here we do not use the underlying requestId (It is not even exposed
+in MessageReceived). We let AppManager randomly generate a messageId instead.
+This is because the underlying requestId is generated by a remote node, and
+could be crafted maliciously so that there are a few equal requestIds.
+
+
+## Sending messages
+
+Two CSwitch nodes are called neighbors if there is a logical communication line
+configured between them. A logical communication line could mean many things.
+It could be UDP communication over the Internet, but also could be
+communication over an ad-hoc cable connected between two computers, or even
+communication over radio. It is also required that the two CSwitch nodes have
+configured each other as neighbors. This is done using the `AddNeighbor` API.
+
+Messages in the CSwitch network can only be sent through neighbors. This means
+that if a node A wants to send node B a message, node A must first find a route
+of adjacent neighbors from A to B. This is done by the `RequestNeighborsRoute`
+API, and waiting for an answer.  It is possible that there is no available
+neighbors route between A and B. In that case, it will not be possible to send
+a message from A to B.
+
+Given a route, it is already possible to send unencrypted messages between A
+and B (This is done by the Messenger module, inside the Networker), but the
+AppManager does not expose this ability, becuase the messages are not
+encrypted.
+
+Therefore, it is first required to open a secure path between A and B. This is
+done using the `RequestPath` API. A secure path is created by performing Diffie
+Hellman between A and B. The result of a `RequestPath` message is
+`ResponsePath`, which contains a pathId, a unique identifier representing a
+secure path from A to B, using a specific route. Finally A can send messages to
+B using the `RequestSendMessage`, providing the obtained pathId.
+
+The node A might want to use more than one route from A to B to send messages,
+for efficiency or for higher reliability. In that case A can request more
+routes using the `RequestNeighborsRoute` API, and open another secure route for
+this path using `RequestPath`. Internally, the Networker will not perform
+another Diffie-Hellman for the next RequestPath. It will only create a new
+pathId and return it to AppManager, which in turn returns it to the
+Application. The Application will then have a few pathIds to choose from, each
+one will send a message along a different route, but encrypted with the same
+symmetric keys.
+
+It is possible to close a path if it is not required anymore. This is done
+using the `ClosePath` API.
+
+Messages sent over a path may arrive out of order at the remote side (like
+UDP). 
+
+Messages sent over a path are always acknowledged: If an application sends a
+message using RequestSendMessage, it should eventually get a
+ResponseSendMessage with the same requestId.  The exception to this rule is
+that if an Application crashes, it will not receive an acknowledgement for the
+messages it sent. AppManager should not attempt to overcome this behaviour.
+
+From the side of the remote receiver Application: The Application receives a
+MessageReceived message, with some messageId. The Application should then
+respond with a RespondIncomingMessage with the same messageId. This is the way
+of the Application to acknowledge the receipt of this incoming messages.
+
+If the AppManager sends a MessageReceived message to an Application, and the
+Application crashes, AppManager should create its own RespondIncomingMessage
+with `ResponseData::noListeningApp`, and charge 0 credits.
+
+
+It is crucial for Applications to acknowledge incoming messages
+(Using RespondIncomingMessage).  Only by acknowledging an incoming message,
+frozen credits are freed along the neighbors route from the remote node to the
+Application node. If the messsage is not acknowledged, credits will stay frozen
+forever (Until the Application crashes, or until CSwitch crashes). 
+
+If an Application does not acknowledge many messages, eventually the route from
+the remote node to the Application's node will be clogged by frozen credits,
+and no messages will not be able to be sent.
+
+Some requests allow the receipient to charge a fee. The fee will not be
+received until the message is acknowledged. The recipient can choose how much
+out of the provided fee he may charge. In addition, it might be possible for
+the reciever to send back a response (inside the acknowledgement message). The
+response bytes are already payed for by the original sender of the request
+message. The amount of response bytes available for use by the receiver is
+predetermined by the original sender, as he is the one paying for those bytes.
+
+
+TODO
+
+## Sending payments
+
+TODO
+
+
 ## Behaviour on special cases
-
-**An Application disconnects**
-
-All unacknowledged ResponseSendFunds messages will be kept, in case the
-Application reconnects later.
 
 TODO: What should be done in the following cases:
 
 - IndexerClient disconnects.
 - Timeout when asking for a route from IndexerClient.
 
-
-TODO:
-
-- Explain about random generation of paymentId and messageId used for
-    communication with the AppManager.
 
