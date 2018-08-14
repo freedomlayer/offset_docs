@@ -256,5 +256,7 @@ Upon the receipt of this message, the party A will remove its sending end of
 the ChannelAB channel. If A has the ability to initiate a connection, it might
 attempt to setup a new connection with B.
 
+Note that UnknownChannel can not be replayed, because it can only be sent once
+per channel. Once it is sent, the channel will never be used again.
 
 
