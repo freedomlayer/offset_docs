@@ -82,7 +82,7 @@ follows:
 1. A -> B: RequestNonce         (randNonce1)
 2. B -> A: ResponseNonce        (randNonce1, randNonceB, responseNonceB, Signature(B))
 
-3. A -> B: ExchangeActive       (randNonceB, randNonceA, publicKeyA, publicKeyB,  dhPublicKeyA, keySaltA, Signature(A))
+3. A -> B: ExchangeActive       (randNonceB, randNonceA, publicKeyA, publicKeyB, dhPublicKeyA, keySaltA, Signature(A))
 4. B -> A: ExchangePassive      (hashPrev, dhPublicKeyB, keySaltB, Signature(B))
 5. A -> B: ChannelReady         (hashPrev, Signature(A))
 ```
