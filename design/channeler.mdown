@@ -83,7 +83,7 @@ restarted, it needs to be reconfigured.
 // Channeler -> Funder
 pub struct MessageReceived {
     pub remote_public_key: PublicKey,
-    pub message_content: Bytes,
+    pub content: Bytes,
 }
 
 // Funder -> Channeler
