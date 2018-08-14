@@ -87,7 +87,6 @@ follows:
 5. A -> B: ChannelReady         (hashPrev, Signature(A))
 ```
 
-
 Where:
 
 - hashPrev is sha512/256 over the previous message [32 bytes]. This makes sure
@@ -99,6 +98,19 @@ Where:
 
 A considers the connection to be up once message ChannelReady is sent. B
 considers the connection to be up once message ChannelReady is received.
+
+In ResponseNonce, randNonceB is taken from a constant size nonces list kept at B.
+randNonceB is the newest nonce on this list. Every period of time, B generates
+a new random Nonce and adds it into the nonces list, removing the oldest nonce
+from the list.
+
+Whenever B receives an ExchangeActive message, it makes sure that randNonceB is
+found somewhere inside the constant size nonces list.
+
+Using a constant size nonces list, B can respond to message RequestNonce with
+ResponseNonce without having to keep any state for that request, hence
+protecting B from DoS.
+
 
 After the connection was set up, each party has two ends of channels, one
 sending end and one receving end. The channel from A to B is called
@@ -121,6 +133,47 @@ symmetric encryption key.
 
 TODO: Dealing with message drops during connection setup? How to maintain state
 for connection setup?
+
+
+## Ideas behind connection setup
+
+The first stage, RequestNonce and ResponseNonce, serve as some kind of a
+timestamp requested by A. In some sense, A requests the current time at B's
+location. This current time is represented by a random nonce from the top of
+the constant size nonces list B maintains.
+
+When A sends an ExchangeActive message containing randNonceB, B can be sure
+that this message was created recently by B, and was not replayed.
+
+B does not need to allocate new memory to serve a RequestNonce message, which
+protects B from DoS. Only public keys that are "friends" of B can cause him to
+allocate new memory.
+
+We do not use a real timestamp because it will require having synchronized clocks
+between nodes, which is very difficult to acheive on a decentralized setting.
+
+In the next 3 messages: ExchangeActive, ExchangePassive and ChannelReady there
+is a hashPrev field. This field is the result of a hash function applied over
+the previous messages. This field makes sure that a message can be sent only
+after the previous message was received (Or else, the hash can not be
+calculated).
+
+When B sends the ExchangePassive message, B already has all the information
+required to send and receive messages, however, A still does not have B's
+dhPublicKeyB, and therefore does not yet have the symmetric keys used for
+communication. If B sends an encrypted message to A at this point, it is
+possible that this message will arrive before the ExchangePassive message
+(Messages may arrive out of order), and therefore it will be dropped by A.
+
+The solution to this problem is the extra ChannelReady message, sent from A to
+B. This message indicates to B that A has already obtained all the symmetric
+keys required for decryption of messages. At this point B can send an encrypted
+message to A, and know for sure that A will be able to decrypt it (If no other
+failure occured).
+
+Note that every message that contains a signature also contains an extra nonce
+value added by the sender (Which is also the signer). This is used to make sure
+the remote side does not trick the sender into signing specially crafted data.
 
 
 ## Channel receiving ends Carousel
