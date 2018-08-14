@@ -102,3 +102,16 @@ however, it is possible that the message will not arrive.
 
 See `theory/udp_encryption.mdown`
 
+
+## Keepalives
+
+A Channeler should attempt to open a secure channel to a remote Channeler every period of time.
+In addition, once the secure channel was opened, a message must be sent over
+this channel every certain period of time. If no user message is sent through a
+channel, the Channeler will send a dedicated Keepalive message to the remote
+side.
+
+If a remote side does not send any message over a channel for a long period of
+time, the local Channeler will attempt to open a new secure channel to the
+remote Channeler.
+
