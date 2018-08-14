@@ -97,3 +97,8 @@ The Funder can send a message to a remote Funder over by sending SendMessage to
 the Channeler. The Channeler will do its best effort to send this message,
 however, it is possible that the message will not arrive. 
 
+
+## Implementation of secure communication
+
+See `theory/udp_encryption.mdown`
+
