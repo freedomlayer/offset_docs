@@ -88,7 +88,7 @@ pub struct MessageReceived {
 
 // Funder -> Channeler
 pub struct SendMessage {
-    pub neighbor_public_key: PublicKey,
+    pub remote_public_key: PublicKey,
     pub content: Bytes,
 },
 ```
