@@ -26,8 +26,8 @@ replay attacks. We can not use an incrementing counter because we can not be
 sure that messages arrive at the remote party at the same order they were sent.
 
 This document presents a design for an anti-replay mechanism to be used when
-encrypting UDP style communication layers. Idea is due to Zur, and thus called
-Zur's sliding window.
+encrypting UDP style communication layers. The design is due to Zur, and thus
+called Zur's sliding window.
 
 
 ## Problem setup
@@ -75,13 +75,17 @@ In other cases it is possible that both sides can play the role of the client
 (If for example both sides have static known addresses).
 
 
-Setting up an encrypted connection is done through a 4-way handshake, as
+Setting up an encrypted connection is done through a 5-way handshake, as
 follows:
 
-1. A -> B: InitChannel      (randNonceA, publicKeyA) 
-2. B -> A: ExchangePassive  (hashPrev, randNonceB, publicKeyB, dhPublicKeyB, keySaltB, Signature(B))
-3. A -> B: ExchangeActive   (hashPrev, dhPublicKeyA, keySaltA, Signature(A))
-4. B -> A: ChannelReady     (hashPrev, Signature(B))
+```
+1. A -> B: RequestNonce         (randNonce1)
+2. B -> A: ResponseNonce        (randNonce1, randNonceB, responseNonceB, Signature(B))
+
+3. A -> B: ExchangeActive       (randNonceB, randNonceA, publicKeyA, publicKeyB,  dhPublicKeyA, keySaltA, Signature(A))
+4. B -> A: ExchangePassive      (hashPrev, dhPublicKeyB, keySaltB, Signature(B))
+5. A -> B: ChannelReady         (hashPrev, Signature(A))
+```
 
 
 Where:
@@ -93,7 +97,7 @@ Where:
 - publicKeyX and dhPublicKeyX are of size [32 bytes].
 - keySalt is of size [32 bytes].
 
-B considers the connection to be up once message ChannelReady is sent. A
+A considers the connection to be up once message ChannelReady is sent. B
 considers the connection to be up once message ChannelReady is received.
 
 After the connection was set up, each party has two ends of channels, one
@@ -159,7 +163,8 @@ the sending end of a channel:
 - sendCounter       [12 bytes]
 - symmetricKey      [32 bytes]
 
-The initial value of sendCounter is 1.
+The initial value of sendCounter is 1. (Because the recvCounter starts from 0,
+and sendCounter > recvCounter)
 
 To send a message M to through a channel to the remote party, the party will
 send:
@@ -231,8 +236,8 @@ malfunctions, it is possible that B will lose his state for the receiving end
 of the channel ChannelAB. 
 
 A might keep sending encrypted messages to B on the ChannelAB channel, but B
-will not be able to read those messages because he does not have the symmetric
-key required to decrypt the messages, and he does not have a recvCounter in
+will not be able to read those messages because B does not have the symmetric
+key required to decrypt the messages, and B does not have a recvCounter in
 place to make sure the messages are not being replayed.
 
 In this case B will indicate to A that he has no information about the channel
