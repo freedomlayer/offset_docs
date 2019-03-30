@@ -516,7 +516,7 @@ possible in most cases), the attacker might be able to block a specific
 friendship channel between two parties.
 
 
-## Proportional credit freezing allocation
+## Proportional credit freezing allocation (Legacy)
 
 To solve the credit freezing DoS problem, we limit the amount of credit that
 can be frozen. This is done as follows:
@@ -569,7 +569,7 @@ Note that the right hand of this inequality is fully determined by A's
 configuration.
 
 
-## Exponential decay of credit freezing
+## Exponential decay of credit freezing (Legacy)
 
 Proportional credit freezing allocation makes sure that all the immediate
 friends of A can freeze credits only according to the amount of trust A puts in
