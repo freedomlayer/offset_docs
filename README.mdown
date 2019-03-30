@@ -1,6 +1,6 @@
-# CSwitch documentation
+# Offst documentation
 
-This respository contains documentation and general ideas behind cswitch.
+This respository contains documentation and general ideas behind offst.
 
 To open the pencil diagrams (Files ending with .egz) you need to install
 [pencil](https://pencil.evolus.vn/).
