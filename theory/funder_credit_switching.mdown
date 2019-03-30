@@ -1,5 +1,5 @@
 # Introduction to Credit Switching
-12.05.2018
+30.03.2019
 
 Credit switching is a protocol that allows secure exchange of communication and
 funds, based on trust between people.
