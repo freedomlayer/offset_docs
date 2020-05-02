@@ -1,5 +1,8 @@
 # Offset documentation
 
+[![Build Status](https://travis-ci.com/freedomlayer/offset_docs.svg?branch=master)](https://travis-ci.com/freedomlayer/offset_docs)
+[![Documentation Status](https://readthedocs.org/projects/offset/badge/?version=latest)](https://offset.readthedocs.io/en/latest/?badge=latest)
+
 This respository contains documentation and general ideas behind Offset.
 
 To open the pencil diagrams (Files ending with .egz) you need to install
