@@ -245,7 +245,7 @@ fees.
    most readers are familiar with it.
 .. [5] 
    The credit limits don't have to be equal! In some cases it might be possible
-   that one party trusts the other party more than the other way around. In
+   that one party trusts the other party more than the other way around. It
    might also be true that certain businesses might have different turnover,
    and therefore might need different amount of credit to operate.
 
