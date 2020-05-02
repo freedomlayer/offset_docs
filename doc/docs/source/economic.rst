@@ -1,10 +1,9 @@
 Economic idea
 =============
 
-In traditional monetary systems, money is issued by the state. (For example, the
-US dollar is issued by the USA government). Participants of the market can then
-use the money issued by the state to buy and sell goods and services in the
-market.
+In traditional monetary systems, money is issued by the state. Participants of
+the market can then use the money issued by the state to buy and sell goods and
+services in the market.
 
 **Offset moves the power of issuing money from the state to the market
 participants.** 
