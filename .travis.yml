@@ -1,0 +1,12 @@
+os: linux
+dist: bionic
+language: python
+python: 3.8
+
+install:
+- pip install -r doc/requirements.txt
+script:
+- cd doc/docs
+# See: https://coderwall.com/p/wws2uq/have-travis-ci-test-your-sphinx-docs
+- sphinx-build -nW -b html source build
+- cd -
