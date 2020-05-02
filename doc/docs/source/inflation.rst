@@ -66,14 +66,15 @@ might not be able to connect between the money printing and the inflation.
 
 TODO: Add image showing inflation rate during some war somewhere?
 
-Except for wars, printing new money could also be used as a band aid for over
-spending of the government, or for dealing with unexpected disasters.
+Except for wars, printing new money could also be used as a band aid for
+overspending of the government, or for dealing with unexpected disasters.
 
 
 Dangers of inflation
 --------------------
 
-Quick changes in the value of money damage the ability to trade.
+High inflation rates distort the value of money and damage the ability to
+trade.
 
 Let's look at an example. Consider two merchants, Bob and Charli, living in the
 same community. Bob owns a bakery, and Charli is a chocolate artist,
@@ -83,57 +84,13 @@ Assume that one loaf of bread at Bob's bakery costs 1USD, and one chocolate bar
 at Charli's shop costs 2USD.
 
 
-
-Sources of inflation
----------------------
-
-In modern times, inflation usually originates from the monetary policy of the
-state. To decrease the value of money, the state can insert money into the
-market faster than new goods in the market are created [1]_.
-
-The ability of the state to control the value of money comes from its power to
-create money.
-
-In most countries of the world inflation is created artificially, and
-perceived as a [healthy tool to control the growth of the
-market](https://en.wikipedia.org/wiki/Inflation_targeting)]. A common idea is
-to insert new money into the market just slightly faster than the rate of
-market growth. This creates a constant small inflation rate for the money.
-
-
-Controlled inflation
----------------------
-
-Inflation usually occurs when new money enters the market faster than new
-goods are created. As a result, the same item will now cost more money.
-
-Most countries [attempt to
-achieve](https://en.wikipedia.org/wiki/Inflation_targeting) a certain amount of
-"healthy" inflation as a monetary policy. As the government has control over
-creating the money, it can create new money and insert it into the market,
-usually just a little bit faster than the market grows.
-
-Controlled inflation is used as a tool for setting growth velocity
-for the market. As people experience inflation, they prefer to
-buy things instead of holding to the money, because the money depreciates over
-time.
-
-The opposite phenomenon is called **deflation**. If more goods enter the
-market, but the supply of money stays exactly the same, the buying power of
-money increases. Deflation causes people to hoard to their money (And not spend
-it), because it increases in value. When people buy less, the market growth
-slows down.
-
-In a sense, controlled inflation is used as a tool by governments to avoid deflation,
-hence, keeping the market growing.
-
 .. [1] 
    The control over the money supply sometimes take other forms than the direct
    ability to print new money.
 
 .. [2]
-   When asked, you could delighfully explain that "by inserting new money into the market
-   you make the country richer". 
+   When asked, you could delighfully reply that "by printing new money you make
+   the country richer". 
 
 
 
