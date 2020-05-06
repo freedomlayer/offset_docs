@@ -47,7 +47,7 @@ exclude_patterns = []
 html_theme = 'alabaster'
 
 html_theme_options = {
-        'sidebar_width': '250px',
+        'sidebar_width': '280px',
 }
 
 # Add any paths that contain custom static files (such as style sheets) here,
