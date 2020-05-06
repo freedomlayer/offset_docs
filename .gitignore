@@ -1,1 +1,9 @@
+# vim's swap files
 *.sw*
+
+# Python pyc files
+*.pyc
+
+# Built docs
+doc/docs/build
+
