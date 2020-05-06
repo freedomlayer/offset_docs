@@ -2,8 +2,7 @@
 Offset
 ======
 
-Offset is a decentralized payment system, allowing to pay and process
-payments efficiently and safely.
+Offset is a credit card powered by trust between people. 
 
 .. toctree::
    :maxdepth: 2
@@ -13,7 +12,14 @@ payments efficiently and safely.
    app_manual
    economic
    inflation
+   privacy
    about
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Advanced
+
+   advanced_usage
 
 .. toctree::
    :maxdepth: 2
@@ -21,13 +27,6 @@ payments efficiently and safely.
 
    protocol
    network
-   privacy
-
-.. toctree::
-   :maxdepth: 2
-   :caption: Advanced
-
-   advanced_usage
 
 .. toctree::
    :maxdepth: 2
