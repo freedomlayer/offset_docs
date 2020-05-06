@@ -1,4 +1,0 @@
-The Offset Protocol
-===================
-
-TODO
