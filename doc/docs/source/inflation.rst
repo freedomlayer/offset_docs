@@ -19,14 +19,13 @@ they used to be. An item that costs 10 US dollars in 2020 probably costed only
 TODO: Add an image, possibly inflation chart of US dollar.
 
 How can the value of the currency be measured? One way to do it is to track,
-over a long period of time, how much it costs to buy an [average basket of
-goods](https://en.wikipedia.org/wiki/Consumer_price_index), and see how it
-changes over time. We deduce that money loses its value over time, if the price
-of goods generally increases over time.
+over a long period of time, how much it costs to buy an `average basket of
+goods`_, and see how it changes over time. We deduce that money loses its value
+over time, if the price of goods generally increases over time.
 
 Money depreciation is not special to US dollars. People in most countries of
 the world experience a similar phenomenon. Money depreciates in value as time
-passes. This phenomenon is called [inflation](https://en.wikipedia.org/wiki/Inflation).
+passes. This phenomenon is called inflation_.
 
 
 Control over money supply
@@ -175,6 +174,13 @@ If the whole community where Bob and Charli live used Offset, they will all be
 protected from the effect of inflation created by money printed by the state.
 
 
+Further reading
+---------------
+
+- `The New Approach to Freedom`_ (E.C. Riegel)
+- `Flight from Inflation`_ (E.C. Riegel)
+
+
 .. [1] 
    The control over the money supply sometimes take other forms than the direct
    ability to print new money.
@@ -183,6 +189,8 @@ protected from the effect of inflation created by money printed by the state.
    When asked, you could delighfully reply that "by printing new money you make
    the country richer". 
 
-
-
+.. _`average basket of goods`: https://en.wikipedia.org/wiki/Consumer_price_index
+.. _inflation: https://en.wikipedia.org/wiki/Inflation
+.. _`The New Approach to Freedom`: http://www.newapproachtofreedom.info/documents/naf.pdf
+.. _`Flight from Inflation`: http://www.newapproachtofreedom.info/documents/ffi.pdf
 
