@@ -39,7 +39,7 @@ the bank [2]_.
 TODO: Image showing loan process and repayment.
 
 The loan solution has some major disadvantages for Charli and Bob: When Charli
-takes the loan, she promised to the bank to return more money at a later time,
+took the loan, she promised to the bank to return more money at a later time,
 usually in the form of `interest rate`_. As a result, Charli will have to
 increase her chocolate bars prices to be able to return the loan she took from
 the bank. Bob will also have to increase his bread prices if he wants to keep
