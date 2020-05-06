@@ -12,16 +12,16 @@ sell without having to pay the extra fees to a payment processor.
 
 Most importantly, Offset gives **you** the control. Offset is free and open
 source [1]_. There is no single "Offset server", as Offset is fully decentralized. 
-Your Offset credit fits nicely into your mobile phone [2]_, and you are the
+Your Offset credits fit nicely into your mobile phone [2]_, and you are the
 only one having control over those credits. You can open as many Offset cards
 as you like, without having to pay any fees. Your Offset cards can not be
 frozen, and your transactions can not be tracked [3]_.
 
 Offset moves the power of issuing money from the state to the market
-participants. Therefore, Offset credits are protcted from inflation.
-While the currencies of the world constantly depreciate in value, your Offset
-credits will hold to their original value.
+participants. Therefore, Offset credits are :doc:`protected from inflation
+<inflation>`. While the currencies of the world constantly depreciate in value,
+Offset credits will hold to their original value.
 
 .. [1] Licensed under the AGPL license
-.. [2] Or your desktop computer. In fact, you can even run your Offset card at your favourite cloud provider.
+.. [2] Or your desktop computer, or even in the cloud.
 .. [3] Except for when you file your tax report and pay your taxes
