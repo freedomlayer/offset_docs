@@ -95,9 +95,11 @@ payment protocol:
                    B --- C --- D --- E
 
 Where single arrows (``--->``) represent communication done between nodes, and
-fat arrows (``===>``) represent communication done out of band, for example:
-Using QR codes, by sending an instant message on a mobile phone, or using
-email. For example, in the diagram above, the invoice will be sent from E to B
+fat arrows (``===>``) represent communication done out of band. Out of band
+communication could be using QR codes, sending an instant message on a mobile
+phone, or using email. 
+
+For example, in the diagram above, the invoice will be sent from E to B
 using some external communication. However, the Request message sent from B to
 E is sent along the chain of nodes ``B -- C -- D -- E``.
 
