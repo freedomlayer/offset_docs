@@ -8,31 +8,32 @@ Offset is a credit card powered by trust between people.
    :maxdepth: 2
    :caption: Introduction
 
-   offset_idea
-   app_manual
-   economic
-   inflation
-   privacy
-   about
+   intro/offset_idea
+   intro/app_manual
+   intro/economic
+   intro/inflation
+   intro/privacy
+   intro/about
 
 .. toctree::
    :maxdepth: 2
    :caption: Advanced
 
-   advanced_usage
+   advanced/setup
+   advanced/node
 
 .. toctree::
    :maxdepth: 2
    :caption: Theory
 
-   network
-   mutual_credit_protocol
+   theory/network
+   theory/mutual_credit_protocol
 
 .. toctree::
    :maxdepth: 2
    :caption: Development
 
-   contributing
+   dev/contributing
 
 Indices and tables
 ==================

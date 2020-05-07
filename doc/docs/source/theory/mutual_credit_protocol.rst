@@ -6,7 +6,7 @@ Prior reading
 
 To get the most of this document, you are recommended to first read:
 
-- :doc:`Economic idea <economic>`
+- :doc:`Economic idea <../intro/economic>`
 - :doc:`Network structure <network>`
 
 Intro
