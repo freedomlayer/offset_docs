@@ -8,8 +8,8 @@ tutorial requires minimal familiarity using the `command line interface
 You will also need a working desktop computer. Offset should work correctly on
 Windows, Linux and macOS.
 
-Download Offset
----------------
+Download
+--------
 
 To use this tutorial, you first need to download an Offset release suitable for
 your system. You can download Offset from the `releases page
