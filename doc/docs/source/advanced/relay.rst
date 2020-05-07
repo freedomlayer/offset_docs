@@ -7,7 +7,10 @@ We use relays because most user devices are behind `NATs
 not own a public address. As a result, it is usually very difficult for two
 user devices to communicate directly.
 
-Make sure to go through the required :doc:`initial setup <setup>` first.
+Recommended prior reading:
+
+- :doc:`Network structure <../theory/network>`
+- :doc:`Initial setup <setup>`
 
 Running your own relay
 ----------------------

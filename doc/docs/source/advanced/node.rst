@@ -10,7 +10,10 @@ becomes offline. As a result, transactions can not be forwarded using the node.
 We will now see how to set up a node on your desktop computer. You can use the
 same instructions to run your Offset node in the cloud.
 
-Make sure to go through the required :doc:`initial setup <setup>` first.
+Recommended prior reading:
+
+- :doc:`Network structure <../theory/network>`
+- :doc:`Initial setup <setup>`
 
 Running your own node
 ---------------------
@@ -102,7 +105,7 @@ public facing IP, or possibly to your domain name. If you are using a domain
 name, note that you do not need to obtain a certificate, because Offset uses a
 different type of authentication.
 
-``NODE_PORT``` is the public facing listening port of the node. Usually you
+``NODE_PORT`` is the public facing listening port of the node. Usually you
 should be able to select any port that you like that is larger or equal to 1024 [1]_. 
 
 Next, we create a directory for the node's data, and invoke:
