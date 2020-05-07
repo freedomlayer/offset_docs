@@ -7,8 +7,8 @@ An Offset node that lives inside a mobile device has a major disadvantage: when
 the mobile device enters "sleep mode", or loses Internet connection, the node
 becomes offline. As a result, transactions can not be forwarded using the node.
 
-We will now see how to set up a node on your desktop computer. You can use the
-same instructions to run your Offset node in the cloud.
+This document describes how to set up a node on your desktop computer. You can
+use the same instructions to run your Offset node in the cloud.
 
 Recommended prior reading:
 
