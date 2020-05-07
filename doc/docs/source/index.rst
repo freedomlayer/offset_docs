@@ -21,6 +21,7 @@ Offset is a credit card powered by trust between people.
 
    advanced/setup
    advanced/node
+   advanced/relay
 
 .. toctree::
    :maxdepth: 2
