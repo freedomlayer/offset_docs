@@ -767,6 +767,13 @@ atomically. This is done as follows:
    ``isComplete=true`` can be used to compose a valid Receipt.
 
 
+Future work
+-----------
+
+This is not a final protocol specification. The Offset protocol is expected to
+change in the future. If you have ideas, suggestions or questions, don't
+hesitate to open an issue at the `project's repository
+<https://github.com/freedomlayer/offset>`. 
 
 .. [1] 
    Offset's Mutual credit protocol does not contain any built in timeouts.
