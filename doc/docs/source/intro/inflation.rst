@@ -7,7 +7,7 @@ participants. Therefore, Offset credits are protected from inflation.
 What is inflation?
 ------------------
 
-Imagine a living in 1970, having 1000 US dollars in your bank account. Now
+Imagine living in 1970, having 1000 US dollars in your bank account. Now
 imagine you fell asleep for 50 years, waking up in the year 2020. 
 
 After the first moments of cultural shock, witnessing all the new roads, cars,
