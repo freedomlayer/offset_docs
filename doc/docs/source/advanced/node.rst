@@ -10,7 +10,7 @@ becomes offline. As a result, transactions can not be forwarded using the node.
 We will now see how to set up a node on your desktop computer. You can use the
 same instructions to run your Offset node in the cloud.
 
-Make sure to go through the required :doc:`initial setup first <setup>`.
+Make sure to go through the required :doc:`initial setup <setup>` first.
 
 Running your own node
 ---------------------
@@ -76,9 +76,8 @@ your mobile phone to your node, you need to transfer the ``node/node.rcard``
 file to your mobile phone (You can also scan it as a QR
 code).
 
-
 Node commands explained
-~~~~~~~~~~~~~~~~~~~~~~~
+-----------------------
 
 Let's begin explaining the above commands.
 
@@ -104,7 +103,7 @@ name, note that you do not need to obtain a certificate, because Offset uses a
 different type of authentication.
 
 ``NODE_PORT``` is the public facing listening port of the node. Usually you
-should be able to select any port that you like above 1024 [1]_. 
+should be able to select any port that you like that is larger or equal to 1024 [1]_. 
 
 Next, we create a directory for the node's data, and invoke:
 
@@ -194,7 +193,7 @@ The `&` sign at the end of the command means that the command will run at the
 background. If this is not what you want, you may omit the sign.
 
 Resulting files tree
-~~~~~~~~~~~~~~~~~~~~
+--------------------
 
 These are the files you should have after running the above commands:
 
