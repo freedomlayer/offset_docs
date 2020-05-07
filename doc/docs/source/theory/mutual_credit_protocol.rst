@@ -773,7 +773,7 @@ Future work
 This is not a final protocol specification. The Offset protocol is expected to
 change in the future. If you have ideas, suggestions or questions, don't
 hesitate to open an issue at the `project's repository
-<https://github.com/freedomlayer/offset>`. 
+<https://github.com/freedomlayer/offset>`_. 
 
 .. [1] 
    Offset's Mutual credit protocol does not contain any built in timeouts.
