@@ -21,7 +21,8 @@ How can I help?
 ---------------
 
 * Development: Offset is far from complete. There are many features
-  to add and many bugs to fix.
+  to add and many bugs to fix. Check out the issues pages on the Offset
+  repositories and see if there is any issue you would like to help solve.
 
 * Bug reports: If you find any issue with Offset, or have an interesting idea,
   don't hesitate to open an issue here at the relevant repository.
