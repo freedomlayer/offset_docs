@@ -10,8 +10,8 @@ Privacy is a core value in the design of Offset. This document discusses what
 information Offset allows you to keep private, and what bits of information
 might leak when you use Offset.
 
-Privacy summary
----------------
+Summary
+-------
 
 * The only unique id representing your Offset identity is a public key.
 
