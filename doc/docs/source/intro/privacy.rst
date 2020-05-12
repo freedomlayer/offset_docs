@@ -31,14 +31,14 @@ Summary
 * Index servers 
 
   * Know your public key
-  * Know the public keys of your friends
-  * Know approximate balances between you and your friends.
+  * Know the public keys of your Offset friends
+  * Know approximate balances between you and your Offset friends.
   * Know when you are online
 
 * Relays
 
   * Know your public key
-  * Might know the public keys of some of your friends
+  * Might know the public keys of some of your Offset friends
 
 * Offset friends
 
@@ -52,8 +52,8 @@ Summary
 
   * If a stranger knows your public key, he might be able to deduce:
 
-    * The public keys of your friends
-    * Approximate balances between you and your friends.
+    * The public keys of your Offset friends
+    * Approximate balances between you and your Offset friends.
     * When you are online
 
 
