@@ -60,8 +60,9 @@ Summary
 * The Offset app 
 
   * Contains no tracking code
-  * Does not send your information to any third party, except for the ones you select explicitly.
-
+  * Stores your identity locally.
+  * Does not send your information to any third party, except for servers and
+    Offset friends you choose explicitly.
 
 
 Identity
@@ -144,8 +145,9 @@ Offset app
 ----------
 
 The Offset app does not include any tracking functionality, and does not send
-your information to any third party without your explicit consent. There is no
-"Offset app backend", as Offset is fully decentralized.
+your information to any third party without your explicit consent. When you
+create an Offset local card, your identity is kept inside your mobile device.
+There is no "Offset app backend", as Offset is fully decentralized.
 
 When you connect with an index server, relay or an (Offset) friend, you share
 some information with them, as described earlier in this document.
