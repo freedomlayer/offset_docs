@@ -17,7 +17,7 @@ journey learning about the nature of money, and how to decentralize the power
 over it back to the people. 
 
 10 years later, with the help of many friends along the way, the basic
-technology is complete. For the first time, I can hold in my hand a credit card
+technology is complete. For the first time I can hold in my hand a credit card
 that is truly mine.
 
 -- real
