@@ -78,7 +78,7 @@ server:
    cp other_index2.index index/trusted/
 
    # Start index server
-   stmgr --idfile index/index.ident \
+   stindex --idfile index/index.ident \
          --lclient $INDEX_ADDRESS:$INDEX_PORT_CLIENT \
          --lserver $INDEX_ADDRESS:$INDEX_PORT_SERVER \
          --trusted index/trusted &
@@ -100,4 +100,94 @@ added using the Offset app.
 Index commands explained
 ------------------------
 
-TODO
+Selecting public listening address and ports:
+
+.. code:: sh
+
+   INDEX_ADDRESS="www.myindex.com"
+   INDEX_PORT_CLIENT=3456
+   INDEX_PORT_SERVER=6543
+
+``INDEX_ADDRESS`` is the index server's public address. You may use either IP
+address or a domain name. If you choose to use a domain name, note that you do
+not need to register a certificate, as Offset has its own authentication
+mechanism.
+
+``INDEX_PORT_CLIENT`` is the index's public listening port for clients. In
+other words, nodes will connect to ``INDEX_ADDRESS:INDEX_PORT_CLIENT``. You can
+pick any port number that you want that is at least 1024 [1]_.
+
+``INDEX_PORT_SERVER`` is the index's publick listening port for servers. This
+means other index servers federating with this index server will connect to
+``INDEX_ADDRESS:INDEX_PORT_SERVER``.
+
+Next, we create directories to store the data required for the index server. We
+also create a subdirectory called ``trusted`` to keep a list of trusted index
+servers that this index server will federate with:
+
+.. code:: sh
+
+   mkdir index
+   mkdir index/trusted
+
+We generate a identity for the index server:
+
+.. code:: sh
+
+   stmgr gen-ident --output index/index.ident
+
+An identity is a key pair: A private key and a public key. The identity is used
+for authentication during communication with other nodes and other index
+servers.
+
+We then create two tickets for this index server. A ticket contains the index's
+public address and public key. The first ticket will be used by nodes to
+connect to this index server:
+
+.. code:: sh
+
+   stmgr index-ticket \
+           --address $INDEX_ADDRESS:$INDEX_PORT_CLIENT \
+           --idfile index/index.ident \
+           --output index/index_client.index
+
+
+The second ticket will be used by other index servers to connect to this index
+server:
+
+
+.. code:: sh
+
+   stmgr index-ticket \
+           --address $INDEX_ADDRESS:$INDEX_PORT_SERVER \
+           --idfile index/index.ident \
+           --output index/index_server.index
+
+
+The next step is to set up trusted index servers for this index server. In the
+snippet below, we add two index servers tickets to our trusted directory:
+
+.. code:: sh
+
+   cp other_index1.index index/trusted/
+   cp other_index2.index index/trusted/
+
+To make federation work, we also have to provide our index server's
+ticket to the owners of those index servers. Federation between index servers
+only works if both index servers configured it.
+
+Finally, we start the index server:
+
+.. code:: sh
+
+   stindex --idfile index/index.ident \
+         --lclient $INDEX_ADDRESS:$INDEX_PORT_CLIENT \
+         --lserver $INDEX_ADDRESS:$INDEX_PORT_SERVER \
+         --trusted index/trusted &
+
+The `&` sign at the end of the command means that the command will run at the
+background. If this is not what you want, you may omit the sign.
+
+.. [1]
+   In most operating systems, ports below 1024 are usually reserved, and
+   require administrator priviledges to use.
