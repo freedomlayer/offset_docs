@@ -32,7 +32,7 @@ How can I help?
   send us a pull request.
 
 * Design: The Offset website and the Offset app user interface are still a work
-  in progress.  If you have the skills to make it look better, don't hesitate
+  in progress. If you have the skills to make it look better, don't hesitate
   to contact us.
 
 * Spread the message: Show the Offset app to your friends, and teach them how
