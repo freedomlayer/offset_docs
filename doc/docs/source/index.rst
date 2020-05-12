@@ -17,19 +17,19 @@ Offset is a credit card powered by trust between people.
 
 .. toctree::
    :maxdepth: 2
+   :caption: Theory
+
+   theory/network
+   theory/mutual_credit_protocol
+
+.. toctree::
+   :maxdepth: 2
    :caption: Advanced
 
    advanced/setup
    advanced/node
    advanced/relay
    advanced/index
-
-.. toctree::
-   :maxdepth: 2
-   :caption: Theory
-
-   theory/network
-   theory/mutual_credit_protocol
 
 .. toctree::
    :maxdepth: 2
