@@ -1,10 +1,9 @@
 Economic idea
 =============
 
-In traditional monetary systems, money is issued by the state. (For example, the
-US dollar is issued by the USA government). Participants of the market can then
-use the money issued by the state to buy and sell goods and services in the
-market.
+In traditional monetary systems, money is issued by the state. Participants of
+the market can then use the money issued by the state to buy and sell goods and
+services in the market.
 
 **Offset moves the power of issuing money from the state to the market
 participants.** 
@@ -40,7 +39,7 @@ the bank [2]_.
 TODO: Image showing loan process and repayment.
 
 The loan solution has some major disadvantages for Charli and Bob: When Charli
-takes the loan, she promised to the bank to return more money at a later time,
+took the loan, she promised to the bank to return more money at a later time,
 usually in the form of `interest rate`_. As a result, Charli will have to
 increase her chocolate bars prices to be able to return the loan she took from
 the bank. Bob will also have to increase his bread prices if he wants to keep
@@ -246,7 +245,7 @@ fees.
    most readers are familiar with it.
 .. [5] 
    The credit limits don't have to be equal! In some cases it might be possible
-   that one party trusts the other party more than the other way around. In
+   that one party trusts the other party more than the other way around. It
    might also be true that certain businesses might have different turnover,
    and therefore might need different amount of credit to operate.
 
