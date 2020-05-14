@@ -46,8 +46,6 @@ exclude_patterns = []
 
 html_theme = 'alabaster'
 
-# 'sidebar_width': '280px',
-
 html_theme_options = {
     'description': 'A credit card powered by trust between people',
     'github_user': 'freedomlayer',
