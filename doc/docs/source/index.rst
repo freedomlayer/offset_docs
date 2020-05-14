@@ -14,6 +14,7 @@ Offset is a credit card powered by trust between people.
    intro/inflation
    intro/privacy
    intro/about
+   intro/contact
 
 .. toctree::
    :maxdepth: 2
