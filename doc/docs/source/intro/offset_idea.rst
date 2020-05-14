@@ -1,6 +1,10 @@
 What is Offset?
 ===============
 
+.. warning::
+
+        Offset is experimental technology, and not yet ready to use in production!
+
 Offset is a credit card powered by trust between people. Payments in Offset are
 secure, fast and :doc:`privacy preserving <privacy>`. In addition,
 Offset lets you pay with any currency you like.
