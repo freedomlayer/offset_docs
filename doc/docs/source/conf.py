@@ -47,7 +47,7 @@ exclude_patterns = []
 html_theme = 'alabaster'
 
 html_theme_options = {
-    'sidebar_width': '280px',
+    'description': 'A credit card powered by trust between people',
     'github_user': 'freedomlayer',
     'github_repo': 'offset_docs',
     'github_button': 'false',
@@ -55,6 +55,7 @@ html_theme_options = {
     'logo': 'offset_logo_128_128.png',
     'logo_name': 'true',
     'logo_text_align': 'center',
+    'font_family': '"Noto Sans", "Helvetica Neue", Helvetica, Arial, sans-serif'
 }
 
 # Add any paths that contain custom static files (such as style sheets) here,

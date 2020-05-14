@@ -1,5 +1,10 @@
-
 /* Used to align inline images with the rest of the text */
 .align-top {
         vertical-align: text-top;
+}
+
+/* Solves issue: https://github.com/bitprophet/alabaster/issues/139 */
+div.body {	
+    min-width: auto;	
+    max-width: auto;	
 }
