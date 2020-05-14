@@ -55,6 +55,7 @@ html_theme_options = {
     'logo': 'offset_logo_128_128.png',
     'logo_name': 'true',
     'logo_text_align': 'center',
+    'font_family': '"Noto Sans", "Helvetica Neue", Helvetica, Arial, sans-serif'
 }
 
 # Add any paths that contain custom static files (such as style sheets) here,
