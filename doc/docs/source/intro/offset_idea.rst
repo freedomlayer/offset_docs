@@ -23,5 +23,5 @@ frozen, and your transactions can not be tracked.
 
 Offset moves the power of issuing money :doc:`from the state to the market
 participants <economic>`. Therefore, Offset credits are :doc:`protected from
-inflation <inflation>`. While the currencies of the world constantly depreciate
-in value, Offset credits hold to their original value.
+inflation <inflation>`. While the currencies of the world are constantly
+depreciating in value, Offset credits hold to their original value.
