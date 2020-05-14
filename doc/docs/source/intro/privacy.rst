@@ -38,6 +38,7 @@ Summary
 * Relays
 
   * Know your public key
+  * Know when you are online
   * Might know the public keys of some of your Offset friends
 
 * Offset friends
