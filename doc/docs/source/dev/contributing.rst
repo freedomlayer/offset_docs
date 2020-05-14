@@ -14,6 +14,9 @@ Offset is an open source project, currently split between a few repositories:
 * `Offset mobile app <https://www.github.com/freedomlayer/offset_mobile>`_,
   containing mostly UI code for the Offset mobile app.
 
+* `Offset inside docker <https://github.com/freedomlayer/offset_docker>`_,
+  dockerized versions of Offset entities.
+
 * `Offset documentation <https://www.github.com/freedomlayer/offset_docs>`_,
   containing Offset documentation (The document you are reading right now)
 
