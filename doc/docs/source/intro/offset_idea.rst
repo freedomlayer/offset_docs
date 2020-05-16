@@ -9,6 +9,11 @@ Offset is a credit card powered by trust between people. Payments in Offset are
 secure, fast and :doc:`privacy respecting <privacy>`. In addition,
 Offset lets you pay with any currency you like.
 
+.. image:: images/offset_card.svg
+  :alt: Offset credit card
+  :width: 320px
+  :align: center
+
 You can pay with Offset at the local grocery store by scanning
 a QR code, or buy something online from the other side of the world, even
 from someone you have never met. As a merchant, Offset gives you the freedom to
@@ -29,3 +34,4 @@ Offset moves the power of issuing money :doc:`from the state to the market
 participants <economic>`. Therefore, Offset credits are :doc:`protected from
 inflation <inflation>`. While the currencies of the world are constantly
 depreciating in value, Offset credits hold to their original value.
+
