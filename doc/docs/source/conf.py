@@ -55,7 +55,19 @@ html_theme_options = {
     'logo': 'offset_logo_128_128.png',
     'logo_name': 'true',
     'logo_text_align': 'center',
-    'font_family': '"Noto Sans", "Helvetica Neue", Helvetica, Arial, sans-serif'
+    'font_family': '"Noto Sans", "Helvetica Neue", Helvetica, Arial, sans-serif',
+    'extra_nav_links': {'Main website': 'https://www.offsetcredit.org'},
+}
+
+html_sidebars = {
+    '**': [
+        'about.html',
+        'navigation.html',
+        'relations.html',
+        'searchbox.html',
+        'donate.html',
+    ]
+
 }
 
 # Add any paths that contain custom static files (such as style sheets) here,
