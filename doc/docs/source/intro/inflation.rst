@@ -115,7 +115,8 @@ The total amount of goods in the market hasn't changed, but the amount of money
 cirulating in the market has doubled. This means that every new USD has half
 the value of an old USD.
 
-TODO: Add image illustrating the changes in amounts of money.
+.. image:: images/money_market_changes.svg
+  :alt: A person using bills as wallpaper during German hyperinflation, 1923
 
 We now go back to Bob and Charli. As the money changed its value, but the value
 of one loaf of bread, or of one chocolate bar hasn't changed, Bob and Charli
