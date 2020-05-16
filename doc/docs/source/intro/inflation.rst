@@ -16,7 +16,12 @@ your 1000 US dollars you have in the bank have became much less valuable than
 they used to be. An item that costs 10 US dollars in 2020 probably costed only
 1.5 US dollars back in 1970!
 
-TODO: Add an image, possibly inflation chart of US dollar.
+.. figure:: images/officialdata_usd_inflation.png
+  :alt: $100 since 1799, adjusted for inflation
+
+  Changes in the price of an item that costs $100 since the year 1799. The
+  price arrives at $2084.46 in the year 2020. Figure taken from
+  `www.officialdata.org <https://www.officialdata.org/us/inflation/1799>`_
 
 How can the value of the currency be measured? One way to do it is to track,
 over a long period of time, how much it costs to buy an `average basket of
@@ -63,7 +68,12 @@ prices of all the goods in the market will start rising, causing inflation. By
 the time inflation hits enough time have passed. The citizens of the country
 might not be able to connect between the money printing and the inflation.
 
-TODO: Add image showing inflation rate during some war somewhere?
+.. figure:: images/bills_wallpaper_germany.jpg
+  :alt: A person using bills as wallpaper during German hyperinflation, 1923
+
+  A person using bills as wallpaper during German hyperinflation in 1923, after
+  the first world war.  Taken from: `rarehistoricalphotos.com
+  <https://rarehistoricalphotos.com/banknotes-german-hyperinflation-1923/>`_
 
 Except for wars, printing new money could also be used as a band aid for
 overspending of the government, or for dealing with unexpected disasters.
