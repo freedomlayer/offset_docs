@@ -18,7 +18,8 @@ bars and sells them. Bob bakes bread. Living in the same community, Charli
 often buys bread from Bob's store, and Bob often buys chocolate from Charli's
 store.
 
-TODO: Image here showing Bob and Charli.
+.. image:: images/bob_charli.svg
+  :alt: Bob's bakery and Charli's chocolate store
 
 To clarify our understanding about the trading process, let's
 *imagine that Bob and Charli have no money at all*. Now, given that Charli has
@@ -36,7 +37,8 @@ Bob can later use that money to buy chocolate bars from Charli. If Charli could
 sell enough chocolate bars, she will be able eventually to repay the loan to
 the bank [2]_.
 
-TODO: Image showing loan process and repayment.
+.. image:: images/charli_loan.svg
+  :alt: Charli taking a loan to buy bread
 
 The loan solution has some major disadvantages for Charli and Bob: When Charli
 took the loan, she promised to the bank to return more money at a later time,
@@ -60,7 +62,8 @@ Charli could ask Bob to directly exchange one bar of chocolate from her store
 for two loafs of bread from Bob's bakery [3]_. If Bob agrees, the a deal can be
 made. This sort of direct exchange is called barter_.
 
-TODO: Image here showing barter
+.. image:: images/bob_charli_barter.svg
+  :alt: Bob and Charli trading using barter
 
 Barter allows to trade in a moneyless world, but by itself it is not always a
 convenient solution. 
@@ -84,13 +87,17 @@ contains the current mutual balance between Bob and Charli.
 
 At first, the balance will be zero:
 
-TODO: Image: Bob owes Charli: 0
+.. image:: images/bob_charli_mutual_0.svg
+  :alt: Zero balance between Bob and Charli
 
 Now when Bob wants to buy a chocolate bar from Charli's store, Charli hands Bob
 a chocolate bar, and they both agree to move the balance to 2USD [4]_. **At
 that moment, new money was created.** What this balance means is that Bob now
 owes Charli 2USD, and Charli can use those 2USD anytime she wants to buy bread
 at Bob's bakery. We call this idea `Mutual credit`_.
+
+.. image:: images/bob_charli_mutual_2.svg
+  :alt: Mutual credit: Adjusting balance as payment
 
 Mutual credit allows Bob and Charli to split the transaction into two
 separate parts that could happen in separate place and time, compared to
@@ -123,6 +130,15 @@ declare that Bob can owe her a maximum of 150USD [5]_. Therefore, if Charli will
 keep on buying bread without selling chocolate, eventually Bob will not be
 willing to provide any more bread.
 
+.. figure:: images/bob_charli_credit_limit.svg
+  :alt: Illustration of credit limits
+  
+  Above: Charli set up a 150USD credit limit. This means 150USD is the maximum
+  amount of value Charli can accumulate through this relationship. Bob set up a
+  credit limit of 200USD. Note that only Charli has control over the right
+  credit limit, and only Bob has control over the left credit limit.
+
+
 Charli might still decide to take as much bread as it can and disappear one
 day, but with credit limits, Bob knows that the maximum amount he may lose from
 the relationship with Charli is 200USD. 
@@ -151,12 +167,8 @@ that Daniel and Charli are good friends, and they also set up a mutual credit
 line. This is the resulting graph of relationships:
 
 
-.. code:: text
-
-      TODO: Image
-
-           0         0
-      B ---|--- C ---|--- D
+.. image:: images/bob_charli_daniel_mutual.svg
+  :alt: Mutual credit relationships between Bob, Charli and Dan
 
 
 In the figure above, we denote B: Bob, C: Charli and D: Daniel.
@@ -179,12 +191,8 @@ cost 100USD. Bob can push the credits all the way to Daniel through Charli:
 
 resulting state will look like this:
 
-.. code:: text
-
-      TODO: Image showing the purchase process
-
-        -100      -100
-      B --|---- C --|---- D
+.. image:: images/bob_charli_daniel_mutual_paid.svg
+  :alt: Bob's, Charli's and Daniel's mutual credit relationship after purchase
 
 Note that the total balance of Charli (-100USD + 100USD = 0USD) hasn't changed as a result of
 the transaction between Bob and Daniel. Bob's total balance decreased by
@@ -202,14 +210,6 @@ Fees
 ----
 
 Earlier we described how Bob can buy from Daniel, through a route along Charli.
-
-.. code:: text
-
-      TODO: Image
-
-           0         0
-      B ---|--- C ---|--- D
-
 
 With Offset, Charli's phone (or computer) will mediate the transaction
 automatically, without any human intervention. In some cases Charli might
