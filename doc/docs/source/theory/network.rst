@@ -26,39 +26,10 @@ The network consists of a few entities:
 Example network topology
 ------------------------
 
-.. code:: text
+.. figure:: images/network.svg
+  :alt: Example for an Offset network layout
 
-                      +-------+
-                      | Index |
-                      +-+---+-+
-                        |   |
-                  +-----+   +------+
-                  |                |
-             +----+--+         +---+---+          +-------+
-             | Index +---------+ Index +----------+ Index |
-             +-+-----+         +-------+          +-----+-+
-               |                                        |
-               |                                        +---+
-               |     +-------+         +-------+            |    +-------+
-               |     | Relay |         | Relay |            |    | Relay |
-               |     +--+----+         +-+---+-+            |    +---+---+
-               |        |                |   |              |        |
-               |+-------+                |   |              |        |
-               || +----------------------+   +-----------+  |+-------+
-               || |                                      |  ||
-             /-++-+-\                                  /-+--++\
-             | Node |                                  | Node |
-             \-+--+-/                                  \---+--/
-               |  |                                        |
-            +--+  +---+                                    |
-            |         |                                    |
-         +--+--+   +--+--+                              +--+--+
-         | App |   | App |                              | App |
-         +-----+   +-----+                              +-----+
-
-All lines in the diagram above represent encrypted TCP connections.
-
-TODO: Create an image for the above diagram.
+  All lines in the diagram above represent encrypted TCP connections.
 
 Node
 ----
