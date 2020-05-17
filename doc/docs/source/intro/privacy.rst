@@ -10,6 +10,11 @@ Privacy is a core value in the design of Offset. This document discusses what
 information Offset allows you to keep private, and what bits of information
 might leak when you use Offset.
 
+.. image:: images/privacy_eye.svg
+  :alt: The all seeing eye
+  :width: 200px
+  :align: center
+
 Summary
 -------
 
