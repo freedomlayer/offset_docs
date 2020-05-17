@@ -69,6 +69,9 @@ html_sidebars = {
     ]
 
 }
+# Do not add link for scaled images. See:
+# https://stackoverflow.com/questions/40096251/disable-click-behavior-for-images
+html_scaled_image_link = False
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
