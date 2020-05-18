@@ -13,7 +13,7 @@ Trading without money
 ---------------------
 
 To understand how Offset works, we begin with an example. Consider two local
-merchants, Charli and Bob, who work at the same street. Charli makes chocolate
+merchants, Charli and Bob, who work on the same street. Charli makes chocolate
 bars and sells them. Bob bakes bread. Living in the same community, Charli
 often buys bread from Bob's store, and Bob often buys chocolate from Charli's
 store.
@@ -43,12 +43,12 @@ the bank [2]_.
 The loan solution has some major disadvantages for Charli and Bob: When Charli
 took the loan, she promised to the bank to return more money at a later time,
 usually in the form of `interest rate`_. As a result, Charli will have to
-increase her chocolate bars prices to be able to return the loan she took from
+increase her chocolate bar prices to be able to return the loan she took from
 the bank. Bob will also have to increase his bread prices if he wants to keep
 buying the same amount of chocolate bars from Charli. 
 
 In other words, the exchange between Bob and Charli becomes less efficient, as
-some of the value is leaking from the mutual relationship to an external
+some of the value is leaking from the mutual relationship with an external
 entity: the bank.
 
 
@@ -59,7 +59,7 @@ What if Bob and Charli lived in a place without money? Could they still manage
 to exchange without an external entity that creates money?
 
 Charli could ask Bob to directly exchange one bar of chocolate from her store
-for two loafs of bread from Bob's bakery [3]_. If Bob agrees, the a deal can be
+for two loaves of bread from Bob's bakery [3]_. If Bob agrees, the a deal can be
 made. This sort of direct exchange is called barter_.
 
 .. image:: images/bob_charli_barter.svg
@@ -70,8 +70,8 @@ convenient solution.
 
 First, the value of goods do not always behave nicely as in the example
 above. What if one bar of Charli's chocolate has the same value of one and a
-half Bob's loafs of bread? To resolve this issue, Charli might trade two
-chocolate bars for three loafs of bread, but this is inefficient.
+half Bob's loaves of bread? To resolve this issue, Charli might trade two
+chocolate bars for three loaves of bread, but this is inefficient.
 
 Second, barter trade requires that each side wants something that the other
 side wants, at about the same time. What if Charli wants to buy bread today,
@@ -100,7 +100,7 @@ at Bob's bakery. We call this idea `Mutual credit`_.
   :alt: Mutual credit: Adjusting balance as payment
 
 Mutual credit allows Bob and Charli to split the transaction into two
-separate parts that could happen in separate place and time, compared to
+separate parts that could happen in a separate place and time, compared to
 barter which requires everything to happen at once.
 
 There are a few points to consider here. First, the creation of money:
@@ -108,9 +108,9 @@ Initially Bob and Charli both had no money, but Bob was able to create new
 money during the purchase of the chocolate bar from Charli. Bob didn't need any
 help from external entities to create the money.
 
-If in the future Charli ever arrives at Bob store and buys two loafs of bread for
+If in the future Charli ever arrives at Bob store and buys two loaves of bread for
 exactly 2USD, the balance between Bob and Charli will again be restored to 0.
-**At that moment, money was destroyed**
+**At that moment, money was destroyed.**
 
 
 Credit limits
@@ -158,7 +158,7 @@ multiple participants. **Offset was designed to allow using mutual credit
 at scale.**
 
 Continuing our story, consider an extra market participant, called Daniel.
-Daniel is a mechanic, repairing cars for living. Daniel lives in the same
+Daniel is a mechanic, repairing cars for a living. Daniel lives in the same
 community as Bob (the baker), and Charli (the chocolate artist). Daniel wants
 to be able to buy from Bob and Charli, and also provide his car repair services.
 
@@ -174,7 +174,7 @@ line. This is the resulting graph of relationships:
 In the figure above, we denote B: Bob, C: Charli and D: Daniel.
 We assume that initially the balance between Bob and Charli is 0, and that the
 balance between Charli and Daniel is also 0. We also assume that both Bob and
-Charli, and Charli and Daniel has set up some credit limits.
+Charli, and Charli and Daniel have set up credit limits.
 
 In Offset we denote the relationship between Bob and Charli, or between Charli
 and Daniel, as **friendship**.
@@ -214,7 +214,7 @@ Earlier we described how Bob can buy from Daniel, through a route along Charli.
 With Offset, Charli's phone (or computer) will mediate the transaction
 automatically, without any human intervention. In some cases Charli might
 decide to collect fees for mediating the transaction. This could be to mitigate
-risk, or for example, due to expenses of running an Offset card in the cloud.
+risk, or for example, due to the expenses of running an Offset card in the cloud.
 The default value for fees in Offset is ``0``.
 
 Offset allows setting up fee in the form of ``a% + b``, where ``a`` is the amount
@@ -228,17 +228,17 @@ fees.
 
 
 .. [1] 
-   Considering a closed system including only Charli and Bob, If Charli was
+   Considering a closed system, including only Charli and Bob. If Charli was
    able to repay the loan (with interest) then it definitely means Bob has less
    than 0 "money", which means he is bankrupt! How can this be? In our modern
    economy, more and more money is created all the time. This is a strategy
    called inflation.
 .. [2] 
-   Or borrowing credit from a credit card company
+   Or borrowing credit from a credit card company.
 .. [3] 
    Charli happens to own one of the only chocolate stores in town, and
    therefore she can price her chocolate bars higher than what Bob can price
-   his loafs of bread.
+   his loaves of bread.
 .. [4] 
    In fact, Bob and Charli could decide upon any currency that fits them, or
    even invent a new currency. USD was chosen here because of the assumption
