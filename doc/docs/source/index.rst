@@ -12,6 +12,7 @@ Offset is a credit card powered by trust between people.
    intro/app_manual
    intro/economic
    intro/inflation
+   intro/blockchain_comparison
    intro/privacy
    intro/about
    intro/contact
