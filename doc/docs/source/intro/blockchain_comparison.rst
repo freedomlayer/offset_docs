@@ -113,7 +113,7 @@ roles:
 Blockchains are usually designed such that mining is initially more rewarding
 to miners, and as time goes by it becomes less and less profitable. For
 example, in Bitcoin, mining is designed to become `50% less profitable every
-210000 blocks <https://en.bitcoin.it/wiki/Controlled_supply>`, and the total
+210000 blocks <https://en.bitcoin.it/wiki/Controlled_supply>`_, and the total
 amount of Bitcoins ever created is limited to about 21 million.
 
 This property of blockchains makes it more appealing for people to join early,
@@ -144,7 +144,8 @@ Charli. Suppose that initially the balance between Bob and Charli is ``0``.
 Next, assume that Bob buys a chocolate bar from Charli for the price of $2. Now
 the balance between Bob and Charli is -$2 from Bob's point of view, and +$2
 from Charli's point of view. In the moment of purchase, new money was created
-by Bob. In this case we can say that the amount of money in the market is $2.
+by Bob. In this case we can say that the total amount of money in the market is
+$2.
 
 .. image:: images/bob_charli_mutual_2.svg
   :alt: Creation of money by Bob's purchase
@@ -163,7 +164,7 @@ Avoiding Sybil attacks
 
 Decentralized network can be subverted when populated by large amounts of
 identities all belonging to a single malicious adversary. This kind of attack
-is called a `Sybil attack <https://en.wikipedia.org/wiki/Sybil_attack>`. We
+is called a `Sybil attack <https://en.wikipedia.org/wiki/Sybil_attack>`_. We
 compare here the mitigations used in blockchain systems and in Offset against
 sybil attacks.
 
@@ -171,11 +172,10 @@ Blockchain systems use proof of work as a safeguard against Sybil attacks. This
 idea can be simply described as: "one processor, one vote". **blockchain
 networks rely on the fact that computation power is rare.**
 
-Therefore an adversary `has to gain meaningful computation power
-<https://www.investopedia.com/terms/1/51-attack.asp>` before he can obtain
-influence over a blockchain network. In blockchain based network, having large
-computation power can provide an adversary with the ability to double spend
-money.
+Therefore an adversary has to gain meaningful computation power before he can
+obtain influence over a blockchain network. In blockchain based network, having
+large computation power can provide an adversary with the ability to double
+spend money.
 
 Offset does not make use of Proof of work. Instead, Offset uses trust between
 people as a safeguard against Sybil attacks. In order to use Offset, a user
