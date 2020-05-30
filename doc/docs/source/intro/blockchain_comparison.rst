@@ -58,9 +58,22 @@ Summary
 Global consensus
 ----------------
 
-TODO
+Global consensus is a core idea powering blockchain based digital currencies:
+All the participants in a blockchain network try to maintain together a single
+view of the current state of balances for all users. Blockchain based currencies
+usually use proof of work as a technology to acheive consensus: the ledger that
+took the most effort to create is chosen as the global truth.
 
+Contrast with blockchain currencies, Offset does not attempt to acheive global
+consensus. Instead, every Offset user maintains synchronized balances with a few
+selected Offset friends. In other words, each Offset user has a local view of
+his own balances, and not a global view of the balances of all Offset users. **It
+turns out that secure payments are possible even without a global consensus
+system!**
 
+Offset's approach makes it much more efficient than its blockchain counterparts.
+Transactions are much faster, and the storage required for every user is of
+a very small constant size.
 
 .. _security-core:
 
