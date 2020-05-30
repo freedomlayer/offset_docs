@@ -3,101 +3,103 @@ Offset is not a blockchain
 
 The recent rise in popularity of digital currencies might make it difficult to
 understand what makes Offset different in its approach to money and payments.
-This document attempts to clarify the differences between Offset and a
-blockchain based currency.
+We present here the differences between Offset and a blockchain based digital
+currency.
 
 Summary
 -------
 
-* There is no single ledger and no consensus in Offset.
-* Offset transactions are much more efficient than blockchain transactions.
-* An Offset user has to be online to receive money.
-* You will not get rich by joining Offset early.
-* Money in Offset is created and destroyed according to the size of the market. 
-* Offset has no mining or proof of work. Trust between people is used instead.
+.. list-table:: Offset - Blockchain [1]_ comparison
+   :header-rows: 1
 
-TODO: Comparison table
+   * - 
+     - Blockchain
+     - Offset
+
+   * - :ref:`global-consensus`
+     - Yes
+     - No
+
+   * - :ref:`security-core`
+     - Proof of work (Mining)
+     - Trust between people
+
+   * - :ref:`origin-of-money`
+     - Created through mining
+     - Created and destroyed by users. Automatically adjusts to market size.
+
+   * - :ref:`incentives`
+     - Rewards first adopters
+     - Interest free credit based on trust
+
+   * - :ref:`transaction-speed`
+     - A few mintues, up to a few hours
+     - Less than a few seconds
+
+   * - :ref:`transaction-certainty`
+     - Certainty increases as time progresses, but never reaches 100%
+     - 100% certainty when completed
+
+   * - :ref:`storage`
+     - Blockchain size increases at a rate of a few GBs every month
+     - Small constant size (A few KBs)
+
+   * - :ref:`fees`
+     - High fees due to mining difficulty
+     - According to users' settings along route
+
+   * - :ref:`Receive payment when offline <recipient-online>`
+     - Yes
+     - No
 
 
-Mutual credit
--------------
+.. _global-consensus:
 
-The core idea powering Offset payments is `mutual credit
-<https://en.wikipedia.org/wiki/Mutual_credit>`_: A synchronized balance
-maintained between two people. Offset does not make use of any blockchain
-technology. You can learn more about the economic ideas behind Offset
-:doc:`here <economic>`.
-
-TODO: Add image demonstrating mutual credit.
-
-
-No single legder
+Global consensus
 ----------------
 
-Most blockchain currencies rely on a single ledger containing the current
-balances of all the users and the history of all transactions in the network.
-This single ledger is usually called "the blockchain". Offset does not maintain
-such a ledger. Instead, every Offset user keeps his own balances locally.
+TODO
 
 
-Storage
-~~~~~~~
 
-Offset is storage efficient. To operate a blockchain, every network node has to
-store the full blockchain. For example, the size of the bitcoin blockchain
-in May 2020 is more than 270GB, and it keeps growing in the rate of about 5GB
-every month. In comparison, every Offset user has to save only a few Kilobytes
-of information about his balances and current state, and that amount stays
-constant.
+.. _security-core:
 
-TODO: Add an image comparing a blockchain storage against Offset saved balances
+Security core
+-------------
 
-Transactions Speed and certainty
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Decentralized network can be subverted when populated by large amounts of
+identities all belonging to a single malicious adversary. This kind of attack
+is called a `Sybil attack <https://en.wikipedia.org/wiki/Sybil_attack>`_. We
+compare here the mitigations used in blockchain systems and in Offset against
+sybil attacks.
 
-Avoiding a single ledger makes Offset transactions fast and certain. 
+Blockchain systems use proof of work as a safeguard against Sybil attacks. This
+idea can be simply described as: "one processor, one vote". **blockchain
+networks rely on the fact that computation power is rare.**
 
-In a blockchain based network, every transaction has to propagate through `all
-the nodes in the network
-<https://en.wikipedia.org/wiki/Flooding_(computer_networking)>`_.  In addition,
-as a means of avoiding `double spending
-<https://en.wikipedia.org/wiki/Double-spending>`_ of money, nodes in a
-blockchain network have to perform `proof of work
-<https://en.wikipedia.org/wiki/Proof_of_work>`_ to acheive consensus over the
-shared ledger. 
+Therefore an adversary has to gain meaningful computation power before he can
+obtain influence over a blockchain network. In blockchain based network, having
+large computation power can provide an adversary with the ability to double
+spend money.
 
-In Bitcoin for example, it will usually take at least 10 minutes
-before there is a reasonable certainty that a transaction was completed. For
-more expensive transactions, users will usually wait even over an hour to be
-sure that the transaction was completed successfuly.
+Offset does not make use of Proof of work. Instead, Offset uses trust between
+people as a safeguard against Sybil attacks. In order to use Offset, a user
+has to set up mutual credit lines with a few Offset friends. Friends should be
+chosen carefully! Friends will usually be people the user has real world
+familiarity with, or possibly a trusted local hub.
 
-Compared to blockchain transactions, Offset transactions are fast. It usually
-takes no more than a few seconds for an Offset transaction to complete. an
-Offset transaction will usually pass through only a few computers in the
-network that are relevant to the transaction. Offset doesn't have to maintain
-any shared ledger, and therefore no consensus or proof of work are required.
-When an Offset transacation is completed, it is completed with 100% certainty.
-We call this property "atomicity ".
+For every Offset friend, the user sets up a credit limit. The credit limit is
+the maximum amount of money the friend might owe the user. It is also the
+maximum amount that the user will lose in case the relationship with this
+friend is lost. Hence, **Offset relies on the fact that real life relationships
+are rare**. An Offset user can spend money from his mutual credit relationships
+and disappear, but it will cost him relationships that might be more
+valuable than the money he spent.
 
-TODO: Add image demonstrating comparison between an Offset payment and a
-blockchain payment, from networking point of view.
+.. _origin-of-money:
 
-Recipient has to be Online
-~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-The blockchain approach allows users to collect payments even when they are
-offline. For example, it is possible to send money to a Bitcoin address even if
-the recipient is not connected to the Internet.
-
-One downside of Offset design is that Offset users have to be online in order
-to collect payment. This happens because Offset payments require the recipient
-to sign using his private key. The recipient is the only one knowing his
-private key, and therefore he has to be online in order to collect the incoming
-payment.
-
-
-Money creation
---------------
+Origin of money
+---------------
 
 Money creation in blockchains
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -158,36 +160,115 @@ destroyed.
 
 TODO: Add image demonstrating destruction of money.
 
+.. _incentives:
 
-Avoiding Sybil attacks
-----------------------
+Incentives
+----------
 
-Decentralized network can be subverted when populated by large amounts of
-identities all belonging to a single malicious adversary. This kind of attack
-is called a `Sybil attack <https://en.wikipedia.org/wiki/Sybil_attack>`_. We
-compare here the mitigations used in blockchain systems and in Offset against
-sybil attacks.
+TODO
 
-Blockchain systems use proof of work as a safeguard against Sybil attacks. This
-idea can be simply described as: "one processor, one vote". **blockchain
-networks rely on the fact that computation power is rare.**
 
-Therefore an adversary has to gain meaningful computation power before he can
-obtain influence over a blockchain network. In blockchain based network, having
-large computation power can provide an adversary with the ability to double
-spend money.
+.. _transaction-speed:
 
-Offset does not make use of Proof of work. Instead, Offset uses trust between
-people as a safeguard against Sybil attacks. In order to use Offset, a user
-has to set up mutual credit lines with a few Offset friends. Friends should be
-chosen carefully! Friends will usually be people the user has real world
-familiarity with, or possibly a trusted local hub.
+Transaction speed
+-----------------
 
-For every Offset friend, the user sets up a credit limit. The credit limit is
-the maximum amount of money the friend might owe the user. It is also the
-maximum amount that the user will lose in case the relationship with this
-friend is lost. Hence, **Offset relies on the fact that real life relationships
-are rare**. An Offset user can spend money from his mutual credit relationships
-and disappear, but it will cost him relationships that might be more
-valuable than the money he spent.
+TODO:
 
+Avoiding a global consensus mechanism makes Offset transactions fast and
+certain. 
+
+In a blockchain based network, every transaction has to propagate through `all
+the nodes in the network
+<https://en.wikipedia.org/wiki/Flooding_(computer_networking)>`_.  In addition,
+as a means of avoiding `double spending
+<https://en.wikipedia.org/wiki/Double-spending>`_ of money, nodes in a
+blockchain network have to perform `proof of work
+<https://en.wikipedia.org/wiki/Proof_of_work>`_ to acheive consensus over the
+shared ledger. 
+
+In Bitcoin for example, it will usually take at least 10 minutes
+before there is a reasonable certainty that a transaction was completed. For
+more expensive transactions, users will usually wait even over an hour to be
+sure that the transaction was completed successfuly.
+
+Compared to blockchain transactions, Offset transactions are fast. It usually
+takes no more than a few seconds for an Offset transaction to complete. an
+Offset transaction will usually pass through only a few computers in the
+network that are relevant to the transaction. Offset doesn't have to maintain
+any shared ledger, and therefore no consensus or proof of work are required.
+When an Offset transacation is completed, it is completed with 100% certainty.
+We call this property "atomicity ".
+
+TODO: Add image demonstrating comparison between an Offset payment and a
+blockchain payment, from networking point of view.
+
+.. _transaction-certainty:
+
+Transaction certainty
+---------------------
+
+TODO
+
+.. _storage:
+
+Storage
+-------
+
+Offset is storage efficient. To operate a blockchain, every network node has to
+store the full blockchain. For example, the size of the bitcoin blockchain
+in May 2020 is more than 270GB, and it keeps growing in the rate of about 5GB
+every month. In comparison, every Offset user has to save only a few Kilobytes
+of information about his balances and current state, and that amount stays
+constant.
+
+TODO: Add an image comparing a blockchain storage against Offset saved balances
+
+.. _fees:
+
+Fees
+----
+
+TODO
+
+
+.. _recipient-online:
+
+Recipient has to be Online
+--------------------------
+
+The blockchain approach allows users to collect payments even when they are
+offline. For example, it is possible to send money to a Bitcoin address even if
+the recipient is not connected to the Internet.
+
+One downside of Offset design is that Offset users have to be online in order
+to collect payment. This happens because Offset payments require the recipient
+to sign using his private key. The recipient is the only one knowing his
+private key, and therefore he has to be online in order to collect the incoming
+payment.
+
+Mutual credit
+-------------
+
+The core idea powering Offset payments is `mutual credit
+<https://en.wikipedia.org/wiki/Mutual_credit>`_: A synchronized balance
+maintained between two people. Offset does not make use of any blockchain
+technology. You can learn more about the economic ideas behind Offset
+:doc:`here <economic>`.
+
+TODO: Add image demonstrating mutual credit.
+
+
+No single legder
+----------------
+
+Most blockchain currencies rely on a single ledger containing the current
+balances of all the users and the history of all transactions in the network.
+This single ledger is usually called "the blockchain". Offset does not maintain
+such a ledger. Instead, every Offset user keeps his own balances locally.
+
+
+.. [1] 
+   There are many blockchain based digital currencies, therefore the comparison
+   might fail to generalize over all of them. When in doubt, the comparison
+   refers to the characteristics of Bitcoin.
