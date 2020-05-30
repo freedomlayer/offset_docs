@@ -5,7 +5,7 @@ Offset
 Offset is a credit card powered by trust between people. 
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
    :caption: Introduction
 
    intro/offset_idea
@@ -18,14 +18,14 @@ Offset is a credit card powered by trust between people.
    intro/contact
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
    :caption: Theory
 
    theory/network
    theory/mutual_credit_protocol
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
    :caption: Advanced
 
    advanced/setup
@@ -34,7 +34,7 @@ Offset is a credit card powered by trust between people.
    advanced/index
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
    :caption: Development
 
    dev/contributing
