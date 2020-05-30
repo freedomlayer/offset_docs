@@ -20,7 +20,7 @@ Summary
      - Yes
      - No
 
-   * - :ref:`security-core`
+   * - :ref:`security-foundation`
      - Proof of work (Mining)
      - Trust between people
 
@@ -48,7 +48,7 @@ Summary
      - High fees due to mining difficulty
      - According to users' settings along route
 
-   * - :ref:`Receive payment when offline <recipient-online>`
+   * - :ref:`Receive payments when offline <recipient-online>`
      - Yes
      - No
 
@@ -64,6 +64,8 @@ view of the current state of balances for all users. Blockchain based currencies
 usually use proof of work as a technology to acheive consensus: the ledger that
 took the most effort to create is chosen as the global truth.
 
+TODO: Add image for longest chain rule (Bitcoin)
+
 Contrast with blockchain currencies, Offset does not attempt to acheive global
 consensus. Instead, every Offset user maintains synchronized balances with a few
 selected Offset friends. In other words, each Offset user has a local view of
@@ -75,10 +77,10 @@ Offset's approach makes it much more efficient than its blockchain counterparts.
 Transactions are much faster, and the storage required for every user is of
 a very small constant size.
 
-.. _security-core:
+.. _security-foundation:
 
-Security core
--------------
+Security foundation
+-------------------
 
 Decentralized network can be subverted when populated by large amounts of
 identities all belonging to a single malicious adversary. This kind of attack
@@ -178,15 +180,35 @@ TODO: Add image demonstrating destruction of money.
 Incentives
 ----------
 
-TODO
+Most blockchain based digital currencies reward first adopters: New money is
+easier to create in the beginning. Therefore people want to join early, in
+the hope of becoming rich when late users join the network.
 
+In Bitcoin, for example, mining is designed to become `50% less profitable every
+210000 blocks <https://en.bitcoin.it/wiki/Controlled_supply>`_, and the total
+amount of Bitcoins ever created is limited to about 21 million.
+
+Contrast with blockchain based currencies, **you will not become rich by joining
+Offset early**. Early and late Offset users have the same money creation
+power. 
+
+The money supply in Offset matches the size of the market, and so
+Offset currencies stick to their original value. Unlike blockchain based
+currencies, there is no point in speculating or gambling on the future value
+of Offset currencies.
+
+Offset offers new users interest free credit, based on trust. A new user can
+start using Offset by establishing Offset friendship with another Offset
+user. New users do not need to spend any (traditional) money to start playing
+the Offset "game".
 
 .. _transaction-speed:
 
 Transaction speed
 -----------------
 
-TODO:
+TODO: Split to transaction speed + transaction certainty.
+
 
 Avoiding a global consensus mechanism makes Offset transactions fast and
 certain. 
@@ -228,12 +250,14 @@ TODO
 Storage
 -------
 
-Offset is storage efficient. To operate a blockchain, every network node has to
+To operate a blockchain, every network node has to
 store the full blockchain. For example, the size of the bitcoin blockchain
 in May 2020 is more than 270GB, and it keeps growing in the rate of about 5GB
-every month. In comparison, every Offset user has to save only a few Kilobytes
-of information about his balances and current state, and that amount stays
-constant.
+every month. 
+
+Offset is storage efficient. In comparison, every Offset user has to save only a
+few Kilobytes of information about his balances and current state, and that
+amount stays constant.
 
 TODO: Add an image comparing a blockchain storage against Offset saved balances
 
@@ -247,8 +271,8 @@ TODO
 
 .. _recipient-online:
 
-Recipient has to be Online
---------------------------
+Receive payments when offline
+-----------------------------
 
 The blockchain approach allows users to collect payments even when they are
 offline. For example, it is possible to send money to a Bitcoin address even if
