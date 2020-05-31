@@ -32,8 +32,12 @@ Summary
      - Rewards first adopters
      - Early and late adopters have the same money creation power
 
+   * - :ref:`efficiency`
+     - Transaction are very expensive
+     - Transactions are cheap
+
    * - :ref:`transaction-speed`
-     - A few mintues, up to a few hours
+     - A few minutes, up to a few hours
      - Less than a few seconds
 
    * - :ref:`transaction-certainty`
@@ -46,11 +50,12 @@ Summary
 
    * - :ref:`fees`
      - High fees due to mining difficulty
-     - According to users' settings along route
+     - Low fees
 
    * - :ref:`Receive payments when offline <recipient-online>`
      - Yes
      - No
+
 
 
 .. _global-consensus:
@@ -202,6 +207,39 @@ start using Offset by establishing Offset friendship with another Offset
 user. New users do not need to spend any (traditional) money to start playing
 the Offset "game".
 
+
+.. _efficiency:
+
+Efficiency
+----------
+
+Performing transactions in a blockchain based currency is very expensive.
+Consider a new transaction being issued to a blockchain network. In the typical
+blockchain currency, the transaction is sent to all the network participants.
+Each participant has to verify the transaction. 
+
+The network participants then have to perform expensive proof of work to
+maintain consensus over the current state of the blockchain. Taking Bitcoin for
+example:
+
+  "The digital currency consumes 511 kilowatt hours of electricity for one coin
+  to change hands, according to research by digiconomist. That is equivalent
+  to 330,000 Visa transactions, making it the most energy-intensive form of
+  electronic trading known today"
+  (`source <https://www.robeco.com/en/insights/2019/04/spending-one-bitcoin-330000-credit-card-transactions.html>`_)
+
+Finally, every participant in a blockchain network has to remember the full
+blockchain (Or large part of it) in order to verify future transactions. This
+means that every new transaction will have to be stored on the machines of all
+the network participants forever. In Bitcoin for example, the size of the
+blockchain grows by a few gigabytes every month. Those same gigabytes are stored
+on all the machines running a Bitcoin client.
+
+Offset transactions are efficient, as Offset does not rely on proof of work or
+global consensus. Every Offset transaction involves communication between a few
+select machines, without any significant amount of computation. The amount of
+data Offset nodes has to maintain is small and constant sized.
+
 .. _transaction-speed:
 
 Transaction speed
@@ -243,17 +281,40 @@ blockchain payment, from networking point of view.
 Transaction certainty
 ---------------------
 
-TODO
+Payments with blockchain based currencies have some amount of uncertainty. When
+you send money using blockchain currencies, you have to wait for a while. The
+more you wait, the more certain you are that the transaction completed
+successfuly, though you will never become 100% sure.
+
+This phenomenon is inherent to the blockchain design. When a new transaction is
+added as part of a new block on the blockchain, it is still possible that a
+"longer chain" not containing the new transaction will appear. A transaction is
+considered to be more and more certain as new blocks are added on top of it.
+
+Most blockchain based currencies allows the sender of money to add transaction
+fees. The fees are paid to the miners that run the expensive consensus
+computation (proof of work), hence miners prioritize transactions with higher
+fees. Paying higher fees for a transaction makes it get into the blockchain
+faster, hence increasing the certainty that it will complete successfuly in a
+timely manner.
+
+Unlike blockchain based transactions, Offset transactions do not have an element
+of uncertainty. Offset transactions are 100% certain when complete. We call this
+characteristic **transaction atomicity**.
+
+An Offset transaction changes a list of balances along a path, atomically. When
+the buyer hands an Offset Commitment to the seller, the transaction is complete
+with 100% certainty.
+
 
 .. _storage:
 
 Storage
 -------
 
-To operate a blockchain, every network node has to
-store the full blockchain. For example, the size of the bitcoin blockchain
-in May 2020 is more than 270GB, and it keeps growing in the rate of about 5GB
-every month. 
+To operate a blockchain, every network node has to store the full blockchain.
+For example, the size of the bitcoin blockchain in May 2020 is more than 270GB,
+and it keeps growing in the rate of about 5GB every month. 
 
 Offset is storage efficient. In comparison, every Offset user has to save only a
 few Kilobytes of information about his balances and current state, and that
@@ -266,8 +327,41 @@ TODO: Add an image comparing a blockchain storage against Offset saved balances
 Fees
 ----
 
-TODO
+Sending money using a blockchain based currency usually requires extra
+transaction fees. This is extra money paid to make sure the transaction
+succeeds. Why are those fees required?
 
+Blockchain based currencies are usually operated by miners: Those are machines
+that run the computationaly expensive global consensus algorithm, Also known as proof of
+work.
+
+Running a miner is expensive, as it requires electricity, proper cooling and
+other maintanence. To cover those expenses, miners are incentivized by receiving
+transaction fees. In Bitcoin, for example, the average transaction fee (5/2020)
+is a few US dollars. 
+
+Miners will usually prioritize transactions with higher fees over transactions
+with lower fees. Hence users that want to make sure their transaction is
+processed quickly have to provide large enough fees.
+
+If transaction fees are too low, it will become not profitable to run a miner.
+Therefore blockchain based networks have a theoretical lower bound over the
+transaction fees [2]_. This lower bound is related to the amount of miners in the
+network, and to the costs of computation.
+
+
+Offset does not require a global consensus, and has no miners. It is extremely
+cheap to run an Offset node, and so Offset fees are mostly unrelated to
+computation costs. 
+
+Offset fees are determined by Offset users. Every user can decide the fees
+required for a certain Offset friend to transfer a transaction through him. 
+
+It is too early to know, though we believe that Offset fees will be mostly
+related to risk management. For example, a large Offset hub might take larger
+fees, because of the greater risk taken when dealing with many people, while two
+family relatives might set up 0 fees, because the risk is much lower. Generally
+speaking, the larger the trust between people, the lower the fees.
 
 .. _recipient-online:
 
@@ -276,36 +370,18 @@ Receive payments when offline
 
 The blockchain approach allows users to collect payments even when they are
 offline. For example, it is possible to send money to a Bitcoin address even if
-the recipient is not connected to the Internet.
+the recipient is currently not connected to the Internet.
 
 One downside of Offset design is that Offset users have to be online in order
-to collect payment. This happens because Offset payments require the recipient
-to sign using his private key. The recipient is the only one knowing his
-private key, and therefore he has to be online in order to collect the incoming
-payment.
-
-Mutual credit
--------------
-
-The core idea powering Offset payments is `mutual credit
-<https://en.wikipedia.org/wiki/Mutual_credit>`_: A synchronized balance
-maintained between two people. Offset does not make use of any blockchain
-technology. You can learn more about the economic ideas behind Offset
-:doc:`here <economic>`.
-
-TODO: Add image demonstrating mutual credit.
-
-
-No single legder
-----------------
-
-Most blockchain currencies rely on a single ledger containing the current
-balances of all the users and the history of all transactions in the network.
-This single ledger is usually called "the blockchain". Offset does not maintain
-such a ledger. Instead, every Offset user keeps his own balances locally.
+to collect payments. This happens because Offset payments require the recipient
+to sign using his private key. The recipient is the only one knowing his private
+key, and therefore he has to be online in order to collect the incoming payment.
 
 
 .. [1] 
    There are many blockchain based digital currencies, therefore the comparison
    might fail to generalize over all of them. When in doubt, the comparison
    refers to the characteristics of Bitcoin.
+
+
+.. [2] Unless miners are willing to lose money
