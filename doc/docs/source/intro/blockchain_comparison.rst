@@ -30,7 +30,7 @@ Summary
 
    * - :ref:`incentives`
      - Rewards first adopters
-     - Interest free credit based on trust
+     - Early and late adopters have the same money creation power
 
    * - :ref:`transaction-speed`
      - A few mintues, up to a few hours
@@ -207,33 +207,33 @@ the Offset "game".
 Transaction speed
 -----------------
 
-TODO: Split to transaction speed + transaction certainty.
+In a blockchain based digital currency, every batch of transactions has to
+propagate through all the participants of the blockchain network. As a means of
+avoiding money `double spending
+<https://en.wikipedia.org/wiki/Double-spending>`_, participants in the
+blockchain network have to perform expensive `proof of work
+<https://en.wikipedia.org/wiki/Proof_of_work>`_ and achieve global consensus
+over the new state of the blockchain.
 
+A blockchain transaction is considered complete only when there is enough
+certainty that it will stay inside the blockchain, and this might take a long
+time to happen. 
 
-Avoiding a global consensus mechanism makes Offset transactions fast and
-certain. 
+For example, in Bitcoin new blocks are added to the blockchain
+at a rate of about 1 block every 10 minutes. For small transactions most users
+will want to wait at least one block, and for larger transactions where stronger
+certainty is required, users will sometimes prefer to even wait 6 blocks (about
+one hour).
 
-In a blockchain based network, every transaction has to propagate through `all
-the nodes in the network
-<https://en.wikipedia.org/wiki/Flooding_(computer_networking)>`_.  In addition,
-as a means of avoiding `double spending
-<https://en.wikipedia.org/wiki/Double-spending>`_ of money, nodes in a
-blockchain network have to perform `proof of work
-<https://en.wikipedia.org/wiki/Proof_of_work>`_ to acheive consensus over the
-shared ledger. 
+Offset transactions are very efficient with respect to their blockchain based
+counterparts. This is possible because Offset does not rely on a global
+consensus to operate.
 
-In Bitcoin for example, it will usually take at least 10 minutes
-before there is a reasonable certainty that a transaction was completed. For
-more expensive transactions, users will usually wait even over an hour to be
-sure that the transaction was completed successfuly.
-
-Compared to blockchain transactions, Offset transactions are fast. It usually
-takes no more than a few seconds for an Offset transaction to complete. an
-Offset transaction will usually pass through only a few computers in the
-network that are relevant to the transaction. Offset doesn't have to maintain
-any shared ledger, and therefore no consensus or proof of work are required.
-When an Offset transacation is completed, it is completed with 100% certainty.
-We call this property "atomicity ".
+It usually takes no more than a few seconds for an Offset transaction to
+complete. an Offset transaction will usually pass through only a few computers
+in the network that are relevant to the transaction. Offset doesn't have to
+maintain any shared ledger, and therefore no consensus or proof of work are
+required.
 
 TODO: Add image demonstrating comparison between an Offset payment and a
 blockchain payment, from networking point of view.
