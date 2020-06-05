@@ -406,7 +406,7 @@ computation.
   happening due to large amount of transactions during the "Crypto boom". At that
   time the avarage transaction fee reached $55.16 per transaction. Chart Taken
   from from `bitinfocharts
-  <https://bitinfocharts.com/comparison/bitcoin-mining_profitability.html#log>`__.
+  <https://bitinfocharts.com/comparison/bitcoin-transactionfees.html>`__.
 
 Offset does not require a global consensus, and has no miners. It is extremely
 cheap to run an Offset node, and so Offset fees are mostly unrelated to
