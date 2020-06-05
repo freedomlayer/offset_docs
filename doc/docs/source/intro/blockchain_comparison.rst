@@ -1,5 +1,5 @@
-Offset is not a blockchain
-==========================
+Offset vs Blockchain
+====================
 
 The recent rise in popularity of digital currencies might make it difficult to
 understand what makes Offset different in its approach to money and payments.
@@ -308,9 +308,6 @@ complete. an Offset transaction will usually pass through only a few computers
 in the network that are relevant to the transaction. Offset doesn't have to
 maintain any shared ledger, and therefore no consensus or proof of work are
 required.
-
-TODO: Add image demonstrating comparison between an Offset payment and a
-blockchain payment, from networking point of view.
 
 .. _transaction-certainty:
 
