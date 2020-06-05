@@ -273,8 +273,8 @@ data Offset nodes has to maintain is small and constant sized.
   :alt: Offset payment illustration
   :height: 600px
 
-  During an Offset payment, all that changes is a few balances between a few
-  select nodes. The rest of the network is unaware of the transaction.
+  During an Offset payment, a few balances between a few select nodes are
+  affected. The rest of the network is unaware of the transaction.
 
 .. _transaction-speed:
 
