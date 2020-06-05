@@ -69,7 +69,11 @@ view of the current state of balances for all users. Blockchain based currencies
 usually use proof of work as a technology to acheive consensus: the ledger that
 took the most effort to create is chosen as the global truth.
 
-TODO: Add image for longest chain rule (Bitcoin)
+.. figure:: images/longest_chain_rule.png
+  :alt: Blockchain: Longest chain rule
+
+  Longest chain rule: The black chain is chosen to be the new agreed upon state, because it
+  took the most effort to create. (`source <https://en.bitcoin.it/wiki/File:Blockchain.png>`__)
 
 Contrast with blockchain currencies, Offset does not attempt to acheive global
 consensus. Instead, every Offset user maintains synchronized balances with a few
@@ -78,9 +82,19 @@ his own balances, and not a global view of the balances of all Offset users. **I
 turns out that secure payments are possible even without a global consensus
 system!**
 
+
+.. figure:: images/offset_balances.svg
+  :alt: Offset decentralized balances
+
+  The figure shows how Offset keeps balances in a decentralized manner. Blue
+  dots are Offset nodes, brackets represent credit limits, and green arrows
+  represent the current balance between a pair of nodes. Every Offset node only
+  has to maintain balace information with nodes he has direct relation to.
+
+
 Offset's approach makes it much more efficient than its blockchain counterparts.
-Transactions are much faster, and the storage required for every user is of
-a very small constant size.
+The energy footprint for every transaction is small, transactions are faster,
+and the storage required for every user is of a very small constant size.
 
 .. _security-foundation:
 
@@ -178,7 +192,13 @@ something from Dan, which will use the money to buy something from Eve, which
 will eventually buy services from Bob. When Eve buys from Bob, the money is
 destroyed.
 
-TODO: Add image demonstrating destruction of money.
+.. figure:: images/offset_money_cycle.svg
+  :alt: Offset money cycle
+
+  The figure shows the full cycle of money creation and destruction in Offset.
+  Bob created new money when he wanted to buy something but didn't have any
+  money. The money created by Bob was destroyed when Eve finally used that same
+  money to buy something from Bob.
 
 .. _incentives:
 
@@ -192,6 +212,15 @@ the hope of becoming rich when late users join the network.
 In Bitcoin, for example, mining is designed to become `50% less profitable every
 210000 blocks <https://en.bitcoin.it/wiki/Controlled_supply>`_, and the total
 amount of Bitcoins ever created is limited to about 21 million.
+
+.. figure:: images/bitcoin_mining_profitability.png
+  :alt: Bitcoin mining profitability chart
+
+  Bitcoin mining profitability historical chart, USD/day for 1 THash/s, shown on
+  a logarithmic scale. The first adopters in 2011 could 500k US dollars per day
+  with computation power of 1THash/s. Miners in 2020 can make less than half a
+  dollar with the same computation power. Chart Taken from from `bitinfocharts
+  <https://bitinfocharts.com/comparison/bitcoin-mining_profitability.html#log>`__.
 
 Contrast with blockchain based currencies, **you will not become rich by joining
 Offset early**. Early and late Offset users have the same money creation
@@ -226,7 +255,7 @@ example:
   to change hands, according to research by digiconomist. That is equivalent
   to 330,000 Visa transactions, making it the most energy-intensive form of
   electronic trading known today"
-  (`source <https://www.robeco.com/en/insights/2019/04/spending-one-bitcoin-330000-credit-card-transactions.html>`_)
+  (`source <https://www.robeco.com/en/insights/2019/04/spending-one-bitcoin-330000-credit-card-transactions.html>`__)
 
 Finally, every participant in a blockchain network has to remember the full
 blockchain (Or large part of it) in order to verify future transactions. This
@@ -239,6 +268,13 @@ Offset transactions are efficient, as Offset does not rely on proof of work or
 global consensus. Every Offset transaction involves communication between a few
 select machines, without any significant amount of computation. The amount of
 data Offset nodes has to maintain is small and constant sized.
+
+.. figure:: images/offset_payment.svg
+  :alt: Offset payment illustration
+  :height: 600px
+
+  During an Offset payment, all that changes is a few balances between a few
+  select nodes. The rest of the network is unaware of the transaction.
 
 .. _transaction-speed:
 
@@ -291,6 +327,15 @@ added as part of a new block on the blockchain, it is still possible that a
 "longer chain" not containing the new transaction will appear. A transaction is
 considered to be more and more certain as new blocks are added on top of it.
 
+.. figure:: images/how_many_bitcoin_confirmations.png
+  :alt: How many bitcoin confirmations are enough?
+  :height: 300px
+
+  A diagram with thumb rules of how many bitcoin confirmations (blocks) are
+  enough to be sure a transaction is complete. Taken from `buybitcoinworldwide
+  <https://www.buybitcoinworldwide.com/confirmations/>`__.
+
+
 Most blockchain based currencies allows the sender of money to add transaction
 fees. The fees are paid to the miners that run the expensive consensus
 computation (proof of work), hence miners prioritize transactions with higher
@@ -316,11 +361,15 @@ To operate a blockchain, every network node has to store the full blockchain.
 For example, the size of the bitcoin blockchain in May 2020 is more than 270GB,
 and it keeps growing in the rate of about 5GB every month. 
 
-Offset is storage efficient. In comparison, every Offset user has to save only a
-few Kilobytes of information about his balances and current state, and that
-amount stays constant.
+.. figure:: images/blockchain_size.png
+  :alt: Historical Bitcoin blockchain size
 
-TODO: Add an image comparing a blockchain storage against Offset saved balances
+  A chart showing historical data for Bitcoin's blockchain size. Taken from
+  `blockchain.com <https://www.blockchain.com/charts/blocks-size>`__.
+
+Offset is storage efficient. In comparison, every Offset user has to save only a
+few kilobytes of information about his balances and current state, and that
+amount stays constant.
 
 .. _fees:
 
@@ -346,16 +395,24 @@ processed quickly have to provide large enough fees.
 
 If transaction fees are too low, it will become not profitable to run a miner.
 Therefore blockchain based networks have a theoretical lower bound over the
-transaction fees [2]_. This lower bound is related to the amount of miners in the
-network, and to the costs of computation.
+transaction fees [2]_. This lower bound is related to the amount of miners in
+the network, the amount of transactions (per unit of time) and to the costs of
+computation.
 
+.. figure:: images/bitcoin_avg_transaction_fee.png
+  :alt: Bitcoin average transaction fees
+
+  Historical Bitcoin average transaction fee. Note the peak at the end of 2017,
+  happening due to large amount of transactions during the "Crypto boom". At that
+  time the avarage transaction fee reached $55.16 per transaction. Chart Taken
+  from from `bitinfocharts
+  <https://bitinfocharts.com/comparison/bitcoin-mining_profitability.html#log>`__.
 
 Offset does not require a global consensus, and has no miners. It is extremely
 cheap to run an Offset node, and so Offset fees are mostly unrelated to
-computation costs. 
-
-Offset fees are determined by Offset users. Every user can decide the fees
-required for a certain Offset friend to transfer a transaction through him. 
+computation costs. Offset fees are determined by Offset users. Every user can
+decide the fees required for a certain Offset friend to transfer a transaction
+through him. 
 
 It is too early to know, though we believe that Offset fees will be mostly
 related to risk management. For example, a large Offset hub might take larger
