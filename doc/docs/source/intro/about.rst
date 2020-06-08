@@ -3,8 +3,8 @@ About
 
 The idea for Offset began somewhere in 2010 during a call to my bank, where I
 was asking to cancel my credit card. After some inquiries, the banker on the
-other side of the line finally concluded they he is not willing to cancel my
-credit card. 
+other side of the line finally concluded he is not willing to cancel my credit
+card. 
 
 Baffled by the banker's response, I asked how is it possible that I can not
 cancel my own credit card. The banker laughed and answered that the credit card
