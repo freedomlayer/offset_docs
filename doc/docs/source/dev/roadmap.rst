@@ -16,13 +16,13 @@ Protocol
 
 * Extend/rethink index server protocol.
    * Add cyclic routes search for rebalancing?
-   * How to exit Offset with zero balance?
-   * Other things?
+   * Strategy for unfriending: creating a zero balance with a friend by
+     rebalancing.
 
 * Rethink numbering of token channel messages and increments during
   inconsistencies. Can this mechanism be cheated?
 
-* Somehow log money gained through commisions. Might be required for tax
+* Log money gained through commisions? Might be required for tax
   reports? How to do this elegantly and securely?
 
 * Allow payment without an invoice, like a donation?
@@ -72,8 +72,8 @@ Offset core
    * Possibly use sqlite3?
 
 * Transactions interface
-  * Should different node's applications know about each other's transactions? 
-  * Should there be an option to list all pending incoming/outgoing transactions? If so, how to do this efficiently?
+   * Should different node's applications know about each other's transactions? 
+   * Should there be an option to list all pending incoming/outgoing transactions? If so, how to do this efficiently?
 
 * Safe erasure of secret data [`Issue <https://github.com/freedomlayer/offset/issues/29>`__]
 
@@ -102,8 +102,8 @@ Offset mobile app
 * Password for locking/unlocking the Offset app.
 
 * Support Importing/Exporting 
-  * Nodes (Private key + database)
-  * Transactions history?
+   * Nodes (Private key + database)
+   * Transactions history?
 
 * Make it easier to add friends, while still keeping it safe?
 
