@@ -79,6 +79,10 @@ Offset core
 
 * Exponential backoff for all retrying connectors [`Issue <https://github.com/freedomlayer/offset/issues/144>`__]
 
+* Enhance signature security
+   * Should add textual constant prefix to all signatures?
+   * Is the signature malleable? Is this an issue? What can be done to solve?
+
 Offset mobile app
 -----------------
 
