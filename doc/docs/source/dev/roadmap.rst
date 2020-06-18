@@ -44,9 +44,6 @@ Offset core
 * Add automatic tool to check security issues with Rust dependencies. [`Issue
   <https://github.com/freedomlayer/offset/issues/241>`__]
 
-* Replace ``ring`` cryptographic library with something else, due to testing
-  issues. [`Issue <https://github.com/freedomlayer/offset/issues/167>`__]
-
 * Implement bidirectional connection attempt between nodes, along relays.
   Currently only one node attempts to connect to the other node, according to
   the order of public keys.
@@ -82,6 +79,10 @@ Offset core
 * Enhance signature security
    * Should add textual constant prefix to all signatures?
    * Is the signature malleable? Is this an issue? What can be done to solve?
+
+* Replace ``ring`` cryptographic library with something else, due to testing
+  issues. [`Issue <https://github.com/freedomlayer/offset/issues/167>`__]
+  -- **Closed by** [`PR 300 <https://github.com/freedomlayer/offset/pull/300>`__]
 
 Offset mobile app
 -----------------
