@@ -41,9 +41,6 @@ Offset core
 
 * Update compiler and dependencies
 
-* Add automatic tool to check security issues with Rust dependencies. [`Issue
-  <https://github.com/freedomlayer/offset/issues/241>`__]
-
 * Implement bidirectional connection attempt between nodes, along relays.
   Currently only one node attempts to connect to the other node, according to
   the order of public keys.
@@ -83,6 +80,10 @@ Offset core
 * Replace ``ring`` cryptographic library with something else, due to testing
   issues. [`Issue <https://github.com/freedomlayer/offset/issues/167>`__]
   -- **Closed by** [`PR 300 <https://github.com/freedomlayer/offset/pull/300>`__]
+
+* Add automatic tool to check security issues with Rust dependencies
+  (cargo-audit) [`Issue <https://github.com/freedomlayer/offset/issues/241>`__],
+  **Closed by** [`PR 301 <https://github.com/freedomlayer/offset/pull/301>`__].
 
 Offset mobile app
 -----------------
