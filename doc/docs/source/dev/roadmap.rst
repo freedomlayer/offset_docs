@@ -79,7 +79,7 @@ Offset core
 
 * Replace ``ring`` cryptographic library with something else, due to testing
   issues. [`Issue <https://github.com/freedomlayer/offset/issues/167>`__]
-  -- **Closed by** [`PR 300 <https://github.com/freedomlayer/offset/pull/300>`__]
+  **Closed by** [`PR 300 <https://github.com/freedomlayer/offset/pull/300>`__]
 
 * Add automatic tool to check security issues with Rust dependencies
   (cargo-audit) [`Issue <https://github.com/freedomlayer/offset/issues/241>`__],
