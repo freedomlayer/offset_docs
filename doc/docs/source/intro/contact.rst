@@ -3,13 +3,15 @@ Contact
 
 For any ideas, suggestions or questions, please contact us!
 
+* `Community forum <https://forum.offsetcredit.org>`_
+
 * Email: |email_image|
 
 * Github:
-
-  * `Offset core <https://www.github.com/freedomlayer/offset>`_
-  * `Offset documentation <https://www.github.com/freedomlayer/offset_docs>`_
-  * `Offset website <https://www.github.com/freedomlayer/offset_website>`_
+   * `Offset core <https://www.github.com/freedomlayer/offset>`_
+   * `Offset mobile app <https://www.github.com/freedomlayer/offset_mobile>`_
+   * `Offset documentation <https://www.github.com/freedomlayer/offset_docs>`_
+   * `Offset website <https://www.github.com/freedomlayer/offset_website>`_
 
 * Subscribe to our mailing lists to get updates:
 
