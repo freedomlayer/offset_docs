@@ -6824,14 +6824,14 @@
     <text
        xml:space="preserve"
        style="font-style:normal;font-weight:normal;font-size:10.5833px;line-height:1.25;font-family:sans-serif;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264583"
-       x="113.29976"
+       x="115.94561"
        y="-1.9554502"
        id="text25813-8"><tspan
          sodipodi:role="line"
          id="tspan25811-1"
-         x="113.29976"
+         x="115.94561"
          y="-1.9554502"
-         style="stroke-width:0.264583">-100</tspan></text>
+         style="stroke-width:0.264583">100</tspan></text>
     <path
        style="fill:none;stroke:#000000;stroke-width:0.264583px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
        d="M 125.78899,22.401466 V 3.482064"
@@ -6843,14 +6843,14 @@
     <text
        id="text25813-8-3"
        y="-2.38377"
-       x="342.53369"
+       x="345.70874"
        style="font-style:normal;font-weight:normal;font-size:10.5833px;line-height:1.25;font-family:sans-serif;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264583"
        xml:space="preserve"><tspan
          style="stroke-width:0.264583"
          y="-2.38377"
-         x="342.53369"
+         x="345.70874"
          id="tspan25811-1-4"
-         sodipodi:role="line">-100</tspan></text>
+         sodipodi:role="line">100</tspan></text>
     <path
        id="path25815-3-0"
        d="M 355.59205,21.225668 V 2.3062665"
