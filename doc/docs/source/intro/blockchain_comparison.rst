@@ -66,7 +66,7 @@ Global consensus
 Global consensus is a core idea powering blockchain based digital currencies:
 All the participants in a blockchain network try to maintain together a single
 view of the current state of balances for all users. Blockchain based currencies
-usually use proof of work as a technology to acheive consensus: the ledger that
+usually use proof of work as a technology to achieve consensus: the ledger that
 took the most effort to create is chosen as the global truth.
 
 .. figure:: images/longest_chain_rule.png
@@ -75,7 +75,7 @@ took the most effort to create is chosen as the global truth.
   Longest chain rule: The black chain is chosen to be the new agreed upon state, because it
   took the most effort to create. (`source <https://en.bitcoin.it/wiki/File:Blockchain.png>`__)
 
-Contrast with blockchain currencies, Offset does not attempt to acheive global
+Contrast with blockchain currencies, Offset does not attempt to achieve global
 consensus. Instead, every Offset user maintains synchronized balances with a few
 selected Offset friends. In other words, each Offset user has a local view of
 his own balances, and not a global view of the balances of all Offset users. **It
@@ -89,7 +89,7 @@ system!**
   The figure shows how Offset keeps balances in a decentralized manner. Blue
   dots are Offset nodes, brackets represent credit limits, and green arrows
   represent the current balance between a pair of nodes. Every Offset node only
-  has to maintain balace information with nodes he has direct relation to.
+  has to maintain balance information with nodes he has direct relation to.
 
 
 Offset's approach makes it much more efficient than its blockchain counterparts.
