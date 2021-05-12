@@ -33,7 +33,7 @@ Summary
      - Early and late adopters have the same money creation power
 
    * - :ref:`efficiency`
-     - Transaction are very expensive
+     - Transactions are very expensive
      - Transactions are cheap
 
    * - :ref:`transaction-speed`
