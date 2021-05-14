@@ -9,6 +9,8 @@ Protocol
 * Allow payment using a single out of band file exchange (invoice file), instead
   of two files exchange (invoice + commit).
 
+* Allow adding friends with one scan (Single out of band file)
+
 * Allow removing currency after it was added. Might require a zero balance.
 
 * Currently the buyer pays fees. Maybe this is a wrong model and the seller
@@ -27,6 +29,7 @@ Protocol
 
 * Allow payment without an invoice, like a donation?
 
+
 Economics
 ---------
 
@@ -38,8 +41,6 @@ Economics
 
 Offset core
 -----------
-
-* Update compiler and dependencies
 
 * Implement bidirectional connection attempt between nodes, along relays.
   Currently only one node attempts to connect to the other node, according to
@@ -77,6 +78,10 @@ Offset core
    * Should add textual constant prefix to all signatures?
    * Is the signature malleable? Is this an issue? What can be done to solve?
 
+* Add backup API
+
+* Add monthly report API.
+
 * Replace ``ring`` cryptographic library with something else, due to testing
   issues. [`Issue <https://github.com/freedomlayer/offset/issues/167>`__]
   **Closed by** [`PR 300 <https://github.com/freedomlayer/offset/pull/300>`__]
@@ -84,6 +89,9 @@ Offset core
 * Add automatic tool to check security issues with Rust dependencies
   (cargo-audit) [`Issue <https://github.com/freedomlayer/offset/issues/241>`__],
   **Closed by** [`PR 301 <https://github.com/freedomlayer/offset/pull/301>`__].
+
+* Update compiler and dependencies -- **Done**
+
 
 Offset mobile app
 -----------------
